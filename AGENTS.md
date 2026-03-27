@@ -45,6 +45,7 @@ Current conceptual capability notes:
 - Until launch data exists, prefer a single strict on-tag format over compatibility branches (no legacy read/write paths by default).
 - Serial commands allow spotId (1-64) and huntYear (2000-2100) to be reconfigured dynamically without reflash; changes persist for the session.
 - **Record 1 support**: Attempted hand-rolled NDEF URI record encoding which broke tag scanning. Will use the battle-tested don/NDEF library instead for proper encoding. Hand-rolling NDEF is error-prone; use a library.
+- On ESP8266 with intermittent RF reads, `MifareUltralight::read()` can crash due to parsing partial/invalid buffers; prefer guarded raw page reads for parse input, then use library `write()` for final NDEF encode/TLV/page writes.
 
 Keep this structure intentionally minimal for now.
 

@@ -177,9 +177,8 @@ export function useNfc() {
           ? decodeData(first.data) || `(${first.recordType})`
           : "";
 
-        status.value = "Wand read successfully!";
-        isScanning.value = false;
-        abortController?.abort();
+        status.value =
+          "Wand read successfully! Tap to scan again or tap Stop Scan.";
       };
 
       ndef.onreadingerror = () => {

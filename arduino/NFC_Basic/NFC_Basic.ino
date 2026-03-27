@@ -1,6 +1,9 @@
 #include <Wire.h>
 #include <PN532_I2C.h>
 #include <PN532.h>
+#include <NdefMessage.h>
+#include <NdefRecord.h>
+#include <MifareUltralight.h>
 
 // Wemos D1 Mini I2C wiring:
 // D2 (GPIO4) -> SDA
@@ -13,6 +16,7 @@ uint8_t spotId = 3;
 uint16_t huntYear = 2026;
 // Record 1: default wand link URL.
 const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
+const char kHuntMimePrefix[] = "application/vnd.tryllestav.hunt.year-";
 
 String serialBuffer;
 constexpr uint8_t kI2cSdaPin = 4;
@@ -27,9 +31,7 @@ constexpr uint16_t kPollIntervalMs = 50;
 constexpr uint16_t kReadDebounceMs = 400;
 constexpr uint8_t kCcPage = 3;
 constexpr uint8_t kUserStartPage = 4;
-
-constexpr size_t kMaxTagDataBytes = 888;
-constexpr size_t kMaxMessageBytes = 820;
+constexpr size_t kMaxUserAreaBytes = 888;
 
 PN532_I2C pn532I2c(Wire);
 PN532 pn532(pn532I2c);
@@ -39,15 +41,6 @@ uint8_t lastUidLength = 0;
 uint32_t lastSeenAt = 0;
 uint32_t lastRetryAt = 0;
 bool initialized = false;
-
-struct RecordView {
-  size_t headerOffset;
-  size_t payloadOffset;
-  size_t payloadLength;
-  size_t nextOffset;
-  uint8_t header;
-  bool valid;
-};
 
 void printHexByte(uint8_t value) {
   if (value < 0x10) Serial.print('0');
@@ -84,8 +77,18 @@ bool readPage(uint8_t page, uint8_t* data) {
   return pn532.mifareultralight_ReadPage(page, data);
 }
 
-bool writePage(uint8_t page, const uint8_t* data) {
-  return pn532.mifareultralight_WritePage(page, const_cast<uint8_t*>(data));
+bool readCcPageStable(uint8_t* ccOut) {
+  uint8_t ccA[4] = {0};
+  uint8_t ccB[4] = {0};
+
+  if (!readPage(kCcPage, ccA)) return false;
+  delay(10);
+  if (!readPage(kCcPage, ccB)) return false;
+
+  // Require two consecutive matching CC reads before allowing writes.
+  if (memcmp(ccA, ccB, sizeof(ccA)) != 0) return false;
+  memcpy(ccOut, ccA, sizeof(ccA));
+  return true;
 }
 
 bool unstickI2cBusIfNeeded() {
@@ -184,193 +187,22 @@ void buildHuntMimeType(char* out, size_t outSize) {
   snprintf(out, outSize, "application/vnd.tryllestav.hunt.year-%u", (unsigned)huntYear);
 }
 
-bool readUserAreaPrefix(uint8_t* out, size_t outCapacity, size_t* outReadBytes, size_t* outUserCapacityBytes) {
-  uint8_t cc[4] = {0};
-  if (!readPage(kCcPage, cc)) {
-    Serial.println("Failed to read CC page.");
-    return false;
+void printHuntPayload(const uint8_t* payload) {
+  Serial.print("  Payload (hex): ");
+  for (uint8_t i = 0; i < 8; i++) {
+    printHexByte(payload[i]);
+    if (i < 7) Serial.print(" ");
   }
+  Serial.println();
 
-  const size_t userCapacityBytes = (size_t)cc[2] * 8;
-  if (userCapacityBytes == 0 || userCapacityBytes > kMaxTagDataBytes) {
-    Serial.println("Unsupported user area size.");
-    return false;
-  }
-  *outUserCapacityBytes = userCapacityBytes;
-
-  // Calculate max pages to read from CC declaration.
-  const size_t pagesToReadFromCc = (userCapacityBytes + 3) / 4;
-  const size_t maxReadableBytes = (userCapacityBytes < outCapacity) ? userCapacityBytes : outCapacity;
-  const size_t pagesToRead = (maxReadableBytes + 3) / 4;
-  
-  if (pagesToRead == 0) {
-    Serial.println("User area too small.");
-    return false;
-  }
-
-  *outReadBytes = 0;
-  for (size_t i = 0; i < pagesToRead; i++) {
-    uint8_t pageData[4] = {0};
-    if (!readPage((uint8_t)(kUserStartPage + i), pageData)) {
-      Serial.print("Read failed at page ");
-      Serial.println((unsigned)(kUserStartPage + i));
-      return false;
+  Serial.print("  Payload (binary): ");
+  for (uint8_t i = 0; i < 8; i++) {
+    for (uint8_t b = 7; b < 8; --b) {
+      Serial.print((payload[i] >> b) & 1);
     }
-    memcpy(out + *outReadBytes, pageData, 4);
-    *outReadBytes += 4;
-
-    size_t ndefOffset = 0;
-    size_t ndefLen = 0;
-    if (findNdefTlv(out, *outReadBytes, &ndefOffset, &ndefLen)) {
-      if (ndefOffset + ndefLen <= *outReadBytes) {
-        return true;
-      }
-    }
-
-    yield();
+    if (i < 7) Serial.print(" ");
   }
-
-  // If no complete NDEF was found, we still proceed and will create/update one.
-  return true;
-}
-
-bool writeUserArea(const uint8_t* data, size_t dataBytes) {
-  const size_t pageCount = (dataBytes + 3) / 4;
-  for (size_t i = 0; i < pageCount; i++) {
-    uint8_t pageData[4] = {0, 0, 0, 0};
-    const size_t srcOffset = i * 4;
-    const size_t copyCount = (srcOffset + 4 <= dataBytes) ? 4 : (dataBytes - srcOffset);
-    if (copyCount > 0) memcpy(pageData, data + srcOffset, copyCount);
-
-    if (!writePage((uint8_t)(kUserStartPage + i), pageData)) {
-      Serial.print("Write failed at page ");
-      Serial.println((unsigned)(kUserStartPage + i));
-      return false;
-    }
-    yield();
-  }
-  return true;
-}
-
-size_t encodedNdefTlvLength(size_t messageLen) {
-  return (messageLen < 0xFF) ? (2 + messageLen + 1) : (4 + messageLen + 1);
-}
-
-void printHuntPayload(const uint8_t* message, size_t messageLen, const char* mimeType) {
-  size_t offset = 0;
-  while (offset < messageLen) {
-    RecordView r = parseRecord(message, messageLen, offset);
-    if (!r.valid) return;
-
-    if (typeMatchesMime(message, r, mimeType) && r.payloadLength == 8) {
-      const uint8_t* payload = message + r.payloadOffset;
-
-      Serial.print("  Payload (hex): ");
-      for (uint8_t i = 0; i < 8; i++) {
-        printHexByte(payload[i]);
-        if (i < 7) Serial.print(" ");
-      }
-      Serial.println();
-
-      Serial.print("  Payload (binary): ");
-      for (uint8_t i = 0; i < 8; i++) {
-        for (uint8_t b = 7; b < 8; --b) {
-          Serial.print((payload[i] >> b) & 1);
-        }
-        if (i < 7) Serial.print(" ");
-      }
-      Serial.println();
-      return;
-    }
-
-    offset = r.nextOffset;
-  }
-}
-
-bool findNdefTlv(const uint8_t* data, size_t dataLen, size_t* valueOffset, size_t* valueLen) {
-  size_t i = 0;
-  while (i < dataLen) {
-    const uint8_t t = data[i++];
-    if (t == 0x00) continue;          // NULL TLV
-    if (t == 0xFE) return false;      // Terminator
-    if (i >= dataLen) return false;
-
-    size_t len = 0;
-    if (data[i] == 0xFF) {
-      if (i + 2 >= dataLen) return false;
-      len = ((size_t)data[i + 1] << 8) | data[i + 2];
-      i += 3;
-    } else {
-      len = data[i++];
-    }
-
-    if (i + len > dataLen) return false;
-    if (t == 0x03) {
-      *valueOffset = i;
-      *valueLen = len;
-      return true;
-    }
-
-    i += len;
-  }
-
-  return false;
-}
-
-RecordView parseRecord(const uint8_t* msg, size_t msgLen, size_t offset) {
-  RecordView r = {0, 0, 0, 0, 0, false};
-  if (offset + 3 > msgLen) return r;
-
-  const uint8_t header = msg[offset];
-  const bool sr = (header & 0x10) != 0;
-  const bool il = (header & 0x08) != 0;
-
-  size_t p = offset + 1;
-  const uint8_t typeLen = msg[p++];
-
-  size_t payloadLen = 0;
-  if (sr) {
-    if (p >= msgLen) return r;
-    payloadLen = msg[p++];
-  } else {
-    if (p + 4 > msgLen) return r;
-    payloadLen = ((size_t)msg[p] << 24) | ((size_t)msg[p + 1] << 16) | ((size_t)msg[p + 2] << 8) | msg[p + 3];
-    p += 4;
-  }
-
-  uint8_t idLen = 0;
-  if (il) {
-    if (p >= msgLen) return r;
-    idLen = msg[p++];
-  }
-
-  if (p + typeLen + idLen + payloadLen > msgLen) return r;
-
-  r.headerOffset = offset;
-  r.payloadOffset = p + typeLen + idLen;
-  r.payloadLength = payloadLen;
-  r.nextOffset = r.payloadOffset + payloadLen;
-  r.header = header;
-  r.valid = true;
-  return r;
-}
-
-bool typeMatchesMime(const uint8_t* msg, const RecordView& r, const char* mimeType) {
-  const uint8_t header = r.header;
-  const uint8_t tnf = header & 0x07;
-  if (tnf != 0x02) return false;  // MIME media record
-
-  const bool sr = (header & 0x10) != 0;
-  const bool il = (header & 0x08) != 0;
-  size_t p = r.headerOffset + 1;
-  const uint8_t typeLen = msg[p++];
-  if (sr) p += 1;
-  else p += 4;
-  if (il) p += 1;
-
-  const size_t expectedLen = strlen(mimeType);
-  if (typeLen != expectedLen) return false;
-  return memcmp(msg + p, mimeType, expectedLen) == 0;
+  Serial.println();
 }
 
 void setSpotBit(uint8_t* payload, uint8_t id) {
@@ -382,143 +214,178 @@ void setSpotBit(uint8_t* payload, uint8_t id) {
   payload[byteIndex] |= (uint8_t)(1u << bitInByte);
 }
 
-bool isSpotBitSet(const uint8_t* payload, uint8_t id) {
-  const uint8_t bitIndex = id - 1;
-  const uint8_t byteIndex = 7 - (bitIndex / 8);
-  const uint8_t bitInByte = bitIndex % 8;
-  return (payload[byteIndex] & (uint8_t)(1u << bitInByte)) != 0;
-}
-
-size_t buildHuntRecord(uint8_t* out, size_t outCap, const char* mimeType, uint8_t id) {
-  const size_t typeLen = strlen(mimeType);
-  const size_t recordLen = 1 + 1 + 1 + typeLen + 8;  // SR MIME record
-  if (recordLen > outCap) return 0;
-
+bool findNdefTlv(const uint8_t* data, size_t dataLen, size_t* valueOffset, size_t* valueLen) {
   size_t i = 0;
-  out[i++] = 0xD2;              // MB=1, ME=1, SR=1, TNF=MIME
-  out[i++] = (uint8_t)typeLen;
-  out[i++] = 8;
-  memcpy(out + i, mimeType, typeLen);
-  i += typeLen;
-  memset(out + i, 0, 8);
-  setSpotBit(out + i, id);
-  i += 8;
-  return i;
+  while (i < dataLen) {
+    const uint8_t t = data[i++];
+    if (t == 0x00) continue;
+    if (t == 0xFE) return false;
+    if (i >= dataLen) return false;
+    size_t len = 0;
+    if (data[i] == 0xFF) {
+      if (i + 2 >= dataLen) return false;
+      len = ((size_t)data[i + 1] << 8) | data[i + 2];
+      i += 3;
+    } else {
+      len = data[i++];
+    }
+    if (i + len > dataLen) return false;
+    if (t == 0x03) { *valueOffset = i; *valueLen = len; return true; }
+    i += len;
+  }
+  return false;
 }
 
-bool upsertHuntRecord(uint8_t* message, size_t* messageLen, size_t messageCap, const char* mimeType, uint8_t id) {
-  if (id < 1 || id > 64) {
+bool readRawNdefFromTag(uint8_t* outMessage, size_t outCap, size_t* outLen) {
+  uint8_t cc[4] = {0};
+  if (!readCcPageStable(cc)) {
+    Serial.println("Failed to read CC page.");
+    return false;
+  }
+
+  const size_t userCapacityBytes = (size_t)cc[2] * 8;
+  if (userCapacityBytes == 0 || userCapacityBytes > kMaxUserAreaBytes) {
+    Serial.println("Unsupported tag capacity.");
+    return false;
+  }
+
+  static uint8_t rawBuf[kMaxUserAreaBytes];
+  memset(rawBuf, 0, sizeof(rawBuf));
+
+  size_t rawLen = 0;
+  const size_t pagesToRead = (userCapacityBytes + 3) / 4;
+  for (size_t i = 0; i < pagesToRead; i++) {
+    uint8_t pageData[4] = {0};
+    if (!readPage((uint8_t)(kUserStartPage + i), pageData)) {
+      Serial.print("Read failed at page ");
+      Serial.println((unsigned)(kUserStartPage + i));
+      break;
+    }
+
+    memcpy(rawBuf + rawLen, pageData, 4);
+    rawLen += 4;
+
+    size_t ndefOff = 0;
+    size_t ndefLen = 0;
+    if (findNdefTlv(rawBuf, rawLen, &ndefOff, &ndefLen) && ndefOff + ndefLen <= rawLen) {
+      if (ndefLen > outCap) {
+        Serial.println("NDEF message too large for buffer.");
+        return false;
+      }
+      memcpy(outMessage, rawBuf + ndefOff, ndefLen);
+      *outLen = ndefLen;
+      return true;
+    }
+
+    yield();
+  }
+
+  return false;
+}
+
+bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
+  if (spotId < 1 || spotId > 64) {
     Serial.println("spotId must be in range 1..64.");
     return false;
   }
 
-  if (*messageLen == 0) {
-    size_t built = buildHuntRecord(message, messageCap, mimeType, id);
-    if (!built) return false;
-    *messageLen = built;
-    return true;
-  }
-
-  size_t offset = 0;
-  RecordView last = {0, 0, 0, 0, 0, false};
-  while (offset < *messageLen) {
-    RecordView r = parseRecord(message, *messageLen, offset);
-    if (!r.valid) {
-      Serial.println("NDEF parse failed while scanning records.");
-      return false;
-    }
-
-    last = r;
-    if (typeMatchesMime(message, r, mimeType) && r.payloadLength == 8) {
-      if (!isSpotBitSet(message + r.payloadOffset, id)) {
-        setSpotBit(message + r.payloadOffset, id);
-      }
-      return true;
-    }
-
-    offset = r.nextOffset;
-  }
-
-  uint8_t newRec[96] = {0};
-  size_t newRecLen = buildHuntRecord(newRec, sizeof(newRec), mimeType, id);
-  if (!newRecLen) return false;
-  if (*messageLen + newRecLen > messageCap) return false;
-
-  // Old last record is no longer ME.
-  message[last.headerOffset] &= 0xBF;
-  // New record is not MB when appended.
-  newRec[0] &= 0x7F;
-
-  memcpy(message + *messageLen, newRec, newRecLen);
-  *messageLen += newRecLen;
-  return true;
-}
-
-bool buildAndWriteNdef(uint8_t* userArea, size_t userAreaBytes, uint8_t* message, size_t messageLen) {
-  uint8_t out[kMaxTagDataBytes] = {0};
-  size_t o = 0;
-
-  out[o++] = 0x03;  // NDEF TLV
-  if (messageLen < 0xFF) {
-    out[o++] = (uint8_t)messageLen;
-  } else {
-    out[o++] = 0xFF;
-    out[o++] = (uint8_t)((messageLen >> 8) & 0xFF);
-    out[o++] = (uint8_t)(messageLen & 0xFF);
-  }
-
-  if (o + messageLen + 1 > userAreaBytes || o + messageLen + 1 > sizeof(out)) {
-    Serial.println("NDEF payload does not fit in tag user area.");
-    return false;
-  }
-
-  memcpy(out + o, message, messageLen);
-  o += messageLen;
-  out[o++] = 0xFE;  // Terminator TLV
-
-  const size_t writeBytes = encodedNdefTlvLength(messageLen);
-  memcpy(userArea, out, writeBytes);
-  return writeUserArea(userArea, writeBytes);
-}
-
-bool writeSpotToTag() {
-  uint8_t userArea[kMaxTagDataBytes] = {0};
-  size_t readBytes = 0;
-  size_t userAreaBytes = 0;
-  if (!readUserAreaPrefix(userArea, sizeof(userArea), &readBytes, &userAreaBytes)) return false;
-
   char mimeType[64] = {0};
   buildHuntMimeType(mimeType, sizeof(mimeType));
 
-  uint8_t message[kMaxMessageBytes] = {0};
-  size_t messageLen = 0;
-
-  size_t ndefOffset = 0;
-  size_t ndefLen = 0;
-  if (findNdefTlv(userArea, readBytes, &ndefOffset, &ndefLen)) {
-    if (ndefLen > sizeof(message)) {
-      Serial.println("Existing NDEF message is too large for demo buffer.");
-      return false;
-    }
-    memcpy(message, userArea + ndefOffset, ndefLen);
-    messageLen = ndefLen;
-  }
-
-  if (!upsertHuntRecord(message, &messageLen, sizeof(message), mimeType, spotId)) {
-    Serial.println("Failed to update hunt record.");
+  // Preflight: only write when CC reads are stable.
+  uint8_t ccCheck[4] = {0};
+  if (!readCcPageStable(ccCheck)) {
+    Serial.println("Tag coupling unstable (CC read mismatch/fail); skipping write.");
     return false;
   }
 
-  if (!buildAndWriteNdef(userArea, userAreaBytes, message, messageLen)) {
+  static uint8_t existingNdef[kMaxUserAreaBytes];
+  size_t existingNdefLen = 0;
+  const bool hasExistingNdef = readRawNdefFromTag(existingNdef, sizeof(existingNdef), &existingNdefLen);
+
+  // Parse existing records to preserve URI and other-year hunt data.
+  // Copy to a 4-byte aligned static buffer first to avoid Xtensa alignment faults
+  // that crash the NdefMessage constructor when given an unaligned pointer.
+  NdefRecord uriRecord;
+  bool hasUri = false;
+  String otherYearMimeTypes[MAX_NDEF_RECORDS];
+  uint8_t otherYearPayloads[MAX_NDEF_RECORDS][8] = {{0}};
+  int otherYearCount = 0;
+  uint8_t huntPayload[8] = {0};
+
+  if (hasExistingNdef && existingNdefLen > 0) {
+    NdefMessage existingMsg(existingNdef, (int)existingNdefLen);
+    for (int i = 0; i < (int)existingMsg.getRecordCount(); i++) {
+      NdefRecord r = existingMsg.getRecord(i);
+      if (r.getTnf() == TNF_WELL_KNOWN && r.getType() == "U") {
+        hasUri = true;
+        uriRecord = r;
+      } else if (r.getTnf() == TNF_MIME_MEDIA && r.getPayloadLength() == 8) {
+        String recType = r.getType();
+        if (recType == String(mimeType)) {
+          r.getPayload(huntPayload);
+        } else if (recType.startsWith(String(kHuntMimePrefix)) && otherYearCount < MAX_NDEF_RECORDS) {
+          otherYearMimeTypes[otherYearCount] = recType;
+          r.getPayload(otherYearPayloads[otherYearCount]);
+          otherYearCount++;
+        }
+      }
+    }
+  }
+
+  // Build a clean message: URI first, other valid hunt-year records, then current year.
+  // This intentionally drops unknown/malformed records to self-heal tags written in bad states.
+  NdefMessage outMsg;
+  if (hasUri) {
+    outMsg.addRecord(uriRecord);
+  } else {
+    outMsg.addUriRecord(String(kDefaultWandUrl));
+  }
+  for (int i = 0; i < otherYearCount; i++) {
+    outMsg.addMimeMediaRecord(otherYearMimeTypes[i], otherYearPayloads[i], 8);
+  }
+  setSpotBit(huntPayload, spotId);
+  outMsg.addMimeMediaRecord(String(mimeType), huntPayload, 8);
+
+  // Use the library only for writing — it handles TLV wrapping and page writes correctly.
+  MifareUltralight ul(pn532);
+  if (!ul.write(outMsg, uid, uidLength)) {
     Serial.println("Failed to write NDEF message.");
     return false;
+  }
+
+  // Verify write by re-reading raw NDEF TLV before reporting success.
+  static uint8_t verifyNdef[kMaxUserAreaBytes];
+  size_t verifyNdefLen = 0;
+  if (!readRawNdefFromTag(verifyNdef, sizeof(verifyNdef), &verifyNdefLen)) {
+    Serial.println("WARNING: Write completed but NDEF readback failed.");
+    return false;
+  }
+
+  Serial.print("NDEF readback length: ");
+  Serial.print((unsigned)verifyNdefLen);
+  Serial.println(" bytes");
+
+  NdefMessage verifyMsg(verifyNdef, (int)verifyNdefLen);
+  Serial.print("NDEF records: ");
+  Serial.println((unsigned)verifyMsg.getRecordCount());
+  for (int i = 0; i < (int)verifyMsg.getRecordCount(); i++) {
+    NdefRecord vr = verifyMsg.getRecord(i);
+    Serial.print("  #");
+    Serial.print(i + 1);
+    Serial.print(" TNF=");
+    Serial.print((unsigned)vr.getTnf());
+    Serial.print(" Type=");
+    Serial.print(vr.getType());
+    Serial.print(" PayloadLen=");
+    Serial.println(vr.getPayloadLength());
   }
 
   Serial.print("SUCCESS: spot ");
   Serial.print(spotId);
   Serial.print(" written to year ");
   Serial.println(huntYear);
-  printHuntPayload(message, messageLen, mimeType);
+  printHuntPayload(huntPayload);
   return true;
 }
 
@@ -645,7 +512,7 @@ void loop() {
     return;
   }
 
-  writeSpotToTag();
+  writeSpotToTag(uid, uidLength);
   rememberUid(uid, uidLength);
   delay(kPollIntervalMs);
 }
