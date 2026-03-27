@@ -15,9 +15,112 @@ flowchart LR
   PWA -->|Configures record 1 toys| Wand
   PWA -->|Shows map progress and hints| Kid
 
-  Organizer[Hunt organizer] -->|Sets yearly hunt data| HuntPack[Yearly hunt definitions]
-  HuntPack --> Spot
-  HuntPack --> PWA
+  Organizer[Hunt organizer] -->|Edits hunt assets| Assets[Hunt JSON + Images]
+  Assets -->|Static delivery| PWA
+  Organizer -->|Configures spots| Assets
+
+  Assets -->|Informs spot IDs| Spot
+```
+
+## Hunt Asset System
+
+```mermaid
+flowchart TB
+  Org[Hunt Organizer<br/>Non-technical user]
+
+  Org -->|Edit hunt.json| JSON["hunt.json<br/>- Year title<br/>- Year description<br/>- Year banner image<br/>- Spot metadata<br/>- Hints & collected text"]
+
+  Org -->|Add/replace| Images["Hunt Images<br/>images/hunt-banner.jpg<br/>images/s1-name.jpg<br/>images/s2-name.jpg"]
+
+  JSON --> Build["Build Pipeline<br/>npm run build"]
+  Images --> Build
+
+  Build --> Static["Static Website<br/>dist/ folder<br/>Contains all hunt data"]
+
+  Static --> Web["Website Runtime<br/>spotLoader.ts"]
+
+  Web -->|Fetch| HTTP["fetch('/hunts/2026/hunt.json')"]
+  HTTP -->|Load & cache| Render["Render hunt header<br/>+ spot cards<br/>with images"]
+
+  Render -->|Show to kid| Display["Kid sees<br/>Hunt branding<br/>Spot hints or<br/>collected messages<br/>Progress visualization"]
+```
+
+## Hunt Data Flow (Year View)
+
+```mermaid
+sequenceDiagram
+  participant O as Organizer
+  participant Ed as Text Editor
+  participant FS as File System
+  participant Build as npm build
+  participant Web as Website
+  participant Kid as Kid
+
+  O->>Ed: Edit hunts/2026/hunt.json
+  O->>FS: Add images/ files
+
+  O->>Build: npm run build
+  Build->>FS: Bundle assets into dist/
+  Build->>Build: Website ready
+
+  Kid->>Web: Visit website
+  Web->>Web: Detect available years
+  Web->>FS: fetch('/hunts/2026/hunt.json')
+  FS-->>Web: Return hunt metadata + spots
+
+  Web->>Web: Render hunt header<br/>with banner image
+  Web->>Web: Render spot cards<br/>with images & hints/collected text
+  Web-->>Kid: Display hunt progress
+```
+
+## Hunt Asset Folder Structure
+
+```mermaid
+graph TB
+  Website["website/"]
+  Public["public/"]
+  Hunts["hunts/"]
+  H2026["2026/"]
+  Images2026["images/"]
+  H2025["2025/"]
+  Images2025["images/"]
+
+  Website --> Public
+  Public --> Hunts
+  Hunts --> H2026
+  Hunts --> H2025
+
+  H2026 --> Hunt2026["hunt.json<br/>(Year branding + spots)"]
+  H2026 --> Images2026
+  Images2026 --> BannerImg["hunt-banner.jpg"]
+  Images2026 --> Spot1["s1-garden.jpg"]
+  Images2026 --> Spot2["s2-tower.jpg"]
+
+  H2025 --> Hunt2025["hunt.json"]
+  H2025 --> Images2025
+
+  style Hunt2026 fill:#e6f7ff
+  style Hunt2025 fill:#e6f7ff
+  style BannerImg fill:#fff4e6
+  style Spot1 fill:#fff4e6
+  style Spot2 fill:#fff4e6
+```
+
+## Hunt JSON to Render Mapping
+
+```mermaid
+graph LR
+  JSON["hunt.json<br/>{<br/>year: 2026,<br/>title: Dragon's Quest,<br/>image: images/hunt-banner.jpg,<br/>spots: {<br/>s1: {<br/>name: Dragon's Garden,<br/>hint: ...,<br/>collectedText: ...,<br/>image: images/s1.jpg<br/>}<br/>}<br/>}"]
+
+  Parser["Website Loads<br/>spotLoader.ts<br/>- loadHunts()<br/>- getHuntMetadata()<br/>- getSpot()"]
+
+  Render["Rendering Components<br/>huntHeader.ts<br/>- Hunt title + image<br/>- Year label<br/><br/>spotCard.ts<br/>- Spot name<br/>- Hint OR collected text<br/>- Spot image<br/>- Location"]
+
+  Display["Kid's View<br/>Hunt Header<br/>with branding<br/><br/>Spot Cards<br/>Hint/Collected state<br/>with images<br/><br/>Progress bar<br/>X of Y collected"]
+
+  JSON --> Parser
+  Parser --> Render
+  Render --> Display
 ```
 
 ## Responsibility Boundaries

@@ -108,6 +108,63 @@ Schema rules:
 5. Discovery must use `(recordType=mime, mediaType, payload.year)`.
 6. Spot writes are idempotent and must append only missing spot IDs for that year.
 
+## Hunt Asset Delivery Model
+
+### Overview
+
+Hunt content (spot names, hints, images, branding) is delivered as **static JSON files bundled with the website build**. No backend server is required. This keeps the companion web fully offline-capable and allows non-technical hunt organizers to configure yearly hunts.
+
+### Asset Structure
+
+Each hunt year is a self-contained folder under `website/public/hunts/`:
+
+```
+hunts/
+  2026/
+    hunt.json       ← Year branding + spot metadata (edited by organizers)
+    images/
+      hunt-banner.jpg        ← Hunt branding image
+      s1-garden.jpg          ← Spot images
+      s2-tower.jpg
+```
+
+### hunt.json Schema
+
+```json
+{
+  "year": 2026,
+  "title": "The Dragon's Quest",
+  "description": "Help the dragons find their lost treasures...",
+  "image": "images/hunt-banner.jpg",
+  "imageAlt": "Dragons flying over the city",
+  "spots": {
+    "s1": {
+      "name": "The Dragon's Garden",
+      "hint": "Look for the red door with a golden knocker.",
+      "collectedText": "You found the magical garden! 🎭",
+      "image": "images/s1-garden.jpg",
+      "imageAlt": "Lush green garden with stone statues",
+      "location": "Central Park, North Gate"
+    }
+  }
+}
+```
+
+### Non-Technical Configurability Approach
+
+1. **Asset editing**: Hunt organizers edit JSON and add image files with no coding required.
+2. **Versioning**: Each year's hunt is a separate folder; copying and modifying the previous year is the upgrade path.
+3. **Validation**: Simple JSON structure; non-technical users can validate with online JSON validators.
+4. **Decoupling**: Hunt content is entirely separate from code; website rebuilds automatically recognize new hunts.
+
+### Design Rationale
+
+- **Static delivery** aligns with PWA offline-first design and zero-backend requirements.
+- **Separate by year** mirrors the wand ledger's yearly hunt records.
+- **(year, spotId) lookup** matches the wand data contract: website resolves spot metadata from JSON, wand holds only collected IDs.
+- **Images bundled at build time** ensures fast load and offline availability.
+- **Non-technical authorship** lowers barrier for yearly hunt creation and seasonal updates.
+
 ## Working Agreement
 
 When adding or changing features:
