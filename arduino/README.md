@@ -13,7 +13,7 @@ This sketch initializes a PN532 in I2C mode and performs:
 - NTAG21x page reads (`mifareultralight_ReadPage`)
 - Basic NTAG profile guess from Capability Container (CC) bytes
 - I2C bus scan after PN532 wakeup attempts if initialization still fails
-- I2C recovery cycles for warm-reset cases (SCL pulse release + Wire re-init)
+- I2C recovery cycles for warm-reset cases only after first init failure (SCL pulse release + Wire re-init)
 - Non-NTAG detection by UID length (skips page dump for likely Mifare Classic tags)
 - Continuous background PN532 re-initialization retries instead of halting forever after a failed startup
 
