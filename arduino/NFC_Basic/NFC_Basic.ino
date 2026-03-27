@@ -8,15 +8,18 @@
 // 3V3 -> VCC
 // GND -> GND
 
-// Spot configuration for this board.
-constexpr uint8_t spotId = 1;
-constexpr uint16_t huntYear = 2026;
+// Spot configuration for this board (configurable via serial).
+uint8_t spotId = 3;
+uint16_t huntYear = 2026;
+// Record 1: default wand link URL.
+const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
 
+String serialBuffer;
 constexpr uint8_t kI2cSdaPin = 4;
 constexpr uint8_t kI2cSclPin = 5;
 constexpr uint8_t kPn532I2cAddress = 0x24;  // 7-bit address
 
-constexpr uint16_t kPn532BootDelayMs = 1200;
+constexpr uint16_t kPn532BootDelayMs = 2000;  // Extra time for 3.3V regulator and PN532 module to stabilize
 constexpr uint16_t kRetryIntervalMs = 2000;
 constexpr uint8_t kPassiveActivationRetries = 0x20;  // ESP8266 watchdog safe
 
@@ -75,6 +78,9 @@ void rememberUid(const uint8_t* uid, uint8_t uidLength) {
 }
 
 bool readPage(uint8_t page, uint8_t* data) {
+  // Try twice to handle transient RF coupling issues.
+  if (pn532.mifareultralight_ReadPage(page, data)) return true;
+  delay(10);
   return pn532.mifareultralight_ReadPage(page, data);
 }
 
@@ -111,14 +117,17 @@ bool unstickI2cBusIfNeeded() {
 }
 
 void drainPn532IfReady() {
-  Wire.requestFrom(kPn532I2cAddress, (uint8_t)1);
-  if (!Wire.available()) return;
-  if (!(Wire.read() & 0x01)) return;
+  for (uint8_t attempt = 0; attempt < 5; attempt++) {
+    Wire.requestFrom(kPn532I2cAddress, (uint8_t)1);
+    if (!Wire.available()) break;
+    uint8_t status = Wire.read();
+    if (!(status & 0x01)) break;  // No data ready
 
-  Serial.println("PN532 has buffered response - draining...");
-  Wire.requestFrom(kPn532I2cAddress, (uint8_t)24);
-  while (Wire.available()) Wire.read();
-  delay(50);
+    Serial.println("PN532 has buffered response - draining...");
+    Wire.requestFrom(kPn532I2cAddress, (uint8_t)32);
+    while (Wire.available()) Wire.read();
+    delay(50);
+  }
 }
 
 void configurePn532(uint32_t versionData) {
@@ -131,6 +140,29 @@ void configurePn532(uint32_t versionData) {
 
   pn532.setPassiveActivationRetries(kPassiveActivationRetries);
   pn532.SAMConfig();
+  
+  // Boost RF field power via direct I2C command.
+  // PN532 RFConfiguration: Frame = [PreambleD4] [LEN] [LCS] [TFI] [CMD=0x32] [CFG_ITEM=0x01] [CFG_VALUE=0x01] [POSTAMBLE]
+  // We send: 0x32 (RFConfiguration) 0x01 (RF Field) 0x01 (RF field ON)
+  Wire.beginTransmission(kPn532I2cAddress);
+  Wire.write(0x00);  // Frame header
+  Wire.write(0x00);  
+  Wire.write(0xFF);  // LEN marker for extended frame
+  Wire.write(0x04);  // Actual length
+  Wire.write(0xFC);  // Checksum (calculated for this specific command)
+  Wire.write(0xD4);  // TFI (host to PN532)
+  Wire.write(0x32);  // Command: RFConfiguration
+  Wire.write(0x01);  // Config item: RF Field
+  Wire.write(0x01);  // Value: RF field ON
+  Wire.write(0xB9);  // DCS checksum
+  Wire.write(0x00);  // Postamble
+  Wire.endTransmission();
+  delay(100);
+  
+  // Read response to clear buffer
+  Wire.requestFrom(kPn532I2cAddress, (uint8_t)32);
+  while (Wire.available()) Wire.read();
+  
   Serial.println("Ready. Present NTAG216 tag.");
   initialized = true;
 }
@@ -222,6 +254,37 @@ bool writeUserArea(const uint8_t* data, size_t dataBytes) {
 
 size_t encodedNdefTlvLength(size_t messageLen) {
   return (messageLen < 0xFF) ? (2 + messageLen + 1) : (4 + messageLen + 1);
+}
+
+void printHuntPayload(const uint8_t* message, size_t messageLen, const char* mimeType) {
+  size_t offset = 0;
+  while (offset < messageLen) {
+    RecordView r = parseRecord(message, messageLen, offset);
+    if (!r.valid) return;
+
+    if (typeMatchesMime(message, r, mimeType) && r.payloadLength == 8) {
+      const uint8_t* payload = message + r.payloadOffset;
+
+      Serial.print("  Payload (hex): ");
+      for (uint8_t i = 0; i < 8; i++) {
+        printHexByte(payload[i]);
+        if (i < 7) Serial.print(" ");
+      }
+      Serial.println();
+
+      Serial.print("  Payload (binary): ");
+      for (uint8_t i = 0; i < 8; i++) {
+        for (uint8_t b = 7; b < 8; --b) {
+          Serial.print((payload[i] >> b) & 1);
+        }
+        if (i < 7) Serial.print(" ");
+      }
+      Serial.println();
+      return;
+    }
+
+    offset = r.nextOffset;
+  }
 }
 
 bool findNdefTlv(const uint8_t* data, size_t dataLen, size_t* valueOffset, size_t* valueLen) {
@@ -455,7 +518,57 @@ bool writeSpotToTag() {
   Serial.print(spotId);
   Serial.print(" written to year ");
   Serial.println(huntYear);
+  printHuntPayload(message, messageLen, mimeType);
   return true;
+}
+
+void handleSerialInput() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n' || c == '\r') {
+      if (serialBuffer.length() > 0) {
+        processSerialCommand(serialBuffer);
+        serialBuffer = "";
+      }
+    } else if (serialBuffer.length() < 50) {
+      serialBuffer += c;
+    }
+  }
+}
+
+void processSerialCommand(const String& cmd) {
+  String trimmed = cmd;
+  trimmed.trim();
+  
+  if (trimmed.startsWith("setSpot:")) {
+    String valStr = trimmed.substring(8);
+    valStr.trim();
+    uint8_t val = valStr.toInt();
+    if (val >= 1 && val <= 64) {
+      spotId = val;
+      Serial.print("OK: spotId = ");
+      Serial.println(spotId);
+    } else {
+      Serial.println("ERROR: spot must be 1-64");
+    }
+    return;
+  }
+  
+  if (trimmed.startsWith("setYear:")) {
+    String valStr = trimmed.substring(8);
+    valStr.trim();
+    uint16_t val = valStr.toInt();
+    if (val >= 2000 && val <= 2100) {
+      huntYear = val;
+      Serial.print("OK: huntYear = ");
+      Serial.println(huntYear);
+    } else {
+      Serial.println("ERROR: year must be 2000-2100");
+    }
+    return;
+  }
+  
+  Serial.println("Commands: 'setSpot: X' (1-64) or 'setYear: YYYY' (2000-2100)");
 }
 
 void setup() {
@@ -488,6 +601,8 @@ void setup() {
 }
 
 void loop() {
+  handleSerialInput();
+
   if (!initialized) {
     const uint32_t now = millis();
     if (now - lastRetryAt >= kRetryIntervalMs) {

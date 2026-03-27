@@ -7,11 +7,14 @@
         class="spot-image"
         loading="lazy"
       />
+      <span class="spot-number">#{{ spotId }}</span>
       <span v-if="collected" class="collected-badge">✓ Collected</span>
     </div>
     <div class="content">
       <h3 class="name">{{ spot.name }}</h3>
-      <p v-if="spot.location" class="location">{{ spot.location }}</p>
+      <p v-if="collected && spot.location" class="location">
+        {{ spot.location }}
+      </p>
       <p class="text" :class="collected ? 'collected-text' : 'hint-text'">
         {{ collected ? spot.collectedText : spot.hint }}
       </p>
@@ -23,6 +26,7 @@
 import type { SpotDefinition } from "../utils/spotLoader";
 
 defineProps<{
+  spotId: string;
   spot: SpotDefinition;
   collected: boolean;
 }>();
@@ -74,6 +78,19 @@ defineProps<{
 
 .spot-card.collected .spot-image {
   filter: grayscale(0%);
+}
+
+.spot-number {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: var(--shadow);
 }
 
 .collected-badge {

@@ -47,6 +47,7 @@
       <SpotCard
         v-for="[spotId, spot] in sortedSpots"
         :key="spotId"
+        :spot-id="spotId"
         :spot="spot"
         :collected="collectedSet.has(spotId)"
       />

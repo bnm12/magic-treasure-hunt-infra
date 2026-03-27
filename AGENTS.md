@@ -27,7 +27,7 @@ Current conceptual capability notes:
 - `website/src/components/YearSelector.vue` renders year picker tabs when multiple hunt years are available.
 - `website/src/components/ToyboxPanel.vue` provides the record 1 toy configuration UI with input validation and hunt-record preservation warning.
 - `website/public/hunts/README.md` is the non-technical organizer guide for creating and updating yearly hunts.
-- `arduino/` now includes a PN532-first NFC spot-writer sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini. It scans NTAG21x tags, upserts a yearly hunt MIME record (`application/vnd.tryllestav.hunt.year-<YYYY>`) with an 8-byte 64-bit spot mask payload, and keeps warm-reset-safe I2C recovery behavior (SDA unstick, Wire re-init, buffered response drain).
+- `arduino/` now includes a PN532-first NFC spot-writer sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini. It scans NTAG21x tags, upserts a yearly hunt MIME record (`application/vnd.tryllestav.hunt.year-<YYYY>`) with an 8-byte 64-bit spot mask payload, and keeps warm-reset-safe I2C recovery behavior (SDA unstick, Wire re-init, buffered response drain). Serial commands (`setSpot: X`, `setYear: YYYY`) allow dynamic configuration without recompile. Record 1 (URI wand link) support will be added using the don/NDEF library.
 - `arduino/` includes setup documentation in `arduino/README.md`.
 - Vision alignment is now explicitly documented around a kids treasure-hunt experience with city "magic spots" and a wand-based offline ledger.
 - The intended long-term loop is year-over-year hunt continuity, where the same wand can retain prior years while joining new hunts.
@@ -43,7 +43,8 @@ Current conceptual capability notes:
 - Do not duplicate year inside the payload; derive year from the MIME media type suffix.
 - Spot IDs are numeric and map directly to mask bits: spot 1 -> bit 0, ..., spot 64 -> bit 63.
 - Until launch data exists, prefer a single strict on-tag format over compatibility branches (no legacy read/write paths by default).
-- Keep record 1 user-controlled and preserve it during website writes that update toybox content.
+- Serial commands allow spotId (1-64) and huntYear (2000-2100) to be reconfigured dynamically without reflash; changes persist for the session.
+- **Record 1 support**: Attempted hand-rolled NDEF URI record encoding which broke tag scanning. Will use the battle-tested don/NDEF library instead for proper encoding. Hand-rolling NDEF is error-prone; use a library.
 
 Keep this structure intentionally minimal for now.
 

@@ -10,13 +10,11 @@ This sketch initializes a PN532 in I2C mode and performs:
 
 - ISO14443A polling with high passive activation retries
 - UID reporting over serial (`115200`)
-- NTAG21x page reads (`mifareultralight_ReadPage`)
-- Basic NTAG profile guess from Capability Container (CC) bytes
+- NTAG21x page reads and writes (`mifareultralight_ReadPage`, `mifareultralight_WritePage`)
+- Yearly hunt record MIME writing with spot ID bitmasks (8-byte 64-bit compact format)
 - Warm-reset-safe I2C retry flow (SDA unstick + Wire re-init + PN532 buffered-response drain)
-- Non-NTAG detection by UID length (skips page dump for likely Mifare Classic tags)
-- Continuous background PN532 re-initialization retries instead of halting forever after a failed startup
-
-The immediate purpose is to validate reliable NTAG216 detection and identify whether failures are firmware/configuration or RF-distance related.
+- Serial command interface for dynamic spotId and huntYear configuration (`setSpot: X`, `setYear: YYYY`)
+- NDEF TLV parsing, record building, and idempotent record upsert
 
 ## Library dependencies
 
@@ -72,6 +70,29 @@ Warm reset note:
 - This sketch now attempts automatic I2C bus unstick, re-init, and buffered-response drain before each retry.
 
 Do not switch to RC522 until PN532 I2C mode and wiring have been verified. A missing PN532 on the bus is not an NTAG216 compatibility issue.
+
+## Hunt Records and Dynamic Configuration
+
+The sketch writes and updates yearly hunt MIME records on the wand. Each record uses:
+
+- **Media Type**: `application/vnd.tryllestav.hunt.year-<YYYY>` (e.g., `application/vnd.tryllestav.hunt.year-2026`)
+- **Payload**: An 8-byte compact 64-bit bitmask encoding which spots have been collected
+- **Idempotency**: Spot IDs are added (never removed), so writing the same tag multiple times is safe
+
+### Serial Configuration
+
+While the sketch is running, send commands via serial (115200 baud) to dynamically reconfigure:
+
+```
+setSpot: X          # Set spotId to X (1-64). Example: "setSpot: 5"
+setYear: YYYY       # Set huntYear to YYYY (2000-2100). Example: "setYear: 2027"
+```
+
+Configuration persists for the session. Reset the board to return to default values (`spotId=3`, `huntYear=2026`).
+
+### Future: Record 1 (Wand Link) via NDEF Library
+
+Record 1 support will be added using the [don/NDEF](https://github.com/don/NDEF) library to properly encode a clickable URI record. This will be implemented to preserve existing hunt records while adding a user-facing link.
 
 ## NTAG216 Reliability Notes (small glass ampules)
 
