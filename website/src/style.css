@@ -283,6 +283,83 @@ code {
   }
 }
 
+.hero-panel {
+  text-align: left;
+  padding: 36px 32px 28px;
+  border-bottom: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    padding: 24px 20px;
+  }
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.hero-copy {
+  max-width: 72ch;
+}
+
+#toybox-panel {
+  border-top: 1px solid var(--border);
+  padding: 28px 32px 36px;
+  text-align: left;
+
+  @media (max-width: 1024px) {
+    padding: 24px 20px 28px;
+  }
+}
+
+.hunt-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-block {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--social-bg);
+}
+
+.panel-block h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.record-preview {
+  font-family: var(--mono);
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.nfc-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  border-radius: 6px;
+  padding: 10px;
+  font: 14px/1.4 var(--mono);
+  margin-bottom: 10px;
+}
+
+.toybox-help {
+  font-size: 14px;
+}
+
 .nfc-note {
   margin-bottom: 16px;
 }

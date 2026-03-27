@@ -84,6 +84,30 @@ Deliver a dependable "find, tap, collect" loop where:
 3. Parsing rule: never rely on record index except preserving record 1 availability.
 4. Lookup rule: website maps `(year, spotId)` to external static hunt content.
 
+## Formal Ledger MIME Schema (Draft v1)
+
+Hunt records use a MIME payload format with this media type:
+
+`application/vnd.tryllestav.hunt+json`
+
+Payload shape:
+
+```json
+{
+  "year": 2026,
+  "spots": ["s1", "s3", "s9"]
+}
+```
+
+Schema rules:
+
+1. `year` must be an integer in the expected hunt range.
+2. `spots` must be a string array of unique spot IDs.
+3. The same wand can contain multiple yearly hunt records.
+4. Physical record order is not stable and cannot be used for discovery.
+5. Discovery must use `(recordType=mime, mediaType, payload.year)`.
+6. Spot writes are idempotent and must append only missing spot IDs for that year.
+
 ## Working Agreement
 
 When adding or changing features:
