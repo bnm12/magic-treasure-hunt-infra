@@ -218,15 +218,64 @@ flowchart TB
   Note1 --> Note2 --> Note3
 ```
 
-## Delivery Milestones
+## Website Architecture (Vue 3)
 
 ```mermaid
-flowchart LR
-  M1[Milestone 1\nDefine ledger schema and record allocation]
-  M2[Milestone 2\nReliable spot-to-wand collection writes]
-  M3[Milestone 3\nWebsite progress and hints visualization]
-  M4[Milestone 4\nMulti-year compatibility and migration]
-  M5[Milestone 5\nOptional everyday magic actions via record 1]
+graph TB
+  IndexHTML["index.html<br/>Root entry point<br/>div#app"]
 
-  M1 --> M2 --> M3 --> M4 --> M5
+  Main["src/main.ts<br/>Bootstrap Vue 3<br/>createApp & mount"]
+
+  AppVue["App.vue<br/>Root component<br/>NFC scan & write<br/>Hunt progress<br/>Record 1 toy config"]
+
+  Utils["src/utils/<br/>spotLoader.ts<br/>Fetch hunt JSON<br/>Cache hunts by year"]
+
+  Components["src/components/<br/>Planned:<br/>HuntHeader.vue<br/>SpotCard.vue<br/>ProgressBar.vue"]
+
+  Style["src/style.css<br/>Global styles<br/>Component theme"]
+
+  HuntJSON["public/hunts/[YEAR]/<br/>hunt.json<br/>+ images/"]
+
+  IndexHTML --> Main
+  Main --> AppVue
+  AppVue --> Utils
+  AppVue --> Components
+  AppVue --> Style
+  Utils --> HuntJSON
+
+  style AppVue fill:#e6f7ff
+  style Main fill:#fff4e6
+  style Utils fill:#f0f9ff
+  style Components fill:#f0f9ff
+```
+
+## Vue 3 Component Hierarchy
+
+```mermaid
+graph TD
+  App["App.vue<br/>(root)<br/>Manages state:<br/>isScanning<br/>isWriting<br/>huntYears<br/>collectedSpots"]
+
+  NFC["NFC Scanning<br/>startScan()<br/>stopScan()<br/>Reads MIME records<br/>Parses hunt data"]
+
+  Render["Hunt Rendering<br/>(future components)<br/>HuntHeader.vue<br/>SpotCard.vue<br/>LeaderProgress.vue"]
+
+  Config["Record 1 Config<br/>toyAction<br/>toyPayload<br/>writeToy()"]
+
+  App --> NFC
+  App --> Render
+  App --> Config
+```
+
+## Website Build & Deployment
+
+```mermaid
+graph LR
+  TS["TypeScript<br/>*.ts, *.vue files"]
+  Vite["Build: npm run build<br/>Vite plugin: @vitejs/plugin-vue<br/>TSC type check"]
+  Dist["dist/<br/>Bundled app<br/>+ hunt.json<br/>+ images"]
+
+  TS --> Vite
+  Vite --> Dist
+
+  style Vite fill:#fff4e6
 ```

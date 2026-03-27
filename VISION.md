@@ -63,7 +63,7 @@ Deliver a dependable "find, tap, collect" loop where:
 ## Scope Boundaries
 
 1. `arduino/` owns spot behavior, spot identity, and write protocol execution.
-2. `website/` owns wand scan UX, visualization, hint presentation, compatibility messaging, and record 1 toy configuration UI.
+2. `website/` owns wand scan UX, visualization, hint presentation, compatibility messaging, and record 1 toy configuration UI. Implemented as a Vue 3 Progressive Web App (PWA).
 3. Shared contract includes wand ledger schema, yearly hunt identifiers, and record allocation rules.
 
 ## Resolved Architecture Decisions (v1.0)

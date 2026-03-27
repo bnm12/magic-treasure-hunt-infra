@@ -4,7 +4,7 @@
 
 This repository currently contains two primary folders:
 
-- `website/`: The PWA (Progressive Web App) workspace, currently scaffolded with TypeScript and static-site build output.
+- `website/`: The PWA (Progressive Web App) workspace using Vue 3, TypeScript, and Vite for static-site build output.
 - `arduino/`: The Arduino workspace for firmware, hardware interaction, and device-side logic.
 
 Supporting guidance and planning artifacts:
@@ -19,7 +19,8 @@ Current conceptual capability notes:
 - `website/public/hunts/` now contains the hunt asset delivery system: JSON-based hunt metadata and yearly spot definitions, bundled at build time for offline-first companion web use.
 - `website/public/hunts/[YEAR]/hunt.json` is the canonical hunt definition: it includes year branding (title, description, banner image) plus all spots for that year. Non-technical hunt organizers edit this file and add images without coding.
 - `website/src/utils/spotLoader.ts` provides typed loaders for hunts and spots; discovery is automatic by year (supports multi-year hunts on one wand).
-- `website/src/components/` includes `huntHeader.ts` (renders year branding) and `spotCard.ts` (renders spot details with hint/collected state toggle).
+- `website/` now uses **Vue 3** as the frontend framework with **Vite** as the build tool. Components are defined as Single-File Components (.vue files) with TypeScript and reactive state management.
+- `website/src/App.vue` is the root component managing wand NFC scanning, hunt progress visualization, and record 1 toy configuration.
 - `website/public/hunts/README.md` is the non-technical organizer guide for creating and updating yearly hunts.
 - `arduino/` now includes a PN532-first NFC diagnostic firmware sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini, with NTAG21x page-read diagnostics to validate tag detection reliability.
 - `arduino/` includes setup documentation in `arduino/README.md`.
