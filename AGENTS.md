@@ -21,6 +21,11 @@ Current conceptual capability notes:
 - `website/src/utils/spotLoader.ts` provides typed loaders for hunts and spots; discovery is automatic by year (supports multi-year hunts on one wand).
 - `website/` now uses **Vue 3** as the frontend framework with **Vite** as the build tool. Components are defined as Single-File Components (.vue files) with TypeScript and reactive state management.
 - `website/src/App.vue` is the root component managing wand NFC scanning, hunt progress visualization, and record 1 toy configuration.
+- `website/src/composables/useNfc.ts` encapsulates all Web NFC logic: scanning, MIME-based hunt record parsing, idempotent spot extraction, and record 1 writes with hunt record preservation.
+- `website/src/components/HuntView.vue` renders a single year's hunt: branding header, progress bar, and a grid of `SpotCard.vue` components.
+- `website/src/components/SpotCard.vue` renders a single spot with image, name, location, and contextual text (hint before collection, collected message after).
+- `website/src/components/YearSelector.vue` renders year picker tabs when multiple hunt years are available.
+- `website/src/components/ToyboxPanel.vue` provides the record 1 toy configuration UI with input validation and hunt-record preservation warning.
 - `website/public/hunts/README.md` is the non-technical organizer guide for creating and updating yearly hunts.
 - `arduino/` now includes a PN532-first NFC diagnostic firmware sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini, with NTAG21x page-read diagnostics to validate tag detection reliability.
 - `arduino/` includes setup documentation in `arduino/README.md`.

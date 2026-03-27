@@ -31,10 +31,28 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
     try {
       const response = await fetch(`/hunts/${year}/hunt.json`);
       if (response.ok) {
-        const hunt = await response.json();
+        const hunt = (await response.json()) as HuntYear;
+        // Resolve image paths to absolute URLs relative to the hunt folder
+        const base = `/hunts/${year}`;
+        if (
+          hunt.image &&
+          !hunt.image.startsWith("/") &&
+          !hunt.image.startsWith("http")
+        ) {
+          hunt.image = `${base}/${hunt.image}`;
+        }
+        for (const spot of Object.values(hunt.spots)) {
+          if (
+            spot.image &&
+            !spot.image.startsWith("/") &&
+            !spot.image.startsWith("http")
+          ) {
+            spot.image = `${base}/${spot.image}`;
+          }
+        }
         hunts[hunt.year] = hunt;
       }
-    } catch (error) {
+    } catch {
       // Silently skip missing years
     }
   }
