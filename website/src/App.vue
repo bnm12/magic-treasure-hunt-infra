@@ -46,6 +46,7 @@
         v-if="availableYears.length > 1"
         v-model="selectedYear"
         :years="availableYears"
+        :progress="yearProgress"
       />
       <HuntView
         v-if="selectedHunt"
@@ -107,6 +108,17 @@ const selectedHunt = computed<HuntYear | null>(
 const selectedCollectedIds = computed<string[]>(() =>
   (collectedSpots.value[selectedYear.value] ?? []).map(String),
 );
+
+const yearProgress = computed(() => {
+  const result: Record<number, { collected: number; total: number }> = {};
+  for (const year of availableYears.value) {
+    const hunt = hunts.value[year];
+    const total = hunt ? Object.keys(hunt.spots).length : 0;
+    const collected = (collectedSpots.value[year] ?? []).length;
+    result[year] = { collected, total };
+  }
+  return result;
+});
 </script>
 
 <style scoped>

@@ -1,36 +1,43 @@
 {
-	"servers": {
-		"arduino": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"arduino-mcp-server"
-			],
-			"env": {
-				"ARDUINO_CLI_PATH": "${input:arduino_cli_path}",
-				"ARDUINO_SKETCH_ROOT": "${input:arduino_sketch_root}"
-			},
-			"type": "stdio"
-		},
-		"context7": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"@upstash/context7-mcp@latest"
-			],
-			"type": "stdio"
-		}
-	},
-	"inputs": [
-		{
-			"id": "arduino_cli_path",
-			"type": "promptString",
-			"description": "Arduino CLI Path"
-		},
-		{
-			"id": "arduino_sketch_root",
-			"type": "promptString",
-			"description": "Arduino Sketch Root"
-		}
-	]
+  "servers": {
+    "arduino": {
+      "command": "npx",
+      "args": ["-y", "arduino-mcp-server"],
+      "env": {
+        "ARDUINO_CLI_PATH": "${input:arduino_cli_path}",
+        "ARDUINO_SKETCH_ROOT": "${input:arduino_sketch_root}"
+      },
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "type": "stdio"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--headless",
+        "--no-usage-statistics",
+        "--executable-path",
+        "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+      ],
+      "env": {},
+      "type": "stdio"
+    }
+  },
+  "inputs": [
+    {
+      "id": "arduino_cli_path",
+      "type": "promptString",
+      "description": "Arduino CLI Path"
+    },
+    {
+      "id": "arduino_sketch_root",
+      "type": "promptString",
+      "description": "Arduino Sketch Root"
+    }
+  ]
 }

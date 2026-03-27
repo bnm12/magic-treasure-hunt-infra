@@ -45,7 +45,7 @@
     <!-- Spot grid -->
     <div class="spots-grid">
       <SpotCard
-        v-for="(spot, spotId) in hunt.spots"
+        v-for="[spotId, spot] in sortedSpots"
         :key="spotId"
         :spot="spot"
         :collected="collectedSet.has(spotId)"
@@ -65,6 +65,15 @@ const props = defineProps<{
 }>();
 
 const collectedSet = computed(() => new Set(props.collectedIds));
+
+const sortedSpots = computed(() =>
+  Object.entries(props.hunt.spots).sort(([aId], [bId]) => {
+    const aCol = collectedSet.value.has(aId) ? 0 : 1;
+    const bCol = collectedSet.value.has(bId) ? 0 : 1;
+    return aCol - bCol;
+  }),
+);
+
 const totalCount = computed(() => Object.keys(props.hunt.spots).length);
 const collectedCount = computed(
   () =>

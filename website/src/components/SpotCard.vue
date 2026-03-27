@@ -39,12 +39,15 @@ defineProps<{
   border: 1px solid var(--border);
   transition:
     box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+  opacity: 0.55;
 }
 
 .spot-card.collected {
   border-color: var(--accent-border);
   background: var(--accent-bg);
+  opacity: 1;
 }
 
 .spot-card:hover {
@@ -65,6 +68,12 @@ defineProps<{
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: grayscale(100%);
+  transition: filter 0.2s ease;
+}
+
+.spot-card.collected .spot-image {
+  filter: grayscale(0%);
 }
 
 .collected-badge {
