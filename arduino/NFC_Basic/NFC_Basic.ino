@@ -26,6 +26,7 @@ constexpr uint8_t kPn532I2cAddress = 0x24;  // 7-bit address
 constexpr uint16_t kPn532BootDelayMs = 2000;  // Extra time for 3.3V regulator and PN532 module to stabilize
 constexpr uint16_t kRetryIntervalMs = 2000;
 constexpr uint8_t kPassiveActivationRetries = 0x20;  // ESP8266 watchdog safe
+constexpr uint16_t kCiuRfCfgRegister = 0x6316;
 
 constexpr uint16_t kPollIntervalMs = 50;
 constexpr uint16_t kReadDebounceMs = 400;
@@ -143,28 +144,28 @@ void configurePn532(uint32_t versionData) {
 
   pn532.setPassiveActivationRetries(kPassiveActivationRetries);
   pn532.SAMConfig();
-  
-  // Boost RF field power via direct I2C command.
-  // PN532 RFConfiguration: Frame = [PreambleD4] [LEN] [LCS] [TFI] [CMD=0x32] [CFG_ITEM=0x01] [CFG_VALUE=0x01] [POSTAMBLE]
-  // We send: 0x32 (RFConfiguration) 0x01 (RF Field) 0x01 (RF field ON)
-  Wire.beginTransmission(kPn532I2cAddress);
-  Wire.write(0x00);  // Frame header
-  Wire.write(0x00);  
-  Wire.write(0xFF);  // LEN marker for extended frame
-  Wire.write(0x04);  // Actual length
-  Wire.write(0xFC);  // Checksum (calculated for this specific command)
-  Wire.write(0xD4);  // TFI (host to PN532)
-  Wire.write(0x32);  // Command: RFConfiguration
-  Wire.write(0x01);  // Config item: RF Field
-  Wire.write(0x01);  // Value: RF field ON
-  Wire.write(0xB9);  // DCS checksum
-  Wire.write(0x00);  // Postamble
-  Wire.endTransmission();
-  delay(100);
-  
-  // Read response to clear buffer
-  Wire.requestFrom(kPn532I2cAddress, (uint8_t)32);
-  while (Wire.available()) Wire.read();
+
+  // Keep RF field enabled via official API.
+  if (pn532.setRFField(0x00, 0x01)) {
+    Serial.println("RF field enabled.");
+  } else {
+    Serial.println("WARNING: Failed to enable RF field.");
+  }
+
+  // Raise receiver gain (CIU_RFCfg RxGain bits [6:4]) to maximum (0b111).
+  // This improves tag detect/read sensitivity but does not increase antenna TX power.
+  uint32_t rfCfg = pn532.readRegister(kCiuRfCfgRegister);
+  uint8_t rfCfgByte = (uint8_t)(rfCfg & 0xFF);
+  uint8_t boosted = (uint8_t)((rfCfgByte & 0x8F) | 0x70);
+  if (pn532.writeRegister(kCiuRfCfgRegister, boosted)) {
+    Serial.print("RX gain boosted: 0x");
+    printHexByte(rfCfgByte);
+    Serial.print(" -> 0x");
+    printHexByte(boosted);
+    Serial.println();
+  } else {
+    Serial.println("WARNING: Failed to boost RX gain.");
+  }
   
   Serial.println("Ready. Present NTAG216 tag.");
   initialized = true;
