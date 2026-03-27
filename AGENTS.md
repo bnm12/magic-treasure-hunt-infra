@@ -27,7 +27,7 @@ Current conceptual capability notes:
 - `website/src/components/YearSelector.vue` renders year picker tabs when multiple hunt years are available.
 - `website/src/components/ToyboxPanel.vue` provides the record 1 toy configuration UI with input validation and hunt-record preservation warning.
 - `website/public/hunts/README.md` is the non-technical organizer guide for creating and updating yearly hunts.
-- `arduino/` now includes a PN532-first NFC diagnostic firmware sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini, with NTAG21x page-read diagnostics to validate tag detection reliability.
+- `arduino/` now includes a PN532-first NFC spot-writer sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini. It scans NTAG21x tags, upserts a yearly hunt MIME record (`application/vnd.tryllestav.hunt.year-<YYYY>`) with an 8-byte 64-bit spot mask payload, and keeps warm-reset-safe I2C recovery behavior (SDA unstick, Wire re-init, buffered response drain).
 - `arduino/` includes setup documentation in `arduino/README.md`.
 - Vision alignment is now explicitly documented around a kids treasure-hunt experience with city "magic spots" and a wand-based offline ledger.
 - The intended long-term loop is year-over-year hunt continuity, where the same wand can retain prior years while joining new hunts.

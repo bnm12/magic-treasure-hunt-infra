@@ -114,7 +114,10 @@ const yearProgress = computed(() => {
   for (const year of availableYears.value) {
     const hunt = hunts.value[year];
     const total = hunt ? Object.keys(hunt.spots).length : 0;
-    const collected = (collectedSpots.value[year] ?? []).length;
+    const collectedIds = (collectedSpots.value[year] ?? []).filter(
+      (id) => hunt && String(id) in hunt.spots,
+    );
+    const collected = collectedIds.length;
     result[year] = { collected, total };
   }
   return result;
