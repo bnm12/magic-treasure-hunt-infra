@@ -7,6 +7,10 @@ This repository currently contains two primary folders:
 - `website/`: The PWA (Progressive Web App) workspace, currently scaffolded with TypeScript and static-site build output.
 - `arduino/`: The Arduino workspace for firmware, hardware interaction, and device-side logic.
 
+Current conceptual capability notes:
+
+- `website/` now includes a basic experimental Web NFC feature for scanning and writing text NDEF records on compatible devices/browsers.
+
 Keep this structure intentionally minimal for now.
 
 ## Change Documentation Rule
