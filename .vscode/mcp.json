@@ -1,0 +1,28 @@
+{
+	"servers": {
+		"arduino": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"arduino-mcp-server"
+			],
+			"env": {
+				"ARDUINO_CLI_PATH": "${input:arduino_cli_path}",
+				"ARDUINO_SKETCH_ROOT": "${input:arduino_sketch_root}"
+			},
+			"type": "stdio"
+		}
+	},
+	"inputs": [
+		{
+			"id": "arduino_cli_path",
+			"type": "promptString",
+			"description": "Arduino CLI Path"
+		},
+		{
+			"id": "arduino_sketch_root",
+			"type": "promptString",
+			"description": "Arduino Sketch Root"
+		}
+	]
+}
