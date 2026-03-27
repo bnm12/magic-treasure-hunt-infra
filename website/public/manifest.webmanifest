@@ -1,0 +1,24 @@
+{
+  "name": "Tryllestavsprojekt",
+  "short_name": "Tryllestav",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f1de",
+  "theme_color": "#0f4c5c",
+  "description": "Progressive web app for Tryllestavsprojekt.",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

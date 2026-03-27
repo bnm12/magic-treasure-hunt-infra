@@ -11,6 +11,14 @@
 				"ARDUINO_SKETCH_ROOT": "${input:arduino_sketch_root}"
 			},
 			"type": "stdio"
+		},
+		"context7": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@upstash/context7-mcp@latest"
+			],
+			"type": "stdio"
 		}
 	},
 	"inputs": [
