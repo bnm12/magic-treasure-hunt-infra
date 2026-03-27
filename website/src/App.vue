@@ -26,7 +26,7 @@
           type="button"
           class="counter"
         >
-          {{ isScanning ? 'Scanning...' : 'Scan Wand' }}
+          {{ isScanning ? "Scanning..." : "Scan Wand" }}
         </button>
         <button
           :disabled="!isScanning"
@@ -63,13 +63,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useNfc } from './composables/useNfc';
-import { loadHunts } from './utils/spotLoader';
-import type { HuntYear } from './utils/spotLoader';
-import HuntView from './components/HuntView.vue';
-import YearSelector from './components/YearSelector.vue';
-import ToyboxPanel from './components/ToyboxPanel.vue';
+import { ref, computed, onMounted } from "vue";
+import { useNfc } from "./composables/useNfc";
+import { loadHunts } from "./utils/spotLoader";
+import type { HuntYear } from "./utils/spotLoader";
+import HuntView from "./components/HuntView.vue";
+import YearSelector from "./components/YearSelector.vue";
+import ToyboxPanel from "./components/ToyboxPanel.vue";
 
 const {
   isScanning,
@@ -104,8 +104,8 @@ const selectedHunt = computed<HuntYear | null>(
   () => hunts.value[selectedYear.value] ?? null,
 );
 
-const selectedCollectedIds = computed<string[]>(
-  () => collectedSpots.value[selectedYear.value] ?? [],
+const selectedCollectedIds = computed<string[]>(() =>
+  (collectedSpots.value[selectedYear.value] ?? []).map(String),
 );
 </script>
 

@@ -9,8 +9,8 @@ hunts/
   2026/
     hunt.json           ← Edit this file to add/change spots and hunt branding
     images/             ← Put spot images here
-      s1-garden.jpg
-      s2-tower.jpg
+      1-garden.jpg
+      2-tower.jpg
       hunt-banner.jpg
 ```
 
@@ -38,11 +38,11 @@ The header is shown at the top of the hunt page and branding the whole experienc
 Each spot in the collection:
 
 ```json
-"s1": {
+"1": {
   "name": "The Dragon's Garden",
   "hint": "Look for the red door with a golden knocker.",
   "collectedText": "You found the magical garden! 🎭",
-  "image": "images/s1-garden.jpg",
+  "image": "images/1-garden.jpg",
   "imageAlt": "Lush green garden with stone statues",
   "location": "Central Park, North Gate"
 }
@@ -50,14 +50,14 @@ Each spot in the collection:
 
 ## How to Add a New Spot
 
-1. **Create a new image file** in `2026/images/` (e.g., `s4-castle.jpg`)
+1. **Create a new image file** in `2026/images/` (e.g., `4-castle.jpg`)
 2. **Add a new spot object** in `hunt.json`:
    ```json
-   "s4": {
+   "4": {
      "name": "The Magic Castle",
      "hint": "Look for the tallest tower.",
      "collectedText": "The castle towers over the city! 🏰",
-     "image": "images/s4-castle.jpg",
+     "image": "images/4-castle.jpg",
      "imageAlt": "Description of the castle",
      "location": "North District"
    }
@@ -81,7 +81,7 @@ Each spot in the collection:
 
 ## Tips
 
-✅ **Valid spot ID format**: Use `s1`, `s2`, `s3`, etc. (or `garden`, `tower`, etc. — must be unique)
+✅ **Valid spot ID format**: Use numeric string keys like `"1"`, `"2"`, `"3"` (must be unique)
 
 ✅ **Text tips**:
 
@@ -98,7 +98,7 @@ Each spot in the collection:
 ❌ **Don't do this**:
 
 - Don't change `year` unless it's a new year
-- Don't use duplicate spot IDs (e.g., two spots named "s1")
+- Don't use duplicate spot IDs (e.g., two spots named "1")
 - Don't use quotes in names/hints without escaping them
 - Don't forget to add images to the `images/` folder and reference them correctly
 

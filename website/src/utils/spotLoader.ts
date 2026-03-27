@@ -63,10 +63,10 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
 
 export async function getSpot(
   year: number,
-  spotId: string,
+  spotId: number,
 ): Promise<SpotDefinition | null> {
   const hunts = await loadHunts();
-  return hunts[year]?.spots[spotId] ?? null;
+  return hunts[year]?.spots[String(spotId)] ?? null;
 }
 
 export async function getSpotsForYear(year: number): Promise<SpotDefinition[]> {
@@ -78,12 +78,14 @@ export async function getSpotsForYear(year: number): Promise<SpotDefinition[]> {
   return Object.values(hunt.spots);
 }
 
-export async function getSpotIdsForYear(year: number): Promise<string[]> {
+export async function getSpotIdsForYear(year: number): Promise<number[]> {
   const hunts = await loadHunts();
   const hunt = hunts[year];
   if (!hunt) return [];
 
-  return Object.keys(hunt.spots);
+  return Object.keys(hunt.spots)
+    .map(Number)
+    .sort((a, b) => a - b);
 }
 
 export async function getAvailableYears(): Promise<number[]> {

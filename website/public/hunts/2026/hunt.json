@@ -5,27 +5,27 @@
   "image": "images/hunt-banner.jpg",
   "imageAlt": "Dragons flying over a magical city",
   "spots": {
-    "s1": {
+    "1": {
       "name": "The Dragon's Garden",
       "hint": "Look for the red door with a golden knocker.",
       "collectedText": "You found the magical garden! 🎭",
-      "image": "images/s1-garden.jpg",
+      "image": "images/1-garden.jpg",
       "imageAlt": "Lush green garden with stone statues",
       "location": "Central Park, North Gate"
     },
-    "s2": {
+    "2": {
       "name": "The Crystal Tower",
       "hint": "Follow the blue mosaic path east.",
       "collectedText": "The tower shimmers with enchantment! ✨",
-      "image": "images/s2-tower.jpg",
+      "image": "images/2-tower.jpg",
       "imageAlt": "Tall tower with sparkling crystal panels",
       "location": "Market Square"
     },
-    "s3": {
+    "3": {
       "name": "The Whispering Well",
       "hint": "Listen carefully by the stone well.",
       "collectedText": "The well echoes with ancient magic! 🌊",
-      "image": "images/s3-well.jpg",
+      "image": "images/3-well.jpg",
       "imageAlt": "Old stone well with glowing water",
       "location": "Forest Edge"
     }

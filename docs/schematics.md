@@ -30,7 +30,7 @@ flowchart TB
 
   Org -->|Edit hunt.json| JSON["hunt.json<br/>- Year title<br/>- Year description<br/>- Year banner image<br/>- Spot metadata<br/>- Hints & collected text"]
 
-  Org -->|Add/replace| Images["Hunt Images<br/>images/hunt-banner.jpg<br/>images/s1-name.jpg<br/>images/s2-name.jpg"]
+  Org -->|Add/replace| Images["Hunt Images<br/>images/hunt-banner.jpg<br/>images/1-name.jpg<br/>images/2-name.jpg"]
 
   JSON --> Build["Build Pipeline<br/>npm run build"]
   Images --> Build
@@ -93,8 +93,8 @@ graph TB
   H2026 --> Hunt2026["hunt.json<br/>(Year branding + spots)"]
   H2026 --> Images2026
   Images2026 --> BannerImg["hunt-banner.jpg"]
-  Images2026 --> Spot1["s1-garden.jpg"]
-  Images2026 --> Spot2["s2-tower.jpg"]
+  Images2026 --> Spot1["1-garden.jpg"]
+  Images2026 --> Spot2["2-tower.jpg"]
 
   H2025 --> Hunt2025["hunt.json"]
   H2025 --> Images2025
@@ -110,7 +110,7 @@ graph TB
 
 ```mermaid
 graph LR
-  JSON["hunt.json<br/>{<br/>year: 2026,<br/>title: Dragon's Quest,<br/>image: images/hunt-banner.jpg,<br/>spots: {<br/>s1: {<br/>name: Dragon's Garden,<br/>hint: ...,<br/>collectedText: ...,<br/>image: images/s1.jpg<br/>}<br/>}<br/>}"]
+  JSON["hunt.json<br/>{<br/>year: 2026,<br/>title: Dragon's Quest,<br/>image: images/hunt-banner.jpg,<br/>spots: {<br/>1: {<br/>name: Dragon's Garden,<br/>hint: ...,<br/>collectedText: ...,<br/>image: images/1-garden.jpg<br/>}<br/>}<br/>}"]
 
   Parser["Website Loads<br/>spotLoader.ts<br/>- loadHunts()<br/>- getHuntMetadata()<br/>- getSpot()"]
 
@@ -204,9 +204,9 @@ flowchart LR
 flowchart TB
   R1[Record 1\nUser toy action] --> EX1[URL, text, or common NFC action]
 
-  H1[Hunt record\nMIME: app/vnd.tryllestav.hunt\nYear: 2026\nSpot IDs: [s1,s3,s9]]
-  H2[Hunt record\nMIME: app/vnd.tryllestav.hunt\nYear: 2027\nSpot IDs: [s2,s8]]
-  H3[Hunt record\nMIME: app/vnd.tryllestav.hunt\nYear: 2028\nSpot IDs: []]
+  H1[Hunt record\nMIME: app/vnd.tryllestav.hunt.year-2026\nBytes: [64-bit mask]]
+  H2[Hunt record\nMIME: app/vnd.tryllestav.hunt.year-2027\nBytes: [64-bit mask]]
+  H3[Hunt record\nMIME: app/vnd.tryllestav.hunt.year-2028\nBytes: [64-bit mask]]
 
   Note1[Physical order may vary]
   Note2[Website discovers by MIME and year]

@@ -21,7 +21,7 @@ Current conceptual capability notes:
 - `website/src/utils/spotLoader.ts` provides typed loaders for hunts and spots; discovery is automatic by year (supports multi-year hunts on one wand).
 - `website/` now uses **Vue 3** as the frontend framework with **Vite** as the build tool. Components are defined as Single-File Components (.vue files) with TypeScript and reactive state management.
 - `website/src/App.vue` is the root component managing wand NFC scanning, hunt progress visualization, and record 1 toy configuration.
-- `website/src/composables/useNfc.ts` encapsulates all Web NFC logic: scanning, MIME-based hunt record parsing, idempotent spot extraction, and record 1 writes with hunt record preservation.
+- `website/src/composables/useNfc.ts` encapsulates all Web NFC logic: scanning, MIME-based hunt record parsing, bitmask decoding/encoding of spot IDs, and record 1 writes with hunt record preservation.
 - `website/src/components/HuntView.vue` renders a single year's hunt: branding header, progress bar, and a grid of `SpotCard.vue` components.
 - `website/src/components/SpotCard.vue` renders a single spot with image, name, location, and contextual text (hint before collection, collected message after).
 - `website/src/components/YearSelector.vue` renders year picker tabs when multiple hunt years are available.
@@ -33,8 +33,17 @@ Current conceptual capability notes:
 - The intended long-term loop is year-over-year hunt continuity, where the same wand can retain prior years while joining new hunts.
 - Record allocation intent is documented: wand record 1 remains available for normal user NFC use, while hunt ledger data uses dedicated yearly records discovered by MIME plus year metadata.
 - The website direction now includes a "toybox" section to configure common record 1 NFC actions (for example opening links).
-- Hunt ledger constraints are explicit: one compact spot-ID list per year, idempotent append by spots, and external `(year, spotId)` lookup for rich content.
+- Hunt ledger data model: spot IDs are numeric (1, 2, 3...) and stored on-tag in a compact 8-byte binary MIME payload (64-bit spot mask). Year is encoded in the MIME media type as `application/vnd.tryllestav.hunt.year-<YYYY>`. This supports up to 64 spots per year with minimal storage overhead.
 - Hunt asset design is decoupled from code: non-technical organizers manage JSON and images; website auto-detects new hunt years at build time; no backend server required.
+
+## Session Learnings (2026-03-27)
+
+- Treat writable NFC space as constrained: assume roughly 888 bytes total available on target tags and design for strict compactness.
+- Hunt records must use the compact format: media type `application/vnd.tryllestav.hunt.year-<YYYY>` with payload exactly 8 bytes (64-bit spot mask only).
+- Do not duplicate year inside the payload; derive year from the MIME media type suffix.
+- Spot IDs are numeric and map directly to mask bits: spot 1 -> bit 0, ..., spot 64 -> bit 63.
+- Until launch data exists, prefer a single strict on-tag format over compatibility branches (no legacy read/write paths by default).
+- Keep record 1 user-controlled and preserve it during website writes that update toybox content.
 
 Keep this structure intentionally minimal for now.
 

@@ -54,4 +54,4 @@ RC522 can still be kept as a fallback module, but it is usually not better than 
 
 ## Next firmware step
 
-After read reliability is acceptable, evolve this into spot logic that appends yearly spot IDs idempotently in the hunt MIME record while preserving user-owned record 1.
+After read reliability is acceptable, evolve this into spot logic that appends yearly spot IDs idempotently in compact hunt MIME records where year is encoded in media type (`application/vnd.tryllestav.hunt.year-<YYYY>`) and payload is an 8-byte 64-bit spot mask, while preserving user-owned record 1.

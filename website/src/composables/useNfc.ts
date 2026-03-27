@@ -1,10 +1,11 @@
 import { ref } from "vue";
 
-const HUNT_MIME = "application/vnd.tryllestav.hunt+json";
+const HUNT_MIME_PREFIX = "application/vnd.tryllestav.hunt.year-";
+const HUNT_MASK_LENGTH = 8;
 
 interface HuntLedgerEntry {
   year: number;
-  spots: string[];
+  spots: number[];
 }
 
 export function useNfc() {
@@ -13,10 +14,76 @@ export function useNfc() {
   const status = ref("");
   const nfcCompatMessage = ref("");
   const record1Preview = ref("");
-  const collectedSpots = ref<Record<number, string[]>>({});
+  const collectedSpots = ref<Record<number, number[]>>({});
 
   let abortController: AbortController | null = null;
   let lastReadRecords: NDEFRecord[] = [];
+
+  // Spot ID N corresponds to bit (N-1), so spot 1 = bit 0, spot 2 = bit 1, etc.
+  function spotIdsToMask(spotIds: number[]): bigint {
+    let mask = 0n;
+    for (const id of spotIds) {
+      if (id >= 1 && id <= 64) {
+        mask |= 1n << BigInt(id - 1);
+      }
+    }
+    return mask;
+  }
+
+  function maskToSpotIds(mask: bigint): number[] {
+    const spots: number[] = [];
+    for (let i = 0; i < 64; i++) {
+      if ((mask & (1n << BigInt(i))) !== 0n) {
+        spots.push(i + 1);
+      }
+    }
+    return spots.sort((a, b) => a - b);
+  }
+
+  function toUint8Array(data: DataView | undefined): Uint8Array {
+    if (!data) return new Uint8Array();
+    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+  }
+
+  function mediaTypeForYear(year: number): string {
+    return `${HUNT_MIME_PREFIX}${year}`;
+  }
+
+  function yearFromMediaType(mediaType: string | undefined): number | null {
+    if (!mediaType || !mediaType.startsWith(HUNT_MIME_PREFIX)) {
+      return null;
+    }
+    const year = Number.parseInt(mediaType.slice(HUNT_MIME_PREFIX.length), 10);
+    return isValidYear(year) ? year : null;
+  }
+
+  // Compact payload: [64-bit mask]
+  function encodeBinaryHuntPayload(spots: number[]): ArrayBuffer {
+    const buffer = new ArrayBuffer(HUNT_MASK_LENGTH);
+    const payload = new Uint8Array(buffer);
+
+    const mask = spotIdsToMask(spots);
+    for (let i = 0; i < 8; i++) {
+      const shift = BigInt((7 - i) * 8);
+      payload[i] = Number((mask >> shift) & 0xffn);
+    }
+
+    return buffer;
+  }
+
+  function decodeBinaryHuntPayload(
+    data: DataView | undefined,
+  ): number[] | null {
+    const bytes = toUint8Array(data);
+    if (bytes.length !== HUNT_MASK_LENGTH) return null;
+
+    let mask = 0n;
+    for (let i = 0; i < 8; i++) {
+      mask = (mask << 8n) | BigInt(bytes[i]);
+    }
+
+    return maskToSpotIds(mask);
+  }
 
   function nfcSupported(): boolean {
     return "NDEFReader" in window && window.isSecureContext;
@@ -39,41 +106,35 @@ export function useNfc() {
     );
   }
 
-  function uniqSpotIds(spots: string[]): string[] {
-    return [...new Set(spots.map((s) => s.trim()).filter(Boolean))].sort();
-  }
-
   function parseHuntRecord(record: NDEFRecord): HuntLedgerEntry | null {
-    if (record.recordType !== "mime" || record.mediaType !== HUNT_MIME) {
+    if (record.recordType !== "mime") {
       return null;
     }
-    const raw = decodeData(record.data);
-    if (!raw) return null;
-    try {
-      const parsed = JSON.parse(raw) as { year?: unknown; spots?: unknown };
-      if (!isValidYear(parsed.year) || !Array.isArray(parsed.spots))
-        return null;
-      const spots = (parsed.spots as unknown[]).filter(
-        (s): s is string => typeof s === "string",
-      );
-      return { year: parsed.year, spots: uniqSpotIds(spots) };
-    } catch {
+    const year = yearFromMediaType(record.mediaType);
+    if (!year) {
       return null;
     }
+
+    const spots = decodeBinaryHuntPayload(record.data);
+    if (!spots) {
+      return null;
+    }
+
+    return { year, spots };
   }
 
-  function extractHuntYears(records: NDEFRecord[]): Record<number, string[]> {
-    const byYear = new Map<number, Set<string>>();
+  function extractHuntYears(records: NDEFRecord[]): Record<number, number[]> {
+    const byYear = new Map<number, Set<number>>();
     for (const record of records) {
       const entry = parseHuntRecord(record);
       if (!entry) continue;
-      const existing = byYear.get(entry.year) ?? new Set<string>();
+      const existing = byYear.get(entry.year) ?? new Set<number>();
       for (const spot of entry.spots) existing.add(spot);
       byYear.set(entry.year, existing);
     }
-    const result: Record<number, string[]> = {};
+    const result: Record<number, number[]> = {};
     for (const [year, spots] of byYear) {
-      result[year] = [...spots].sort();
+      result[year] = [...spots].sort((a, b) => a - b);
     }
     return result;
   }
@@ -82,8 +143,8 @@ export function useNfc() {
     const extracted = extractHuntYears(records);
     return Object.entries(extracted).map(([year, spots]) => ({
       recordType: "mime",
-      mediaType: HUNT_MIME,
-      data: JSON.stringify({ year: Number(year), spots }),
+      mediaType: mediaTypeForYear(Number(year)),
+      data: encodeBinaryHuntPayload(spots),
     }));
   }
 

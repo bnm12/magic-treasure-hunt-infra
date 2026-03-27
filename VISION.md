@@ -86,26 +86,23 @@ Deliver a dependable "find, tap, collect" loop where:
 
 ## Formal Ledger MIME Schema (Draft v1)
 
-Hunt records use a MIME payload format with this media type:
+Hunt records use MIME payloads where year is encoded in the media type:
 
-`application/vnd.tryllestav.hunt+json`
+`application/vnd.tryllestav.hunt.year-<YYYY>`
 
-Payload shape:
+Payload shape is fixed-width binary (8 bytes total):
 
-```json
-{
-  "year": 2026,
-  "spots": ["s1", "s3", "s9"]
-}
-```
+1. Bytes `0-7`: `spotsMask` as unsigned 64-bit big-endian bitmask
+
+Bitmask rule: bit 0 = spot 1, bit 1 = spot 2, ..., bit 63 = spot 64.
 
 Schema rules:
 
-1. `year` must be an integer in the expected hunt range.
-2. `spots` must be a string array of unique spot IDs.
+1. `year` must be an integer in the expected hunt range and is parsed from the MIME media type suffix.
+2. `spotsMask` encodes unique numeric spot IDs in the range 1..64.
 3. The same wand can contain multiple yearly hunt records.
 4. Physical record order is not stable and cannot be used for discovery.
-5. Discovery must use `(recordType=mime, mediaType, payload.year)`.
+5. Discovery must use `(recordType=mime, mediaType)` and parse year from media type.
 6. Spot writes are idempotent and must append only missing spot IDs for that year.
 
 ## Hunt Asset Delivery Model
@@ -124,8 +121,8 @@ hunts/
     hunt.json       ← Year branding + spot metadata (edited by organizers)
     images/
       hunt-banner.jpg        ← Hunt branding image
-      s1-garden.jpg          ← Spot images
-      s2-tower.jpg
+      1-garden.jpg           ← Spot images
+      2-tower.jpg
 ```
 
 ### hunt.json Schema
@@ -138,11 +135,11 @@ hunts/
   "image": "images/hunt-banner.jpg",
   "imageAlt": "Dragons flying over the city",
   "spots": {
-    "s1": {
+    "1": {
       "name": "The Dragon's Garden",
       "hint": "Look for the red door with a golden knocker.",
       "collectedText": "You found the magical garden! 🎭",
-      "image": "images/s1-garden.jpg",
+      "image": "images/1-garden.jpg",
       "imageAlt": "Lush green garden with stone statues",
       "location": "Central Park, North Gate"
     }

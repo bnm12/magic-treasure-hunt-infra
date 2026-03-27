@@ -17,6 +17,9 @@ Before making meaningful changes, check `VISION.md` and `docs/schematics.md`.
 6. Prefer reliability and clarity over adding speculative features.
 7. Preserve the v1.0 data model: one hunt record per year with only spot IDs, plus external `(year, spotId)` lookup in the website.
 8. Never rely on hunt record index order; discover hunt records by MIME type and year metadata.
+9. Preserve storage compactness assumptions for target tags: design within an approximately 888-byte total writable budget.
+10. Keep hunt payloads strictly compact: media type carries year (`application/vnd.tryllestav.hunt.year-<YYYY>`) and payload stays exactly 8 bytes (64-bit mask).
+11. Avoid introducing legacy on-tag compatibility branches unless there is real migrated production data that requires it.
 
 ## Documentation updates
 
@@ -33,3 +36,4 @@ When architecture, flows, scope, or milestones change:
 3. Keep setup assumptions explicit in docs when hardware or browser constraints apply.
 4. Keep writes idempotent for spots: append spot ID only when missing from that year's list.
 5. Maintain a website "toybox" path for configuring record 1 with common NFC actions.
+6. Prefer byte-budget-conscious data contracts and call out expected on-tag byte cost in design changes.
