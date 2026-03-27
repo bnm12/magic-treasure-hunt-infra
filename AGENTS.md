@@ -10,6 +10,8 @@ This repository currently contains two primary folders:
 Current conceptual capability notes:
 
 - `website/` now includes a basic experimental Web NFC feature for scanning and writing text NDEF records on compatible devices/browsers.
+- `arduino/` now includes a starter NFC firmware sketch at `arduino/NFC_Basic/NFC_Basic.ino`, based on the baseline work from `D:/Dropbox/IOT/NFC`.
+- `arduino/` also includes workspace Arduino config in `arduino/.vscode/arduino.json` and setup documentation in `arduino/README.md`.
 
 Keep this structure intentionally minimal for now.
 
