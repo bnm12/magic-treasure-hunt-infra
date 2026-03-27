@@ -287,6 +287,24 @@ code {
   margin-bottom: 16px;
 }
 
+.nfc-compat {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  color: #991b1b;
+  font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .nfc-compat {
+    color: #fca5a5;
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.12);
+  }
+}
+
 .nfc-controls {
   display: flex;
   flex-wrap: wrap;

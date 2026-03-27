@@ -59,6 +59,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="nfc-panel">
   <h2>Web NFC Demo</h2>
   <p class="nfc-note">Works on compatible Android browsers in secure contexts (HTTPS).</p>
+  <p id="nfc-compat" class="nfc-compat" hidden></p>
   <div class="nfc-controls">
     <button id="nfc-scan" type="button" class="counter">Scan Tag</button>
     <button id="nfc-stop" type="button" class="counter">Stop Scan</button>
@@ -77,6 +78,7 @@ setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 const statusEl = document.querySelector<HTMLParagraphElement>("#nfc-status");
 const tagEl = document.querySelector<HTMLParagraphElement>("#nfc-tag");
 const recordsEl = document.querySelector<HTMLUListElement>("#nfc-records");
+const compatEl = document.querySelector<HTMLParagraphElement>("#nfc-compat");
 const payloadEl = document.querySelector<HTMLTextAreaElement>("#nfc-payload");
 const scanBtn = document.querySelector<HTMLButtonElement>("#nfc-scan");
 const stopBtn = document.querySelector<HTMLButtonElement>("#nfc-stop");
@@ -147,6 +149,22 @@ function renderReadResult(event: NDEFReadingEvent): void {
 
 function nfcSupported(): boolean {
   return "NDEFReader" in window && window.isSecureContext;
+}
+
+function updateCompatibilityBanner(supported: boolean): void {
+  if (!compatEl) {
+    return;
+  }
+
+  if (supported) {
+    compatEl.hidden = true;
+    compatEl.textContent = "";
+    return;
+  }
+
+  compatEl.hidden = false;
+  compatEl.textContent =
+    "Web NFC is unavailable here. Use HTTPS on Android Chrome or Samsung Internet for NFC scanning/writing.";
 }
 
 async function startScan(): Promise<void> {
@@ -256,6 +274,8 @@ setStatus(
     ? "Web NFC available. Tap Scan Tag to begin."
     : "Web NFC unavailable on this device/browser.",
 );
+
+updateCompatibilityBanner(nfcSupported());
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
