@@ -12,13 +12,15 @@
     >
       <span class="tab-label">
         {{ year }}
-        <span v-if="isComplete(year)" class="complete-badge" aria-label="Completed">✓</span>
+        <span
+          v-if="isComplete(year)"
+          class="complete-badge"
+          aria-label="Completed"
+          >✓</span
+        >
       </span>
       <span class="tab-track" aria-hidden="true">
-        <span
-          class="tab-fill"
-          :style="{ width: percent(year) + '%' }"
-        />
+        <span class="tab-fill" :style="{ width: percent(year) + '%' }" />
       </span>
     </button>
   </div>
@@ -32,7 +34,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  'update:modelValue': [year: number];
+  "update:modelValue": [year: number];
 }>();
 
 function percent(year: number): number {
