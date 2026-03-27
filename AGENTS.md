@@ -16,8 +16,8 @@ Supporting guidance and planning artifacts:
 Current conceptual capability notes:
 
 - `website/` now includes a basic experimental Web NFC feature for scanning and writing text NDEF records on compatible devices/browsers.
-- `arduino/` now includes a starter NFC firmware sketch at `arduino/NFC_Basic/NFC_Basic.ino`, based on the baseline work from `D:/Dropbox/IOT/NFC`.
-- `arduino/` also includes workspace Arduino config in `arduino/.vscode/arduino.json` and setup documentation in `arduino/README.md`.
+- `arduino/` now includes a PN532-first NFC diagnostic firmware sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini, with NTAG21x page-read diagnostics to validate tag detection reliability.
+- `arduino/` includes setup documentation in `arduino/README.md`.
 - Vision alignment is now explicitly documented around a kids treasure-hunt experience with city "magic spots" and a wand-based offline ledger.
 - The intended long-term loop is year-over-year hunt continuity, where the same wand can retain prior years while joining new hunts.
 - Record allocation intent is documented: wand record 1 remains available for normal user NFC use, while hunt ledger data uses dedicated yearly records discovered by MIME plus year metadata.

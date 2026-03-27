@@ -1,48 +1,57 @@
 # Arduino Workspace
 
-Starter NFC firmware has been added based on the baseline in `D:/Dropbox/IOT/NFC`.
+The firmware path is now PN532-first on Wemos D1 Mini to improve Type A/NFC Forum tag compatibility for the wand flow.
 
 ## Sketch
 
 - `NFC_Basic/NFC_Basic.ino`
 
-This sketch currently initializes an MFRC522 reader and prints card details (UID and metadata) to Serial at `115200` baud.
+This sketch initializes a PN532 in I2C mode and performs:
 
-## Optional PN532 support
+- ISO14443A polling with high passive activation retries
+- UID reporting over serial (`115200`)
+- NTAG21x page reads (`mifareultralight_ReadPage`)
+- Basic NTAG profile guess from Capability Container (CC) bytes
 
-The sketch contains optional PN532 support behind:
-
-- `#define ENABLE_PN532 0`
-
-Set it to `1` only after PN532 libraries are installed.
+The immediate purpose is to validate reliable NTAG216 detection and identify whether failures are firmware/configuration or RF-distance related.
 
 ## Library dependencies
 
 Install these libraries in your Arduino environment:
 
-- `MFRC522v2`
-- `SPI` (built-in)
-
-For optional PN532 mode:
-
 - `PN532`
 - `PN532_I2C`
 - `Wire` (built-in)
 
-## Wiring baseline (Wemos D1 Mini)
+## Wiring (Wemos D1 Mini + PN532, I2C)
 
-MFRC522 typical mapping used in this project:
+Use PN532 in **I2C mode** (set module DIP/jumpers accordingly):
 
-- `SDA/SS` -> `D8 (GPIO15)`
-- `SCK` -> `D5`
-- `MISO` -> `D6`
-- `MOSI` -> `D7`
-- `RST` -> `D0` (optional depending on module/library setup)
+- `D1 (GPIO5)` -> `SCL`
+- `D2 (GPIO4)` -> `SDA`
+- `3V3` -> `VCC`
+- `GND` -> `GND`
 
-## VS Code extension setup
+Notes:
 
-Workspace config for Arduino tooling is in:
+- Keep wiring short and stable.
+- Ensure the PN532 module is configured to I2C before powering.
+- Most PN532 breakouts are safe and stable at 3.3V with ESP8266 logic levels.
 
-- `.vscode/arduino.json`
+## NTAG216 Reliability Notes (small glass ampules)
 
-When hardware is connected later, set the serial `port` in that file (or via extension commands) before upload.
+Small capsule tags and a few cm offset are near the physical limit for many hobby antennas. Software can improve polling robustness, but not antenna physics.
+
+Recommended order:
+
+1. Keep PN532 and verify reads at close range first (`<= 1 cm`) with this sketch.
+2. Align tag axis with the reader coil; rotate slowly to find the coupling sweet spot.
+3. Add ferrite backing behind the reader antenna to shape the field forward.
+4. Use a larger tuned PN532 antenna board if available.
+5. If your target interaction distance remains several cm with tiny capsules, evaluate dedicated LF/HF antenna hardware rather than switching only to RC522.
+
+RC522 can still be kept as a fallback module, but it is usually not better than PN532 for marginal NTAG216 coupling distance.
+
+## Next firmware step
+
+After read reliability is acceptable, evolve this into spot logic that appends yearly spot IDs idempotently in the hunt MIME record while preserving user-owned record 1.
