@@ -12,16 +12,9 @@ This sketch initializes a PN532 in I2C mode and performs:
 - UID reporting over serial (`115200`)
 - NTAG21x page reads (`mifareultralight_ReadPage`)
 - Basic NTAG profile guess from Capability Container (CC) bytes
-- I2C bus scan after PN532 wakeup attempts if initialization still fails
-- I2C recovery cycles for warm-reset cases only after first init failure (SCL pulse release + Wire re-init)
+- Warm-reset-safe I2C retry flow (SDA unstick + Wire re-init + PN532 buffered-response drain)
 - Non-NTAG detection by UID length (skips page dump for likely Mifare Classic tags)
 - Continuous background PN532 re-initialization retries instead of halting forever after a failed startup
-
-It also supports a compile-time SPI fallback for board diagnostics:
-
-- Set `TRYLLESTAV_PN532_USE_SPI` to `1` at the top of `NFC_Basic.ino`
-- Switch the PN532 module itself to SPI mode
-- Rewire the D1 Mini to the SPI pins listed below
 
 The immediate purpose is to validate reliable NTAG216 detection and identify whether failures are firmware/configuration or RF-distance related.
 
@@ -54,13 +47,15 @@ Common module-specific gotchas:
 - Adafruit PN532 breakouts use `SEL0/SEL1` jumpers and may require external pull-ups on `SDA` and `SCL` for I2C.
 - Seeing `SDA` and `SCL` silkscreen labels on the header does **not** mean the board is already in I2C mode.
 
-## If serial says "PN532 not detected over I2C"
+## If serial says "PN532 not detected"
 
-Read the I2C scan output first.
+With this I2C-only sketch, repeated detection failure is usually one of these:
 
-- If it says `no I2C devices responded`, this is a wiring, power, or module-mode problem.
-- If it finds devices but not `0x24`, the PN532 is not presenting its expected 7-bit I2C address and is likely not in I2C mode.
-- If it finds `0x24` and `getFirmwareVersion()` still fails, the module is responding electrically but the library handshake is failing; in that case, check module quality, pull-ups, and cable length.
+1. PN532 module is not actually in I2C mode.
+2. SDA/SCL wiring is wrong or intermittent.
+3. Power/ground is unstable.
+4. Pull-ups on SDA/SCL are too weak or missing for your breakout/cable length.
+5. Very long jumpers are degrading the bus.
 
 Most common causes on clone PN532 boards:
 
@@ -74,24 +69,9 @@ Most common causes on clone PN532 boards:
 Warm reset note:
 
 - If pressing the D1 Mini reset button fails but USB power-cycle succeeds, the tag and PN532 path is valid and the issue is typically bus state recovery.
-- This sketch now attempts automatic I2C recovery and re-initialization cycles before declaring PN532 missing.
+- This sketch now attempts automatic I2C bus unstick, re-init, and buffered-response drain before each retry.
 
-Do not switch to RC522 until the PN532 I2C scan has been verified. A missing PN532 on the bus is not an NTAG216 compatibility issue.
-
-## SPI fallback diagnostic wiring
-
-If I2C shows no responding devices, test the PN532 board itself over SPI.
-
-Set `TRYLLESTAV_PN532_USE_SPI` to `1` and wire:
-
-- `D5 (GPIO14)` -> `SCK`
-- `D6 (GPIO12)` -> `MISO`
-- `D7 (GPIO13)` -> `MOSI`
-- `D8 (GPIO15)` -> `SS` / `SSEL`
-- `3V3` or `5V` -> `VCC` depending on module stability
-- `GND` -> `GND`
-
-If SPI works while I2C does not, the PN532 board is alive and the fault is isolated to interface mode, pull-ups, or I2C-side board issues.
+Do not switch to RC522 until PN532 I2C mode and wiring have been verified. A missing PN532 on the bus is not an NTAG216 compatibility issue.
 
 ## NTAG216 Reliability Notes (small glass ampules)
 
@@ -103,9 +83,7 @@ Recommended order:
 2. Align tag axis with the reader coil; rotate slowly to find the coupling sweet spot.
 3. Add ferrite backing behind the reader antenna to shape the field forward.
 4. Use a larger tuned PN532 antenna board if available.
-5. If your target interaction distance remains several cm with tiny capsules, evaluate dedicated LF/HF antenna hardware rather than switching only to RC522.
-
-RC522 can still be kept as a fallback module, but it is usually not better than PN532 for marginal NTAG216 coupling distance.
+5. If your target interaction distance remains several cm with tiny capsules, evaluate dedicated LF/HF antenna hardware.
 
 ## Next firmware step
 
