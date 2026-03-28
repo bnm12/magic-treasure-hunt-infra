@@ -45,6 +45,12 @@
           :initialize-wand="initializeWand"
         />
 
+        <!-- --- CONFIGURE SPOT PAGE --- -->
+        <ConfigureSpotPage
+          v-else-if="currentPage === 'configureSpot'"
+          key="configureSpot"
+        />
+
         <!-- --- HUNT PAGE --- -->
         <div v-else-if="currentPage === 'hunt'" key="hunt" class="page">
           <PageHero
@@ -189,6 +195,7 @@ import HuntView from "./components/HuntView.vue";
 import YearSelector from "./components/YearSelector.vue";
 import ToyboxPanel from "./components/ToyboxPanel.vue";
 import InitializePage from "./components/InitializePage.vue";
+import ConfigureSpotPage from "./components/ConfigureSpotPage.vue";
 import WandInfo from "./components/WandInfo.vue";
 import IconHuntMap from "./components/icons/IconHuntMap.vue";
 import IconArchive from "./components/icons/IconArchive.vue";
@@ -309,7 +316,7 @@ onMounted(async () => {
   window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   window.addEventListener("appinstalled", handleAppInstalled);
 
-  // Check for /initialize path or query param
+  // Check for /initialize or /configureSpot path or query param
   const url = new URL(window.location.href);
   if (
     url.pathname.endsWith("/initialize") ||
@@ -324,6 +331,12 @@ onMounted(async () => {
         initializeYear.value = year;
       }
     }
+  } else if (
+    url.pathname.endsWith("/configureSpot") ||
+    url.pathname.endsWith("/configureSpot/") ||
+    url.searchParams.has("configureSpot")
+  ) {
+    currentPage.value = "configureSpot";
   }
 
   if (!nfcSupported()) {
