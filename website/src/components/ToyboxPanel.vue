@@ -230,9 +230,7 @@ import {
   buildToyRecord,
   createEmptyToyRecordFields,
   TOYBOX_ACTIONS,
-  TOYBOX_PRESETS,
   type ToyRecordAction,
-  type ToyRecordPreset,
   type ToyRecordWriteRequest,
 } from "../utils/toyboxRecord1";
 
@@ -254,7 +252,6 @@ const emit = defineEmits<{
 const wandName = ref("");
 const wandInitError = ref("");
 const toyboxActions = TOYBOX_ACTIONS;
-const toyboxPresets = TOYBOX_PRESETS;
 const toyAction = ref<ToyRecordAction>("url");
 const toyFields = ref<Record<string, string>>(
   createEmptyToyRecordFields("url"),
@@ -376,22 +373,6 @@ function handleWrite() {
   }
 
   emit("write", request);
-}
-
-function applyPreset(presetId: string) {
-  const preset = toyboxPresets.find((entry) => entry.id === presetId);
-  if (!preset) return;
-
-  toyAction.value = preset.action;
-  toyFields.value = buildPresetFields(preset);
-  validationError.value = "";
-}
-
-function buildPresetFields(preset: ToyRecordPreset): Record<string, string> {
-  return {
-    ...createEmptyToyRecordFields(preset.action),
-    ...preset.fields,
-  };
 }
 
 async function handleUnlockSpot() {
