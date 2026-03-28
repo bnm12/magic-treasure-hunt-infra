@@ -40,6 +40,10 @@ void saveConfig() {
   EEPROM.write(ADDR_HUNT_YEAR + 1, (uint8_t)(huntYear & 0xFF));
   EEPROM.write(ADDR_MAGIC, EEPROM_MAGIC);
   if (EEPROM.commit()) {
+    Serial.print("CONFIG:");
+    Serial.print(spotId);
+    Serial.print(",");
+    Serial.println(huntYear);
     Serial.println("OK: Config saved to EEPROM.");
   } else {
     Serial.println("ERROR: EEPROM commit failed.");
@@ -174,6 +178,14 @@ void processSerialCommand(const String& cmd) {
   String trimmed = cmd;
   trimmed.trim();
 
+  if (trimmed == "getConfig") {
+    Serial.print("CONFIG:");
+    Serial.print(spotId);
+    Serial.print(",");
+    Serial.println(huntYear);
+    return;
+  }
+
   if (trimmed.startsWith("setSpot:")) {
     String valStr = trimmed.substring(8);
     valStr.trim();
@@ -205,6 +217,7 @@ void processSerialCommand(const String& cmd) {
   }
 
   Serial.println("Commands:");
+  Serial.println("  'getConfig'");
   Serial.println("  'setSpot: X' (1-64)");
   Serial.println("  'setYear: YYYY' (2000-2100)");
 }
