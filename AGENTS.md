@@ -36,6 +36,7 @@ This repository currently contains two primary folders:
 
 - Vue 3 + Vite PWA with Web NFC scanning
 - Hunt visualization with progress tracking
+- Web Serial configuration for Magic Spots (`/configureSpot`)
 - Record 1 Toybox with multi-action NFC presets (web links, messages, contact cards, maps, and more)
 - Reusable page hero and isolated magic scan-circle components
 - Local custom font asset support for decorative display moments
