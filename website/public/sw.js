@@ -1,9 +1,21 @@
-const CACHE_NAME = "tryllestavsprojekt-v1";
-const ASSETS_TO_CACHE = ["/", "/index.html", "/manifest.webmanifest"];
+const CACHE_NAME = "tryllestavsprojekt-v3";
+const APP_SCOPE = new URL("./", self.registration.scope);
+const INDEX_URL = new URL("index.html", APP_SCOPE).toString();
+const APP_SHELL_ASSETS = [
+  new URL("./", APP_SCOPE).toString(),
+  INDEX_URL,
+  new URL("manifest.webmanifest", APP_SCOPE).toString(),
+  new URL("favicon.svg", APP_SCOPE).toString(),
+  new URL("icon-192.png", APP_SCOPE).toString(),
+  new URL("icon-512.png", APP_SCOPE).toString(),
+  new URL("icon-maskable-192.png", APP_SCOPE).toString(),
+  new URL("icon-maskable-512.png", APP_SCOPE).toString(),
+  new URL("apple-touch-icon.png", APP_SCOPE).toString(),
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE)),
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL_ASSETS)),
   );
   self.skipWaiting();
 });
@@ -28,6 +40,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(event.request, responseClone));
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cachedPage = await caches.match(event.request);
+          return cachedPage || caches.match(INDEX_URL);
+        }),
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -42,7 +77,7 @@ self.addEventListener("fetch", (event) => {
             .then((cache) => cache.put(event.request, responseClone));
           return networkResponse;
         })
-        .catch(() => caches.match("/index.html"));
+        .catch(() => caches.match(INDEX_URL));
     }),
   );
 });

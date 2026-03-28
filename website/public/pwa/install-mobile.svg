@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1242" height="2688" viewBox="0 0 1242 2688">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#080813" />
+      <stop offset="48%" stop-color="#17113d" />
+      <stop offset="100%" stop-color="#0b0b1a" />
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="18%" r="38%">
+      <stop offset="0%" stop-color="#b77cff" stop-opacity="0.38" />
+      <stop offset="100%" stop-color="#b77cff" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0%" stop-color="#f1d378" />
+      <stop offset="100%" stop-color="#c5962f" />
+    </linearGradient>
+  </defs>
+  <rect width="1242" height="2688" fill="url(#bg)" />
+  <rect width="1242" height="2688" fill="url(#halo)" />
+  <g opacity="0.22" stroke="#d4a843" stroke-width="4" fill="none">
+    <circle cx="621" cy="560" r="220" />
+    <circle cx="621" cy="560" r="180" stroke-opacity="0.45" />
+    <path d="M621 330l66 204H900L728 662l66 204-173-124-173 124 66-204-172-128h213z" stroke-opacity="0.18" />
+  </g>
+  <g transform="translate(0 110)">
+    <circle cx="621" cy="440" r="150" fill="none" stroke="#d4a843" stroke-opacity="0.28" stroke-width="4" />
+    <path d="M548 610L621 364L694 610H659L642 548H600L583 610H548ZM607 510H635L621 434L607 510Z" fill="url(#gold)" />
+  </g>
+  <text x="621" y="1040" text-anchor="middle" fill="#9f79ff" font-size="64" font-family="Georgia, serif" letter-spacing="10">TRYLLESTAVSPROJEKT</text>
+  <text x="621" y="1160" text-anchor="middle" fill="url(#gold)" font-size="104" font-family="Georgia, serif">Magic Wand Companion</text>
+  <text x="621" y="1290" text-anchor="middle" fill="#d9d1e7" font-size="52" font-family="Arial, sans-serif">Scan your wand, track your magical hunt, and return anytime from your home screen.</text>
+  <g transform="translate(170 1510)">
+    <rect width="902" height="760" rx="54" fill="rgba(19,20,48,0.7)" stroke="#8e6b2b" stroke-width="3" />
+    <rect x="42" y="42" width="818" height="676" rx="40" fill="none" stroke="rgba(212,168,67,0.18)" stroke-width="2" />
+    <text x="451" y="200" text-anchor="middle" fill="#d7cfe1" font-size="44" font-family="Arial, sans-serif" letter-spacing="6">OWNER</text>
+    <text x="451" y="365" text-anchor="middle" fill="url(#gold)" font-size="118" font-family="'Brush Script MT', cursive">Benjamin Kristensen</text>
+    <line x1="70" x2="832" y1="430" y2="430" stroke="rgba(228,190,92,0.4)" stroke-width="2" />
+    <text x="451" y="520" text-anchor="middle" fill="#d7cfe1" font-size="44" font-family="Arial, sans-serif" letter-spacing="6">CRAFTED</text>
+    <text x="451" y="620" text-anchor="middle" fill="url(#gold)" font-size="82" font-family="Georgia, serif">2026</text>
+  </g>
+</svg>

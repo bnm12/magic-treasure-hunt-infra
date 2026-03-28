@@ -69,6 +69,8 @@ VITE v5.0.0 ready in 123 ms
 
 **What's happening:** Vite is serving your app with hot reload. Every time you edit a Vue file, the browser auto-refreshes.
 
+**PWA note:** When served over HTTPS on a supported phone, the website exposes install metadata (manifest, icons, service worker). Browsers may still choose not to auto-prompt, so the app also shows its own install button when `beforeinstallprompt` is available.
+
 ### 1.4 Test It
 
 - Open `http://localhost:5173` in your browser
@@ -93,6 +95,8 @@ dist/assets/style.def456.css
 ```
 
 **What this does:** Minifies and bundles everything into the `dist/` folder, ready to deploy. All hunt assets from `public/hunts/` are bundled.
+
+**Base path behavior:** The production bundle uses relative asset paths, so the same `dist/` output works both when hosted at a clean domain root and when hosted under a GitHub Pages repository subpath.
 
 ---
 
@@ -426,6 +430,8 @@ git push origin main
 ```
 
 Add GitHub Actions workflow to auto-deploy on push (example in `.github/workflows/`).
+
+The current website build does not need a separate GitHub Pages base override. Bundled assets, hunt JSON, the manifest, and the service worker all resolve relative to the deployed app URL.
 
 **Option C: Node.js Server**
 

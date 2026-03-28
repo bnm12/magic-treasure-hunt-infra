@@ -41,6 +41,8 @@ This repository currently contains two primary folders:
 - Local custom font asset support for decorative display moments
 - Static hunt asset delivery (JSON + images per year)
 - Auto-discovery of multi-year hunts on wand
+- Base-aware static hosting for both repo subpaths and clean domain roots
+- Installable PWA surface with manifest icons, mobile web app metadata, and an in-app install prompt
 
 **Arduino (`arduino/`):**
 

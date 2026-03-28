@@ -141,6 +141,17 @@
       </Transition>
     </div>
 
+    <Transition name="install-cta">
+      <button
+        v-if="canInstallPwa"
+        class="install-cta magical-button"
+        type="button"
+        @click="promptInstall"
+      >
+        Install App
+      </button>
+    </Transition>
+
     <BottomNav v-model="currentPage" :tabs="navTabs" />
 
     <!-- NFC consent popup -->
@@ -181,6 +192,11 @@ import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
 import IconSeeking from "./components/icons/IconSeeking.vue";
 import type { NavTab } from "./components/BottomNav.vue";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
+
 const {
   isScanning,
   isWriting,
@@ -198,6 +214,8 @@ const currentPage = ref("hunt");
 const showNfcConsent = ref(false);
 const scanRevealActive = ref(false);
 const scanRevealComplete = ref(false);
+const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null);
+const isStandalonePwa = ref(false);
 let scanRevealTimer: ReturnType<typeof setTimeout> | undefined;
 
 const navTabs: NavTab[] = [
@@ -223,7 +241,47 @@ watch(status, (val) => {
 
 onBeforeUnmount(() => {
   clearTimeout(scanRevealTimer);
+  window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  window.removeEventListener("appinstalled", handleAppInstalled);
 });
+
+const canInstallPwa = computed(
+  () => deferredInstallPrompt.value !== null && !isStandalonePwa.value,
+);
+
+function updateStandaloneState() {
+  const navigatorWithStandalone = window.navigator as Navigator & {
+    standalone?: boolean;
+  };
+  isStandalonePwa.value =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    navigatorWithStandalone.standalone === true;
+}
+
+function handleBeforeInstallPrompt(event: Event) {
+  const installEvent = event as BeforeInstallPromptEvent;
+  installEvent.preventDefault();
+  deferredInstallPrompt.value = installEvent;
+}
+
+function handleAppInstalled() {
+  deferredInstallPrompt.value = null;
+  updateStandaloneState();
+}
+
+async function promptInstall() {
+  if (!deferredInstallPrompt.value) return;
+
+  await deferredInstallPrompt.value.prompt();
+  const choice = await deferredInstallPrompt.value.userChoice;
+
+  if (choice.outcome !== "accepted") {
+    return;
+  }
+
+  deferredInstallPrompt.value = null;
+  updateStandaloneState();
+}
 
 async function handleNfcConsent() {
   showNfcConsent.value = false;
@@ -236,6 +294,10 @@ async function handleNfcConsent() {
 }
 
 onMounted(async () => {
+  updateStandaloneState();
+  window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  window.addEventListener("appinstalled", handleAppInstalled);
+
   if (!nfcSupported()) {
     nfcCompatMessage.value =
       "Web NFC is not available. Open this page in Chrome on Android over HTTPS.";
@@ -561,6 +623,38 @@ const yearProgress = computed(() => {
 
 .consent-skip:hover {
   opacity: 1;
+}
+
+.install-cta {
+  position: fixed;
+  right: 1rem;
+  bottom: 5.5rem;
+  z-index: 150;
+  padding: 0.8rem 1.1rem;
+  box-shadow:
+    0 12px 32px rgba(5, 5, 15, 0.42),
+    var(--glow-gold);
+}
+
+.install-cta-enter-active,
+.install-cta-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.install-cta-enter-from,
+.install-cta-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@media (max-width: 480px) {
+  .install-cta {
+    right: 0.85rem;
+    bottom: 5.25rem;
+    padding-inline: 1rem;
+  }
 }
 </style>
 
