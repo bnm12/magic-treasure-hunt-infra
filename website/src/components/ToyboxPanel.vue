@@ -44,6 +44,25 @@
 
     <hr class="divider-magic" />
 
+    <div v-if="showInstallAction" class="toybox-section glass-card">
+      <h3>
+        <span class="section-icon" aria-hidden="true">&#11015;</span> Install
+        Companion
+      </h3>
+      <p class="note">
+        Add the wand companion to your home screen as a standalone app when
+        your browser supports installation.
+      </p>
+
+      <div class="nfc-controls">
+        <button @click="emit('install')" type="button" class="counter">
+          &#10022; Install App
+        </button>
+      </div>
+    </div>
+
+    <hr v-if="showInstallAction" class="divider-magic" />
+
     <!-- Record 1 Configuration Section -->
     <div class="toybox-section glass-card">
       <h3>
@@ -105,10 +124,12 @@ const props = defineProps<{
   isWriting: boolean;
   hasScannedWand: boolean;
   initializeWand: (name: string, year: number) => Promise<void>;
+  showInstallAction: boolean;
 }>();
 
 const emit = defineEmits<{
   write: [payload: { action: string; payload: string }];
+  install: [];
 }>();
 
 const wandName = ref("");

@@ -131,22 +131,13 @@
             :is-writing="isWriting"
             :has-scanned-wand="hasScannedWand"
             :initialize-wand="initializeWand"
+            :show-install-action="canInstallPwa"
             @write="({ action, payload }) => writeRecord1(action, payload)"
+            @install="promptInstall"
           />
         </div>
       </Transition>
     </div>
-
-    <Transition name="install-cta">
-      <button
-        v-if="canInstallPwa"
-        class="install-cta magical-button"
-        type="button"
-        @click="promptInstall"
-      >
-        Install App
-      </button>
-    </Transition>
 
     <BottomNav v-model="currentPage" :tabs="navTabs" />
 
@@ -620,35 +611,4 @@ const yearProgress = computed(() => {
   opacity: 1;
 }
 
-.install-cta {
-  position: fixed;
-  right: 1rem;
-  bottom: 5.5rem;
-  z-index: 150;
-  padding: 0.8rem 1.1rem;
-  box-shadow:
-    0 12px 32px rgba(5, 5, 15, 0.42),
-    var(--glow-gold);
-}
-
-.install-cta-enter-active,
-.install-cta-leave-active {
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-
-.install-cta-enter-from,
-.install-cta-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-@media (max-width: 480px) {
-  .install-cta {
-    right: 0.85rem;
-    bottom: 5.25rem;
-    padding-inline: 1rem;
-  }
-}
 </style>
