@@ -1,5 +1,9 @@
 <template>
-  <article class="spot-card glass-card" :class="{ collected }" style="animation: reveal-up 0.4s ease backwards">
+  <article
+    class="spot-card glass-card"
+    :class="{ collected }"
+    style="animation: reveal-up 0.4s ease backwards"
+  >
     <div class="image-wrapper">
       <img
         :src="spot.image"
@@ -53,12 +57,16 @@ defineProps<{
 .spot-card.collected {
   border-color: rgba(212, 168, 67, 0.3);
   opacity: 1;
-  box-shadow: var(--shadow), 0 0 20px rgba(212, 168, 67, 0.08);
+  box-shadow:
+    var(--shadow),
+    0 0 20px rgba(212, 168, 67, 0.08);
 }
 
 .spot-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow), 0 0 30px rgba(155, 109, 255, 0.1);
+  box-shadow:
+    var(--shadow),
+    0 0 30px rgba(155, 109, 255, 0.1);
 }
 
 .spot-card.collected:hover {

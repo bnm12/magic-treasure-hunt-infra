@@ -7,7 +7,10 @@
 
     <!-- Wand Initialization Section -->
     <div class="toybox-section glass-card">
-      <h3><span class="section-icon" aria-hidden="true">&#10022;</span> Initialize Wand</h3>
+      <h3>
+        <span class="section-icon" aria-hidden="true">&#10022;</span> Initialize
+        Wand
+      </h3>
       <p class="note">
         Initialize a blank NFC tag as an official wand. The wand can then
         collect treasures on your adventure.
@@ -37,7 +40,9 @@
           type="button"
           class="counter"
         >
-          {{ isWriting ? "&#10024; Initializing..." : "&#10022; Initialize Wand" }}
+          {{
+            isWriting ? "&#10024; Initializing..." : "&#10022; Initialize Wand"
+          }}
         </button>
       </div>
     </div>
@@ -46,7 +51,10 @@
 
     <!-- Record 1 Configuration Section -->
     <div class="toybox-section glass-card">
-      <h3><span class="section-icon" aria-hidden="true">&#9998;</span> Configure Record 1</h3>
+      <h3>
+        <span class="section-icon" aria-hidden="true">&#9998;</span> Configure
+        Record 1
+      </h3>
       <p class="note">
         Configure record 1 for a normal NFC action. Treasure progress is always
         preserved when writing.

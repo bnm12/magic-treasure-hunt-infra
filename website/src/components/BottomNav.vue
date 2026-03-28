@@ -85,7 +85,9 @@ defineEmits<{
 .nav-icon {
   font-size: 1.4rem;
   line-height: 1;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease;
 }
 
 .nav-tab.active .nav-icon {

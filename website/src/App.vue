@@ -98,9 +98,7 @@
             :has-scanned-wand="hasScannedWand()"
             :is-writing="isWriting"
             :initialize-wand="initializeWand"
-            @write="
-              ({ action, payload }) => writeRecord1(action, payload)
-            "
+            @write="({ action, payload }) => writeRecord1(action, payload)"
           />
         </div>
       </Transition>
@@ -317,8 +315,12 @@ const yearProgress = computed(() => {
 }
 
 @keyframes spin-ring {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ═══ Page layout ═══ */
