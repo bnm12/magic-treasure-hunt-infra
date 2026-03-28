@@ -72,11 +72,7 @@
             >
               <IconSeeking class="scan-circle__icon" aria-hidden="true" />
             </MagicScanCircle>
-            <IconSeeking
-              v-else
-              class="empty-icon"
-              aria-hidden="true"
-            />
+            <IconSeeking v-else class="empty-icon" aria-hidden="true" />
             <p>
               {{
                 showScannedView
@@ -84,8 +80,8 @@
                   : scanRevealActive
                     ? "Your wand is responding..."
                     : isScanning
-                    ? "Hold your wand close to begin your magical adventure!"
-                    : "Preparing NFC scanner..."
+                      ? "Hold your wand close to begin your magical adventure!"
+                      : "Preparing NFC scanner..."
               }}
             </p>
           </div>
@@ -518,8 +514,7 @@ const yearProgress = computed(() => {
   display: block;
   margin-bottom: 1rem;
   animation: float 3s ease-in-out infinite;
-  filter:
-    drop-shadow(0 0 3px rgba(11, 11, 26, 0.9))
+  filter: drop-shadow(0 0 3px rgba(11, 11, 26, 0.9))
     drop-shadow(0 0 8px rgba(212, 168, 67, 0.25));
   position: relative;
   z-index: 2;
@@ -657,5 +652,3 @@ const yearProgress = computed(() => {
   }
 }
 </style>
-
-
