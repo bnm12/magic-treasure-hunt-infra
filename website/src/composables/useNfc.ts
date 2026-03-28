@@ -1,4 +1,4 @@
-import { ref } from "vue";
+﻿import { ref } from "vue";
 
 const HUNT_MIME_PREFIX = "x-hunt:";
 const HUNT_MASK_LENGTH = 8;
@@ -200,6 +200,62 @@ export function useNfc() {
     return [{ recordType: "mime", mediaType: "x-hunt-meta", data: payload }];
   }
 
+  function stopScanning() {
+    abortController?.abort();
+    abortController = null;
+    isScanning.value = false;
+  }
+
+  async function readTagOnce(
+    prompt: string,
+    timeoutMs = 15000,
+  ): Promise<NDEFRecord[]> {
+    if (!nfcSupported()) {
+      throw new DOMException(
+        "Web NFC is unavailable on this device/browser.",
+        "NotSupportedError",
+      );
+    }
+
+    stopScanning();
+    status.value = prompt;
+
+    return await new Promise<NDEFRecord[]>((resolve, reject) => {
+      const scanController = new AbortController();
+      const timeout = setTimeout(() => {
+        scanController.abort();
+        reject(new DOMException("Timed out waiting for tag.", "TimeoutError"));
+      }, timeoutMs);
+
+      const finish = () => {
+        clearTimeout(timeout);
+        scanController.abort();
+      };
+
+      void (async () => {
+        try {
+          const ndef = new NDEFReader();
+
+          ndef.onreading = (event: NDEFReadingEvent) => {
+            const records = [...event.message.records];
+            finish();
+            resolve(records);
+          };
+
+          ndef.onreadingerror = () => {
+            finish();
+            reject(new DOMException("Could not read the tag.", "ReadError"));
+          };
+
+          await ndef.scan({ signal: scanController.signal });
+        } catch (error) {
+          clearTimeout(timeout);
+          reject(error);
+        }
+      })();
+    });
+  }
+
   async function keepReaderActive(): Promise<void> {
     // Reclaim an active scan session after writes so the browser keeps NFC handling.
     if (isScanning.value) return;
@@ -273,30 +329,30 @@ export function useNfc() {
     }
     if (isWriting.value) return;
 
-    if (lastReadRecords.length === 0) {
-      status.value =
-        "⚠️ Scan your wand first before writing. This prevents losing your treasure progress.";
-      return;
-    }
-
     isWriting.value = true;
-    status.value = "Hold the wand near your device to write...";
+    status.value = "Hold the wand near your device to verify and write...";
 
     try {
+      const currentRecords = await readTagOnce(
+        "Hold the wand near your device to verify its current records...",
+      );
       const ndef = new NDEFReader();
       const toyRecord: NDEFRecordInit =
         action === "url"
           ? { recordType: "url", data: payload }
           : { recordType: "text", data: payload };
 
-      const huntRecords = buildHuntRecordInits(lastReadRecords);
-      const metaRecords = buildMetaRecordInits(lastReadRecords);
+      const huntRecords = buildHuntRecordInits(currentRecords);
+      const metaRecords = buildMetaRecordInits(currentRecords);
       await ndef.write({
         records: [toyRecord, ...metaRecords, ...huntRecords],
       });
-      status.value = lastReadRecords.length
-        ? "Record 1 written! Your wand progress was kept safe."
-        : "Record 1 written!";
+
+      lastReadRecords = currentRecords;
+      collectedSpots.value = extractHuntYears(currentRecords);
+      wandMetadata.value = extractWandMetadata(currentRecords);
+      status.value =
+        "Record 1 written! The tag was read first and treasure progress was preserved.";
       await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;
@@ -372,3 +428,4 @@ export function useNfc() {
     initializeWand,
   };
 }
+

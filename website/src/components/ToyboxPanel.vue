@@ -1,10 +1,5 @@
 <template>
   <section class="toybox-panel">
-    <div class="section-title">
-      <span class="icon" aria-hidden="true">&#9881;</span>
-      <h2>Toybox</h2>
-    </div>
-
     <!-- Wand Initialization Section -->
     <div class="toybox-section glass-card">
       <h3>
@@ -60,12 +55,6 @@
         preserved when writing.
       </p>
 
-      <div v-if="!props.hasScannedWand" class="warning" role="alert">
-        <span class="warning-icon" aria-hidden="true">&#9888;</span>
-        Scan your wand first. Writing without a scan will erase your treasure
-        progress.
-      </div>
-
       <div class="form-group">
         <label for="toy-action">Action type</label>
         <select v-model="toyAction" id="toy-action" class="nfc-input">
@@ -97,7 +86,7 @@
 
       <div class="nfc-controls">
         <button
-          :disabled="isWriting || !props.hasScannedWand"
+          :disabled="isWriting"
           @click="handleWrite"
           type="button"
           class="counter"
@@ -187,7 +176,7 @@ function handleWrite() {
 
 <style scoped>
 .toybox-panel {
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem;
 }
 
 .toybox-section {
@@ -214,23 +203,6 @@ function handleWrite() {
   font-size: 0.85rem;
   margin-bottom: 1.25rem;
   line-height: 1.5;
-}
-
-.warning {
-  padding: 0.7rem 1rem;
-  border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  background: rgba(251, 191, 36, 0.06);
-  color: var(--warning);
-  font-size: 0.85rem;
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.warning-icon {
-  font-size: 1rem;
 }
 
 .form-group {
@@ -262,5 +234,16 @@ function handleWrite() {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+.nfc-controls {
+  width: 100%;
+  justify-content: center;
+}
+
+.nfc-controls .counter {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
 }
 </style>

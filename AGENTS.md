@@ -37,6 +37,8 @@ This repository currently contains two primary folders:
 - Vue 3 + Vite PWA with Web NFC scanning
 - Hunt visualization with progress tracking
 - Record 1 (wand link) Toybox configuration UI
+- Reusable page hero and isolated magic scan-circle components
+- Local custom font asset support for decorative display moments
 - Static hunt asset delivery (JSON + images per year)
 - Auto-discovery of multi-year hunts on wand
 

@@ -38,25 +38,15 @@
       <Transition name="page-fade" mode="out-in">
         <!-- --- HUNT PAGE --- -->
         <div v-if="currentPage === 'hunt'" key="hunt" class="page">
-          <header class="hero-panel">
-            <component
-              :is="hasScannedWand ? IconHuntMap : IconSeeking"
-              class="hero-sparkle"
-              aria-hidden="true"
-            />
-            <p class="eyebrow">Tryllestavsprojekt</p>
-            <h1 class="hero-title">Magic Wand Companion</h1>
-            <p class="hero-copy">
-              Tap your wand at a magic spot to collect it.
-              <br />Scan your wand here to see your progress and hints.
-            </p>
-            <div class="nfc-indicator" :class="{ active: isScanning }">
-              <span class="nfc-dot"></span>
-              <span class="nfc-label">{{
-                isScanning ? "NFC Active" : "NFC Off"
-              }}</span>
-            </div>
-          </header>
+          <PageHero
+            :icon="hasScannedWand ? IconHuntMap : IconSeeking"
+            eyebrow="Tryllestavsprojekt"
+            title="Magic Wand Companion"
+            copy="Tap your wand at a magic spot to collect it. Scan your wand here to see your progress and hints."
+            :show-indicator="true"
+            :indicator-active="isScanning"
+            :indicator-label="isScanning ? 'NFC Active' : 'NFC Off'"
+          />
 
           <WandInfo v-if="showScannedView" :metadata="wandMetadata" />
 
@@ -103,14 +93,14 @@
 
         <!-- --- ARCHIVE PAGE --- -->
         <div v-else-if="currentPage === 'archive'" key="archive" class="page">
-          <header class="hero-panel">
-            <IconArchive class="hero-sparkle hero-no-spin" aria-hidden="true" />
-            <p class="eyebrow">Past &amp; Present</p>
-            <h1 class="hero-title">Hunt Archive</h1>
-            <p class="hero-copy">
-              Browse all hunts — including ones you may have missed.
-            </p>
-          </header>
+          <PageHero
+            :icon="IconArchive"
+            eyebrow="Past & Present"
+            title="Hunt Archive"
+            copy="Browse all hunts — including ones you may have missed."
+            :no-spin="true"
+            :compact="true"
+          />
 
           <template v-if="allYears.length > 0">
             <YearSelector
@@ -134,6 +124,13 @@
 
         <!-- --- TOYBOX PAGE --- -->
         <div v-else-if="currentPage === 'toybox'" key="toybox" class="page">
+          <PageHero
+            :icon="IconWandTweaker"
+            eyebrow="Wand Workshop"
+            title="Toybox"
+            copy="Initialize a wand and tune record 1 without disturbing your hunt progress."
+            :compact="true"
+          />
           <ToyboxPanel
             :is-writing="isWriting"
             :has-scanned-wand="hasScannedWand"
@@ -172,6 +169,7 @@ import { loadHunts } from "./utils/spotLoader";
 import type { HuntYear } from "./utils/spotLoader";
 import MagicBackground from "./components/MagicBackground.vue";
 import MagicScanCircle from "./components/MagicScanCircle.vue";
+import PageHero from "./components/PageHero.vue";
 import BottomNav from "./components/BottomNav.vue";
 import HuntView from "./components/HuntView.vue";
 import YearSelector from "./components/YearSelector.vue";
@@ -347,103 +345,6 @@ const yearProgress = computed(() => {
 </script>
 
 <style scoped>
-/* --- Hero Section --- */
-.hero-panel {
-  text-align: center;
-  padding: 2.5rem 1.5rem 2rem;
-  position: relative;
-}
-
-.hero-sparkle {
-  font-size: 2rem;
-  color: var(--accent);
-  display: block;
-  margin: 0 auto 0.5rem;
-  animation: float 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 10px rgba(212, 168, 67, 0.5));
-}
-
-.hero-no-spin {
-  animation: float 3s ease-in-out infinite;
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--accent2);
-  margin-bottom: 0.25rem;
-}
-
-.hero-title {
-  background: var(--gradient-gold);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 1.75rem;
-  margin: 0.25rem 0 0.75rem;
-  line-height: 1.2;
-}
-
-.hero-copy {
-  color: var(--text);
-  font-size: 0.9rem;
-  line-height: 1.6;
-  max-width: 48ch;
-  margin: 0 auto;
-}
-
-/* --- NFC Indicator --- */
-.nfc-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 1rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 20px;
-  background: rgba(120, 90, 180, 0.1);
-  border: 1px solid var(--border);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text);
-  transition: all 0.5s ease;
-}
-
-.nfc-indicator.active {
-  border-color: var(--accent-border);
-  color: var(--accent);
-  background: var(--accent-bg);
-}
-
-.nfc-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text);
-  transition:
-    background 0.5s ease,
-    box-shadow 0.5s ease;
-}
-
-.nfc-indicator.active .nfc-dot {
-  background: var(--accent);
-  box-shadow: 0 0 6px rgba(212, 168, 67, 0.6);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-
 /* --- NFC Banner (errors) --- */
 .nfc-banner {
   position: sticky;

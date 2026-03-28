@@ -26,9 +26,17 @@
         <span class="wand-label">Your Wand</span>
       </div>
       <div class="wand-details">
-        <div class="owner-section">
+        <div ref="ownerSectionRef" class="owner-section">
           <p class="detail-label">Owner</p>
-          <p class="owner-name">{{ metadata.name }}</p>
+          <p
+            ref="ownerNameRef"
+            class="owner-name"
+            :style="ownerNameStyle(metadata.name)"
+          >
+            <span ref="ownerNameTextRef" class="owner-name-text">
+              {{ metadata.name }}
+            </span>
+          </p>
         </div>
         <div class="divider"></div>
         <div class="year-section">
@@ -41,7 +49,14 @@
 </template>
 
 <script setup lang="ts">
-import { Transition } from "vue";
+import {
+  Transition,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import IconWand from "./icons/IconWand.vue";
 
 interface Props {
@@ -51,16 +66,113 @@ interface Props {
   } | null;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const ownerSectionRef = ref<HTMLElement | null>(null);
+const ownerNameRef = ref<HTMLElement | null>(null);
+const ownerNameTextRef = ref<HTMLElement | null>(null);
+const fittedOwnerFontSize = ref("4.5rem");
+const fittedOwnerLetterSpacing = ref("0.015em");
+
+let ownerResizeObserver: ResizeObserver | null = null;
+
+function ownerNamePreset(length: number) {
+  if (length <= 6) {
+    return { max: 12, min: 3.2, spacing: "0.01em" };
+  }
+  if (length <= 10) {
+    return { max: 10, min: 2.8, spacing: "0.008em" };
+  }
+  if (length <= 14) {
+    return { max: 8.5, min: 2.4, spacing: "0.004em" };
+  }
+  if (length <= 18) {
+    return { max: 7, min: 2.1, spacing: "0em" };
+  }
+
+  return { max: 5.8, min: 1.8, spacing: "-0.006em" };
+}
+
+function fitOwnerName() {
+  const ownerName = ownerNameRef.value;
+  const ownerNameText = ownerNameTextRef.value;
+  const name = props.metadata?.name?.trim();
+
+  if (!ownerName || !ownerNameText || !name) return;
+
+  const { max, min, spacing } = ownerNamePreset(name.length);
+
+  fittedOwnerLetterSpacing.value = spacing;
+  ownerName.style.setProperty("--owner-letter-spacing", spacing);
+  let low = min;
+  let high = max;
+  let best = min;
+
+  for (let i = 0; i < 16; i += 1) {
+    const mid = (low + high) / 2;
+    ownerName.style.setProperty("--owner-font-size", `${mid}rem`);
+
+    const availableWidth = ownerName.getBoundingClientRect().width;
+    const renderedWidth = ownerNameText.getBoundingClientRect().width;
+
+    if (renderedWidth <= availableWidth) {
+      best = mid;
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  fittedOwnerFontSize.value = `${best.toFixed(2)}rem`;
+  ownerName.style.setProperty("--owner-font-size", fittedOwnerFontSize.value);
+}
+
+function ownerNameStyle(name: string) {
+  return {
+    "--owner-font-size": fittedOwnerFontSize.value,
+    "--owner-letter-spacing": fittedOwnerLetterSpacing.value,
+  };
+}
+
+watch(
+  () => props.metadata?.name,
+  async () => {
+    await nextTick();
+    fitOwnerName();
+  },
+  { immediate: true },
+);
+
+onMounted(async () => {
+  if ("fonts" in document) {
+    await document.fonts.ready;
+  }
+
+  await nextTick();
+  fitOwnerName();
+
+  if (typeof ResizeObserver !== "undefined" && ownerSectionRef.value) {
+    ownerResizeObserver = new ResizeObserver(() => {
+      fitOwnerName();
+    });
+    ownerResizeObserver.observe(ownerSectionRef.value);
+  } else {
+    window.addEventListener("resize", fitOwnerName);
+  }
+});
+
+onBeforeUnmount(() => {
+  ownerResizeObserver?.disconnect();
+  window.removeEventListener("resize", fitOwnerName);
+});
 </script>
 
 <style scoped>
 .wand-info-card {
   margin: 1rem;
-  padding: 1.25rem;
+  padding: 1.1rem 1.25rem 0.95rem;
   border-color: var(--accent-border);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   animation: reveal-up 0.4s ease;
 }
 
@@ -93,7 +205,7 @@ defineProps<Props>();
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--accent);
@@ -109,38 +221,46 @@ defineProps<Props>();
 }
 
 .wand-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.18rem;
 }
 
-.owner-section,
-.year-section {
-  flex: 1;
+.owner-section {
+  margin-inline: -0.65rem;
 }
 
 .detail-label {
+  margin: 0;
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--text);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin: 0 0 0.4rem;
 }
 
 .owner-name {
-  font-family: var(--heading);
-  font-size: 1.35rem;
-  font-weight: 600;
+  font-family: var(--script);
+  font-size: var(--owner-font-size, 4.5rem);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  font-weight: 400;
+  letter-spacing: var(--owner-letter-spacing, 0.015em);
+  line-height: 1.04;
+  white-space: nowrap;
+  text-align: center;
   color: var(--text-h);
-  margin: 0;
-  word-break: break-word;
-  animation: golden-reveal 0.8s ease 0.2s both;
+  margin: -0.08rem 0 -0.52rem;
+  animation: owner-name-reveal 0.8s ease 0.2s both;
   background: var(--gradient-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.owner-name-text {
+  display: inline-block;
 }
 
 .year-value {
@@ -148,6 +268,7 @@ defineProps<Props>();
   font-size: 1.35rem;
   font-weight: 600;
   margin: 0;
+  text-align: center;
   background: var(--gradient-gold);
   -webkit-background-clip: text;
   background-clip: text;
@@ -155,10 +276,11 @@ defineProps<Props>();
 }
 
 .divider {
-  width: 1px;
-  height: 50px;
+  width: 100%;
+  height: 1px;
+  margin-top: -0.12rem;
   background: linear-gradient(
-    to bottom,
+    90deg,
     transparent,
     var(--accent-border),
     transparent
@@ -167,29 +289,25 @@ defineProps<Props>();
 
 @media (max-width: 480px) {
   .wand-info-card {
-    padding: 1rem;
+    margin: 1rem;
+    padding: 0.95rem 1rem 0.85rem;
   }
 
   .wand-details {
-    flex-direction: column;
-    gap: 1rem;
+    gap: 0.14rem;
     text-align: center;
   }
 
-  .divider {
-    width: 60%;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--accent-border),
-      transparent
-    );
+  .owner-section {
+    margin-inline: -0.55rem;
   }
 
-  .owner-name,
   .year-value {
     font-size: 1.15rem;
+  }
+
+  .owner-name {
+    max-width: 100%;
   }
 }
 
@@ -229,5 +347,19 @@ defineProps<Props>();
 .wand-appear-leave-to {
   opacity: 0;
   transform: scale(0.95) translateY(-8px);
+}
+
+@keyframes owner-name-reveal {
+  0% {
+    opacity: 0;
+    filter: brightness(2) blur(4px);
+  }
+  60% {
+    filter: brightness(1.4) blur(0);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1) blur(0);
+  }
 }
 </style>
