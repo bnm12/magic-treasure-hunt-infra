@@ -1,10 +1,13 @@
 <template>
   <section class="toybox-panel">
-    <h2>Toybox</h2>
+    <div class="section-title">
+      <span class="icon" aria-hidden="true">&#9881;</span>
+      <h2>Toybox</h2>
+    </div>
 
     <!-- Wand Initialization Section -->
-    <div class="toybox-section">
-      <h3>Initialize Wand</h3>
+    <div class="toybox-section glass-card">
+      <h3><span class="section-icon" aria-hidden="true">&#10022;</span> Initialize Wand</h3>
       <p class="note">
         Initialize a blank NFC tag as an official wand. The wand can then
         collect treasures on your adventure.
@@ -34,22 +37,23 @@
           type="button"
           class="counter"
         >
-          {{ isWriting ? "Initializing..." : "Initialize Wand" }}
+          {{ isWriting ? "&#10024; Initializing..." : "&#10022; Initialize Wand" }}
         </button>
       </div>
     </div>
 
-    <hr class="section-divider" />
+    <hr class="divider-magic" />
 
     <!-- Record 1 Configuration Section -->
-    <div class="toybox-section">
-      <h3>Configure Record 1</h3>
+    <div class="toybox-section glass-card">
+      <h3><span class="section-icon" aria-hidden="true">&#9998;</span> Configure Record 1</h3>
       <p class="note">
         Configure record 1 for a normal NFC action. Treasure progress is always
         preserved when writing.
       </p>
 
       <div v-if="!hasScannedWand" class="warning">
+        <span class="warning-icon" aria-hidden="true">&#9888;</span>
         Scan a wand first so progress can be safely kept during the write.
       </div>
 
@@ -89,7 +93,7 @@
           type="button"
           class="counter"
         >
-          {{ isWriting ? "Writing..." : "Write to Wand" }}
+          {{ isWriting ? "&#10024; Writing..." : "&#9733; Write to Wand" }}
         </button>
       </div>
     </div>
@@ -174,36 +178,50 @@ function handleWrite() {
 
 <style scoped>
 .toybox-panel {
-  padding: 2rem;
-  border-top: 1px solid var(--border);
+  padding: 1.5rem;
 }
 
-.toybox-panel h2 {
+.toybox-section {
+  padding: 1.25rem;
+  margin-bottom: 0;
+}
+
+.toybox-section h3 {
   margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.section-icon {
+  font-size: 1rem;
+  color: var(--accent);
 }
 
 .note {
   color: var(--text);
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
 }
 
 .warning {
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  border: 1px solid #f59e0b;
-  background: rgba(245, 158, 11, 0.08);
-  color: #92400e;
-  font-size: 0.9rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.06);
+  color: var(--warning);
+  font-size: 0.85rem;
   margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  .warning {
-    color: #fbbf24;
-    border-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.12);
-  }
+.warning-icon {
+  font-size: 1rem;
 }
 
 .form-group {
@@ -214,50 +232,26 @@ function handleWrite() {
 }
 
 .form-group label {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group small {
+  font-size: 0.75rem;
+  color: var(--text);
+  opacity: 0.6;
+  margin-top: 0.15rem;
 }
 
 .validation-error {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin: -0.5rem 0 0.75rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .validation-error {
-    color: #f87171;
-  }
-}
-
-.toybox-section {
-  margin-bottom: 1.5rem;
-}
-
-.toybox-section h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  color: var(--text-h);
-}
-
-.toybox-section small {
+  color: var(--danger);
   font-size: 0.8rem;
-  color: var(--text);
-  opacity: 0.75;
-  display: block;
-  margin-top: 0.25rem;
-}
-
-.section-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 1.5rem 0;
-}
-
-@media (max-width: 1024px) {
-  .toybox-panel {
-    padding: 1.5rem 1.25rem;
-  }
+  margin: -0.5rem 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 </style>

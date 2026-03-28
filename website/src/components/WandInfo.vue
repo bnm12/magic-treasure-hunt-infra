@@ -1,17 +1,17 @@
 <template>
-  <div v-if="metadata" class="wand-info-card">
+  <div v-if="metadata" class="wand-info-card glass-card">
     <div class="wand-badge">
-      <span class="wand-icon">✨</span>
+      <span class="wand-icon" aria-hidden="true">&#10022;</span>
       <span class="wand-label">Your Wand</span>
     </div>
     <div class="wand-details">
       <div class="owner-section">
-        <p class="owner-label">Owner</p>
+        <p class="detail-label">Owner</p>
         <p class="owner-name">{{ metadata.name }}</p>
       </div>
       <div class="divider"></div>
       <div class="year-section">
-        <p class="year-label">Activated</p>
+        <p class="detail-label">Activated</p>
         <p class="year-value">{{ metadata.creationYear }}</p>
       </div>
     </div>
@@ -31,13 +31,33 @@ defineProps<Props>();
 
 <style scoped>
 .wand-info-card {
-  margin: 0 auto 2rem;
-  max-width: 540px;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, var(--accent-bg) 0%, rgba(170, 59, 255, 0.05) 100%);
-  border: 1px solid var(--accent-border);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  margin: 1rem;
+  padding: 1.25rem;
+  border-color: var(--accent-border);
+  position: relative;
+  overflow: hidden;
+  animation: reveal-up 0.4s ease;
+}
+
+/* Magical gradient border glow */
+.wand-info-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 168, 67, 0.4),
+    rgba(155, 109, 255, 0.2),
+    rgba(212, 168, 67, 0.1)
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  animation: border-glow 3s ease-in-out infinite;
 }
 
 .wand-badge {
@@ -45,28 +65,18 @@ defineProps<Props>();
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .wand-icon {
-  font-size: 20px;
+  font-size: 1.2rem;
   display: inline-block;
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-@keyframes sparkle {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
-  }
+  animation: sparkle-spin 4s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(212, 168, 67, 0.5));
 }
 
 .wand-details {
@@ -81,18 +91,18 @@ defineProps<Props>();
   flex: 1;
 }
 
-.owner-label,
-.year-label {
-  font-size: 12px;
-  font-weight: 600;
+.detail-label {
+  font-size: 0.65rem;
+  font-weight: 700;
   color: var(--text);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 0.5rem;
+  letter-spacing: 1px;
+  margin: 0 0 0.4rem;
 }
 
 .owner-name {
-  font-size: 24px;
+  font-family: var(--heading);
+  font-size: 1.35rem;
   font-weight: 600;
   color: var(--text-h);
   margin: 0;
@@ -100,57 +110,52 @@ defineProps<Props>();
 }
 
 .year-value {
-  font-size: 24px;
+  font-family: var(--heading);
+  font-size: 1.35rem;
   font-weight: 600;
-  color: var(--accent);
   margin: 0;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .divider {
   width: 1px;
-  height: 60px;
-  background: var(--accent-border);
-}
-
-@media (max-width: 768px) {
-  .wand-info-card {
-    padding: 1.25rem;
-    margin: 0 auto 1.5rem;
-  }
-
-  .wand-details {
-    gap: 1rem;
-  }
-
-  .divider {
-    height: 50px;
-  }
-
-  .owner-name,
-  .year-value {
-    font-size: 20px;
-  }
+  height: 50px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--accent-border),
+    transparent
+  );
 }
 
 @media (max-width: 480px) {
   .wand-info-card {
     padding: 1rem;
-    margin: 0 auto 1rem;
   }
 
   .wand-details {
     flex-direction: column;
     gap: 1rem;
+    text-align: center;
   }
 
   .divider {
-    width: 100%;
+    width: 60%;
     height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--accent-border),
+      transparent
+    );
   }
 
   .owner-name,
   .year-value {
-    font-size: 18px;
+    font-size: 1.15rem;
   }
 }
 </style>

@@ -16,7 +16,7 @@
           v-if="isComplete(year)"
           class="complete-badge"
           aria-label="Completed"
-          >✓</span
+          >&#10003;</span
         >
       </span>
       <span class="tab-track" aria-hidden="true">
@@ -53,48 +53,52 @@ function isComplete(year: number): boolean {
 .year-selector {
   display: flex;
   gap: 0.5rem;
-  padding: 1.25rem 2rem;
-  border-bottom: 1px solid var(--border);
+  padding: 1rem 1rem 0.75rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .year-tab {
-  padding: 0.4rem 1.1rem 0.45rem;
-  border-radius: 20px;
+  padding: 0.4rem 1rem 0.45rem;
+  border-radius: 12px;
   border: 1.5px solid var(--border);
-  background: transparent;
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
   color: var(--text);
-  font: inherit;
-  font-size: 0.9rem;
+  font-family: var(--heading);
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0.3rem;
-  min-width: 4rem;
+  min-width: 5rem;
 }
 
 .year-tab:hover {
   border-color: var(--accent-border);
   color: var(--accent);
+  box-shadow: var(--glow-gold);
 }
 
 .year-tab.active {
   background: var(--accent-bg);
-  border-color: var(--accent-border);
+  border-color: var(--accent);
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: var(--glow-gold);
 }
 
 .year-tab.complete {
-  border-color: #22c55e;
+  border-color: rgba(52, 211, 153, 0.4);
 }
 
 .year-tab.complete.active {
-  background: #f0fdf4;
-  border-color: #22c55e;
-  color: #16a34a;
+  background: var(--collected-bg);
+  border-color: var(--collected);
+  color: var(--collected);
+  box-shadow: var(--glow-green);
 }
 
 .tab-label {
@@ -105,20 +109,16 @@ function isComplete(year: number): boolean {
 }
 
 .complete-badge {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: #22c55e;
-}
-
-.year-tab.active .complete-badge {
-  color: #16a34a;
+  color: var(--collected);
 }
 
 .tab-track {
   display: block;
   height: 3px;
   border-radius: 2px;
-  background: var(--border);
+  background: rgba(120, 90, 180, 0.15);
   overflow: hidden;
 }
 
@@ -126,17 +126,11 @@ function isComplete(year: number): boolean {
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: var(--accent);
-  transition: width 0.3s ease;
+  background: var(--gradient-gold);
+  transition: width 0.4s ease;
 }
 
 .year-tab.complete .tab-fill {
-  background: #22c55e;
-}
-
-@media (max-width: 1024px) {
-  .year-selector {
-    padding: 1rem 1.25rem;
-  }
+  background: linear-gradient(135deg, var(--collected), #6ee7b7);
 }
 </style>

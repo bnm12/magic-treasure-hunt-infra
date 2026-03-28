@@ -1,7 +1,7 @@
 <template>
   <section class="hunt-view">
     <!-- Hunt header -->
-    <div class="hunt-header">
+    <div class="hunt-header glass-card">
       <div class="banner-wrapper">
         <img
           :src="hunt.image"
@@ -9,25 +9,29 @@
           class="banner-image"
           loading="lazy"
         />
+        <div class="banner-overlay"></div>
+        <span class="year-badge">{{ hunt.year }}</span>
       </div>
       <div class="hunt-meta">
-        <span class="year-label">{{ hunt.year }}</span>
         <h2 class="hunt-title">{{ hunt.title }}</h2>
         <p class="hunt-description">{{ hunt.description }}</p>
         <div class="progress-row">
           <div class="progress-bar-track">
             <div
               class="progress-bar-fill"
+              :class="{ complete: progressPercent === 100 }"
               :style="{ width: progressPercent + '%' }"
             />
+            <div class="progress-shimmer" />
           </div>
           <span class="progress-label">
-            {{ collectedCount }} / {{ totalCount }}
+            {{ collectedCount }}<span class="progress-sep">/</span
+            >{{ totalCount }}
           </span>
         </div>
         <p class="progress-text">
           <template v-if="collectedCount === totalCount && totalCount > 0">
-            🎉 All spots collected!
+            <span class="complete-text">&#10024; All spots collected!</span>
           </template>
           <template v-else-if="collectedCount === 0">
             No spots collected yet — tap your wand at a magic spot!
@@ -45,11 +49,12 @@
     <!-- Spot grid -->
     <div class="spots-grid">
       <SpotCard
-        v-for="[spotId, spot] in sortedSpots"
+        v-for="([spotId, spot], index) in sortedSpots"
         :key="spotId"
         :spot-id="spotId"
         :spot="spot"
         :collected="collectedSet.has(spotId)"
+        :style="{ animationDelay: index * 0.06 + 's' }"
       />
     </div>
   </section>
@@ -90,23 +95,18 @@ const progressPercent = computed(() =>
 
 <style scoped>
 .hunt-view {
-  border-top: 1px solid var(--border);
+  padding: 0 1rem;
 }
 
 .hunt-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: center;
-  padding: 2rem;
-  background: var(--accent-bg);
-  border-bottom: 1px solid var(--accent-border);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
 }
 
 .banner-wrapper {
-  border-radius: 8px;
+  position: relative;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
   background: var(--code-bg);
 }
 
@@ -117,32 +117,54 @@ const progressPercent = computed(() =>
   display: block;
 }
 
-.hunt-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    rgba(11, 11, 26, 0.8) 100%
+  );
 }
 
-.year-label {
+.year-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-family: var(--heading);
   font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
   font-weight: 700;
   color: var(--accent);
+  background: rgba(11, 11, 26, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--accent-border);
+  letter-spacing: 1px;
+}
+
+.hunt-meta {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .hunt-title {
   margin: 0;
-  font-size: 1.8rem;
-  color: var(--text-h);
+  font-size: 1.4rem;
   line-height: 1.2;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hunt-description {
-  margin: 0.25rem 0 0.5rem;
+  margin: 0;
   color: var(--text);
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .progress-row {
@@ -154,57 +176,68 @@ const progressPercent = computed(() =>
 
 .progress-bar-track {
   flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--border);
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(120, 90, 180, 0.2);
   overflow: hidden;
+  position: relative;
 }
 
 .progress-bar-fill {
   height: 100%;
-  border-radius: 4px;
-  background: var(--accent);
-  transition: width 0.4s ease;
+  border-radius: 3px;
+  background: var(--gradient-gold);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.progress-bar-fill.complete {
+  background: linear-gradient(135deg, var(--collected), #6ee7b7);
+  box-shadow: var(--glow-green);
+}
+
+.progress-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
 }
 
 .progress-label {
-  font-size: 0.875rem;
+  font-family: var(--heading);
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-h);
+  color: var(--accent);
   white-space: nowrap;
 }
 
+.progress-sep {
+  color: var(--text);
+  opacity: 0.4;
+  margin: 0 0.15rem;
+}
+
 .progress-text {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--text);
   margin: 0;
+}
+
+.complete-text {
+  color: var(--collected);
+  font-weight: 600;
 }
 
 .spots-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 2rem;
-}
-
-@media (max-width: 1024px) {
-  .hunt-header {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-    padding: 1.5rem 1.25rem;
-  }
-
-  .banner-wrapper {
-    aspect-ratio: 16 / 9;
-  }
-
-  .hunt-title {
-    font-size: 1.4rem;
-  }
-
-  .spots-grid {
-    padding: 1.25rem;
-    gap: 1rem;
-  }
+  gap: 1rem;
+  padding-bottom: 1rem;
 }
 </style>

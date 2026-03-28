@@ -4,8 +4,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f4f1de",
-  "theme_color": "#0f4c5c",
+  "background_color": "#0b0b1a",
+  "theme_color": "#0b0b1a",
   "description": "Progressive web app for Tryllestavsprojekt.",
   "icons": [
     {

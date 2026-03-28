@@ -1,5 +1,5 @@
 <template>
-  <article class="spot-card" :class="{ collected }">
+  <article class="spot-card glass-card" :class="{ collected }" style="animation: reveal-up 0.4s ease backwards">
     <div class="image-wrapper">
       <img
         :src="spot.image"
@@ -7,12 +7,17 @@
         class="spot-image"
         loading="lazy"
       />
+      <div class="image-overlay"></div>
       <span class="spot-number">#{{ spotId }}</span>
-      <span v-if="collected" class="collected-badge">✓ Collected</span>
+      <span v-if="collected" class="collected-badge">
+        <span class="badge-icon" aria-hidden="true">&#10003;</span> Collected
+      </span>
+      <span v-else class="locked-badge" aria-hidden="true">&#128274;</span>
     </div>
     <div class="content">
       <h3 class="name">{{ spot.name }}</h3>
       <p v-if="collected && spot.location" class="location">
+        <span class="loc-icon" aria-hidden="true">&#9673;</span>
         {{ spot.location }}
       </p>
       <p class="text" :class="collected ? 'collected-text' : 'hint-text'">
@@ -36,33 +41,33 @@ defineProps<{
 .spot-card {
   display: flex;
   gap: 0;
-  border-radius: 10px;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  background: var(--bg);
-  border: 1px solid var(--border);
   transition:
-    box-shadow 0.2s ease,
-    border-color 0.2s ease,
-    opacity 0.2s ease;
-  opacity: 0.55;
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  opacity: 0.5;
 }
 
 .spot-card.collected {
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
+  border-color: rgba(212, 168, 67, 0.3);
   opacity: 1;
+  box-shadow: var(--shadow), 0 0 20px rgba(212, 168, 67, 0.08);
 }
 
 .spot-card:hover {
-  box-shadow:
-    rgba(0, 0, 0, 0.15) 0 20px 25px -5px,
-    rgba(0, 0, 0, 0.08) 0 8px 10px -4px;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow), 0 0 30px rgba(155, 109, 255, 0.1);
+}
+
+.spot-card.collected:hover {
+  box-shadow: var(--shadow), var(--glow-gold);
 }
 
 .image-wrapper {
   position: relative;
-  flex: 0 0 160px;
+  flex: 0 0 110px;
   overflow: hidden;
   background: var(--code-bg);
 }
@@ -72,87 +77,123 @@ defineProps<{
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: grayscale(100%);
-  transition: filter 0.2s ease;
+  filter: grayscale(100%) brightness(0.6);
+  transition: filter 0.4s ease;
 }
 
 .spot-card.collected .spot-image {
-  filter: grayscale(0%);
+  filter: grayscale(0%) brightness(1);
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(11, 11, 26, 0.3));
+  pointer-events: none;
 }
 
 .spot-number {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(11, 11, 26, 0.75);
+  backdrop-filter: blur(4px);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
   font-weight: 700;
-  box-shadow: var(--shadow);
+  font-family: var(--heading);
+  letter-spacing: 0.5px;
 }
 
 .collected-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #22c55e;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  box-shadow: var(--shadow);
+  top: 6px;
+  right: 6px;
+  background: rgba(52, 211, 153, 0.9);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: var(--glow-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-icon {
+  font-size: 0.7rem;
+}
+
+.locked-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  opacity: 0.3;
+  filter: grayscale(100%);
 }
 
 .content {
   flex: 1;
-  padding: 1.25rem 1.5rem;
+  padding: 0.9rem 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.25rem;
+  min-width: 0;
 }
 
 .name {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-h);
+  line-height: 1.3;
+}
+
+.spot-card.collected .name {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .location {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text);
   opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.loc-icon {
+  font-size: 0.6rem;
+  color: var(--accent);
 }
 
 .text {
-  margin: 0.25rem 0 0;
-  line-height: 1.55;
-  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.85rem;
 }
 
 .hint-text {
   color: var(--text);
   font-style: italic;
+  opacity: 0.7;
 }
 
 .collected-text {
-  color: #22c55e;
+  color: var(--collected);
   font-weight: 500;
-}
-
-@media (prefers-color-scheme: dark) {
-  .collected-badge {
-    background: #16a34a;
-  }
-
-  .collected-text {
-    color: #86efac;
-  }
 }
 
 @media (max-width: 600px) {
@@ -162,12 +203,12 @@ defineProps<{
 
   .image-wrapper {
     flex: 0 0 auto;
-    height: 180px;
+    height: 160px;
     width: 100%;
   }
 
   .content {
-    padding: 1rem;
+    padding: 0.85rem;
   }
 }
 </style>
