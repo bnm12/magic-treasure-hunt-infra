@@ -1,49 +1,5 @@
 <template>
   <section class="toybox-panel">
-    <!-- Wand Initialization Section -->
-    <div class="toybox-section glass-card">
-      <h3>
-        <span class="section-icon" aria-hidden="true">&#10022;</span> Initialize
-        Wand
-      </h3>
-      <p class="note">
-        Initialize a blank NFC tag as an official wand. The wand can then
-        collect treasures on your adventure.
-      </p>
-
-      <div class="form-group">
-        <label for="wand-name">Owner name</label>
-        <input
-          v-model="wandName"
-          id="wand-name"
-          class="nfc-input"
-          type="text"
-          placeholder="e.g., Benjamin"
-          maxlength="127"
-        />
-        <small>{{ wandName.length }}/127 characters</small>
-      </div>
-
-      <p v-if="wandInitError" class="validation-error" role="alert">
-        {{ wandInitError }}
-      </p>
-
-      <div class="nfc-controls">
-        <button
-          :disabled="isWriting || wandName.length === 0"
-          @click="handleInitWand"
-          type="button"
-          class="counter"
-        >
-          {{
-            isWriting ? "&#10024; Initializing..." : "&#10022; Initialize Wand"
-          }}
-        </button>
-      </div>
-    </div>
-
-    <hr class="divider-magic" />
-
     <div v-if="showInstallAction" class="toybox-section glass-card">
       <h3>
         <span class="section-icon" aria-hidden="true">&#11015;</span> Install
@@ -61,17 +17,18 @@
       </div>
     </div>
 
-    <hr v-if="showInstallAction" class="divider-magic" />
+    <div v-if="showInstallAction" class="toybox-divider" aria-hidden="true">
+      <span class="toybox-divider-core"></span>
+    </div>
 
-    <!-- Record 1 Configuration Section -->
     <div class="toybox-section glass-card">
       <h3>
-        <span class="section-icon" aria-hidden="true">&#9998;</span> Configure
-        Record 1
+        <span class="section-icon" aria-hidden="true">&#9998;</span> Default Tap
+        Action
       </h3>
       <p class="note">
-        Configure record 1 for a normal NFC action. Treasure progress is always
-        preserved when writing.
+        Choose what the wand does on a normal NFC tap. Treasure progress is
+        always preserved when writing.
       </p>
 
       <div class="form-group">
@@ -114,17 +71,127 @@
         </button>
       </div>
     </div>
+
+    <div class="toybox-divider" aria-hidden="true">
+      <span class="toybox-divider-core"></span>
+    </div>
+
+    <div class="admin-shell">
+      <div class="admin-header">
+        <p class="admin-kicker">Temporary</p>
+        <h3>Admin Tools</h3>
+        <p class="note">
+          These controls are for setup, testing, and debugging. We plan to
+          remove them from the public Toybox flow later.
+        </p>
+      </div>
+
+      <div class="toybox-section glass-card">
+        <h4>
+          <span class="section-icon" aria-hidden="true">&#10022;</span>
+          Initialize Wand
+        </h4>
+        <p class="note">
+          Initialize a blank NFC tag as an official wand. The wand can then
+          collect treasures on your adventure.
+        </p>
+
+        <div class="form-group">
+          <label for="wand-name">Owner name</label>
+          <input
+            v-model="wandName"
+            id="wand-name"
+            class="nfc-input"
+            type="text"
+            placeholder="e.g., Benjamin"
+            maxlength="127"
+          />
+          <small>{{ wandName.length }}/127 characters</small>
+        </div>
+
+        <p v-if="wandInitError" class="validation-error" role="alert">
+          {{ wandInitError }}
+        </p>
+
+        <div class="nfc-controls">
+          <button
+            :disabled="isWriting || wandName.length === 0"
+            @click="handleInitWand"
+            type="button"
+            class="counter"
+          >
+            {{
+              isWriting ? "&#10024; Initializing..." : "&#10022; Initialize Wand"
+            }}
+          </button>
+        </div>
+      </div>
+
+      <div class="toybox-section glass-card">
+        <h4>
+          <span class="section-icon" aria-hidden="true">&#10038;</span> Unlock
+          Test Treasure
+        </h4>
+        <p class="note">
+          Add any spot from any hunt year onto the wand for testing and debug
+          flows.
+        </p>
+
+        <div class="form-group">
+          <label for="debug-year">Hunt year</label>
+          <select v-model.number="debugYear" id="debug-year" class="nfc-input">
+            <option v-for="year in availableYears" :key="year" :value="year">
+              {{ year }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="debug-spot">Spot</label>
+          <select v-model.number="debugSpotId" id="debug-spot" class="nfc-input">
+            <option
+              v-for="spotId in availableSpotIds"
+              :key="spotId"
+              :value="spotId"
+            >
+              Spot {{ spotId }}
+            </option>
+          </select>
+        </div>
+
+        <p v-if="debugUnlockError" class="validation-error" role="alert">
+          {{ debugUnlockError }}
+        </p>
+
+        <div class="nfc-controls">
+          <button
+            :disabled="isWriting || debugYear === 0 || debugSpotId === 0"
+            @click="handleUnlockSpot"
+            type="button"
+            class="counter"
+          >
+            {{
+              isWriting
+                ? "&#10024; Unlocking..."
+                : `&#9733; Unlock Spot ${debugSpotId || ""}`
+            }}
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   isWriting: boolean;
-  hasScannedWand: boolean;
   initializeWand: (name: string, year: number) => Promise<void>;
+  unlockTestSpot: (year: number, spotId: number) => Promise<void>;
   showInstallAction: boolean;
+  availableYears: number[];
+  availableSpotIdsByYear: Record<number, number[]>;
 }>();
 
 const emit = defineEmits<{
@@ -137,14 +204,49 @@ const wandInitError = ref("");
 const toyAction = ref("url");
 const toyPayload = ref("");
 const validationError = ref("");
+const debugYear = ref(0);
+const debugSpotId = ref(0);
+const debugUnlockError = ref("");
 
-// Clear error when user changes input
+const availableSpotIds = computed(
+  () => props.availableSpotIdsByYear[debugYear.value] ?? [],
+);
+
 watch([toyAction, toyPayload], () => {
   validationError.value = "";
 });
 
 watch(wandName, () => {
   wandInitError.value = "";
+});
+
+watch(
+  () => props.availableYears,
+  (years) => {
+    if (years.length > 0 && !years.includes(debugYear.value)) {
+      debugYear.value = years[0];
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  availableSpotIds,
+  (spotIds) => {
+    if (spotIds.length === 0) {
+      debugSpotId.value = 0;
+      return;
+    }
+
+    if (!spotIds.includes(debugSpotId.value)) {
+      debugSpotId.value = spotIds[0];
+    }
+  },
+  { immediate: true },
+);
+
+watch([debugYear, debugSpotId], () => {
+  debugUnlockError.value = "";
 });
 
 async function handleInitWand() {
@@ -193,6 +295,21 @@ function handleWrite() {
 
   emit("write", { action: toyAction.value, payload });
 }
+
+async function handleUnlockSpot() {
+  debugUnlockError.value = "";
+
+  if (debugYear.value === 0 || debugSpotId.value === 0) {
+    debugUnlockError.value = "Choose a hunt year and a spot first.";
+    return;
+  }
+
+  try {
+    await props.unlockTestSpot(debugYear.value, debugSpotId.value);
+  } catch (error) {
+    debugUnlockError.value = `Error: ${(error as Error).message}`;
+  }
+}
 </script>
 
 <style scoped>
@@ -208,6 +325,15 @@ function handleWrite() {
 .toybox-section h3 {
   margin: 0 0 0.5rem;
   font-size: 1rem;
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.toybox-section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
   color: var(--text-h);
   display: flex;
   align-items: center;
@@ -266,5 +392,98 @@ function handleWrite() {
   width: 100%;
   justify-content: center;
   text-align: center;
+}
+
+.toybox-divider {
+  display: block;
+  position: relative;
+  height: 16px;
+  margin: 1.5rem 0;
+}
+
+.toybox-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 168, 67, 0.18) 14%,
+    rgba(212, 168, 67, 0.58) 34%,
+    rgba(244, 217, 122, 0.96) 50%,
+    rgba(212, 168, 67, 0.58) 66%,
+    rgba(212, 168, 67, 0.18) 86%,
+    transparent
+  );
+  box-shadow:
+    0 0 12px rgba(212, 168, 67, 0.16),
+    0 0 24px rgba(212, 168, 67, 0.08);
+}
+
+.toybox-divider-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(244, 217, 122, 1) 0%,
+    rgba(212, 168, 67, 0.95) 48%,
+    rgba(212, 168, 67, 0) 100%
+  );
+  box-shadow:
+    0 0 14px rgba(244, 217, 122, 0.45),
+    0 0 28px rgba(212, 168, 67, 0.2);
+}
+
+.admin-shell {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.35rem;
+}
+
+.admin-header {
+  position: relative;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(212, 168, 67, 0.24);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(212, 168, 67, 0.1), rgba(212, 168, 67, 0.03)),
+    rgba(16, 16, 36, 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 208, 120, 0.05),
+    0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.admin-shell .toybox-section {
+  margin-top: 0;
+}
+
+.admin-kicker {
+  margin-bottom: 0.25rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-header h3 {
+  margin: 0 0 0.35rem;
+  color: var(--text-h);
+}
+
+.admin-header .note {
+  margin-bottom: 0;
+  color: var(--text);
+  opacity: 0.92;
 }
 </style>

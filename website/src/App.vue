@@ -129,9 +129,11 @@
           />
           <ToyboxPanel
             :is-writing="isWriting"
-            :has-scanned-wand="hasScannedWand"
             :initialize-wand="initializeWand"
+            :unlock-test-spot="unlockTestSpot"
             :show-install-action="canInstallPwa"
+            :available-years="allYears"
+            :available-spot-ids-by-year="availableSpotIdsByYear"
             @write="({ action, payload }) => writeRecord1(action, payload)"
             @install="promptInstall"
           />
@@ -195,6 +197,7 @@ const {
   beginScanning,
   writeRecord1,
   initializeWand,
+  unlockTestSpot,
 } = useNfc();
 
 const currentPage = ref("hunt");
@@ -388,6 +391,19 @@ const yearProgress = computed(() => {
     );
     const collected = collectedIds.length;
     result[year] = { collected, total };
+  }
+  return result;
+});
+
+const availableSpotIdsByYear = computed(() => {
+  const result: Record<number, number[]> = {};
+  for (const year of allYears.value) {
+    const hunt = hunts.value[year];
+    result[year] = hunt
+      ? Object.keys(hunt.spots)
+          .map(Number)
+          .sort((a, b) => a - b)
+      : [];
   }
   return result;
 });

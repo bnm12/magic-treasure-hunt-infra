@@ -43,6 +43,7 @@ This repository currently contains two primary folders:
 - Auto-discovery of multi-year hunts on wand
 - Base-aware static hosting for both repo subpaths and clean domain roots
 - Installable PWA surface with manifest icons, mobile web app metadata, and an in-app install prompt
+- Toybox admin utilities for wand initialization and debug-only treasure unlocking
 
 **Arduino (`arduino/`):**
 
