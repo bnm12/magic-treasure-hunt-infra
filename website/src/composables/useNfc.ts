@@ -289,9 +289,11 @@ export function useNfc() {
 
       const huntRecords = buildHuntRecordInits(lastReadRecords);
       const metaRecords = buildMetaRecordInits(lastReadRecords);
-      await ndef.write({ records: [toyRecord, ...metaRecords, ...huntRecords] });
+      await ndef.write({
+        records: [toyRecord, ...metaRecords, ...huntRecords],
+      });
       status.value = lastReadRecords.length
-        ? "Record 1 written! Hunt + x-hunt-meta records were preserved."
+        ? "Record 1 written! Your wand progress was kept safe."
         : "Record 1 written!";
       await keepReaderActive();
     } catch (error) {
