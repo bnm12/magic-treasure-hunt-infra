@@ -29,7 +29,12 @@
     <line x1="14" y1="9" x2="18.5" y2="9" opacity="0.4" />
     <line x1="13.5" y1="11.5" x2="19" y2="11.5" opacity="0.4" />
     <!-- Star symbol on right page -->
-    <path d="M16.5 14.5 L17 13.2 L17.5 14.5 L18.8 14.5 L17.8 15.3 L18.1 16.5 L17 15.8 L15.9 16.5 L16.2 15.3 L15.2 14.5 Z" fill="currentColor" stroke="none" opacity="0.5" />
+    <path
+      d="M16.5 14.5 L17 13.2 L17.5 14.5 L18.8 14.5 L17.8 15.3 L18.1 16.5 L17 15.8 L15.9 16.5 L16.2 15.3 L15.2 14.5 Z"
+      fill="currentColor"
+      stroke="none"
+      opacity="0.5"
+    />
   </svg>
 </template>
 

@@ -39,7 +39,11 @@
         <!-- ═══ HUNT PAGE ═══ -->
         <div v-if="currentPage === 'hunt'" key="hunt" class="page">
           <header class="hero-panel">
-            <component :is="hasScannedWand ? IconHuntMap : IconSeeking" class="hero-sparkle" aria-hidden="true" />
+            <component
+              :is="hasScannedWand ? IconHuntMap : IconSeeking"
+              class="hero-sparkle"
+              aria-hidden="true"
+            />
             <p class="eyebrow">Tryllestavsprojekt</p>
             <h1 class="hero-title">Magic Wand Companion</h1>
             <p class="hero-copy">

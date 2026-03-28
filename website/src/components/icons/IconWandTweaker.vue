@@ -20,9 +20,20 @@
     <!-- Wand (diagonal, crossing through the circle) -->
     <path d="M6.5 21 L13.5 10" stroke-width="2" />
     <!-- Handle knob -->
-    <circle cx="5.8" cy="21.7" r="1.2" fill="currentColor" stroke="currentColor" stroke-width="0.5" />
+    <circle
+      cx="5.8"
+      cy="21.7"
+      r="1.2"
+      fill="currentColor"
+      stroke="currentColor"
+      stroke-width="0.5"
+    />
     <!-- Sparkle at wand tip inside circle -->
-    <path d="M14.2 8 L14.5 6.8 L14.8 8 L16 8.3 L14.8 8.6 L14.5 9.8 L14.2 8.6 L13 8.3 Z" fill="currentColor" stroke="none" />
+    <path
+      d="M14.2 8 L14.5 6.8 L14.8 8 L16 8.3 L14.8 8.6 L14.5 9.8 L14.2 8.6 L13 8.3 Z"
+      fill="currentColor"
+      stroke="none"
+    />
   </svg>
 </template>
 
