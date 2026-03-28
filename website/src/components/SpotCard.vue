@@ -29,7 +29,98 @@
           >
         </span>
       </span>
-      <span v-else class="locked-badge" aria-hidden="true">
+      <span v-else class="undiscovered-badge">Undiscovered</span>
+      <span v-if="!collected" class="locked-badge" aria-hidden="true">
+        <svg
+          class="lock-chain chain-a"
+          viewBox="0 0 120 16"
+          preserveAspectRatio="none"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <ellipse cx="10" cy="8" rx="7" ry="4" transform="rotate(18 10 8)" />
+            <ellipse
+              cx="26"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(-18 26 8)"
+            />
+            <ellipse cx="42" cy="8" rx="7" ry="4" transform="rotate(18 42 8)" />
+            <ellipse
+              cx="58"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(-18 58 8)"
+            />
+            <ellipse cx="74" cy="8" rx="7" ry="4" transform="rotate(18 74 8)" />
+            <ellipse
+              cx="90"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(-18 90 8)"
+            />
+            <ellipse
+              cx="106"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(18 106 8)"
+            />
+          </g>
+        </svg>
+        <svg
+          class="lock-chain chain-b"
+          viewBox="0 0 120 16"
+          preserveAspectRatio="none"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <ellipse cx="10" cy="8" rx="7" ry="4" transform="rotate(18 10 8)" />
+            <ellipse
+              cx="26"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(-18 26 8)"
+            />
+            <ellipse cx="42" cy="8" rx="7" ry="4" transform="rotate(18 42 8)" />
+            <ellipse
+              cx="58"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(-18 58 8)"
+            />
+            <ellipse cx="74" cy="8" rx="7" ry="4" transform="rotate(18 74 8)" />
+            <ellipse
+              cx="90"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(-18 90 8)"
+            />
+            <ellipse
+              cx="106"
+              cy="8"
+              rx="7"
+              ry="4"
+              transform="rotate(18 106 8)"
+            />
+          </g>
+        </svg>
         <svg viewBox="0 0 24 24" class="ward-sigil">
           <circle
             cx="12"
@@ -193,6 +284,28 @@ defineProps<{
   overflow: visible;
 }
 
+.undiscovered-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--accent2-rgb), 0.28);
+  background: rgba(11, 11, 26, 0.78);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: rgba(232, 220, 200, 0.88);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent2-rgb), 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.28);
+}
+
 .badge-rune {
   font-size: 0.7rem;
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6));
@@ -250,30 +363,55 @@ defineProps<{
 
 .locked-badge {
   position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lock-chain {
+  position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: 3rem;
-  height: 3rem;
-  opacity: 0.5;
-  animation: ward-pulse 3s ease-in-out infinite;
+  width: 150%;
+  height: 1rem;
+  transform-origin: center;
+  color: var(--accent);
+  opacity: 0.34;
+  overflow: visible;
+  filter:
+    drop-shadow(0 0 1px rgba(var(--accent-rgb), 0.28))
+    drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.08))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24));
+}
+
+.chain-a {
+  transform: translate(-50%, -50%) rotate(35deg);
+}
+
+.chain-b {
+  transform: translate(-50%, -50%) rotate(-35deg);
 }
 
 .ward-sigil {
-  width: 100%;
-  height: 100%;
-  color: var(--accent2, #9b6dff);
-  filter: drop-shadow(0 0 4px rgba(155, 109, 255, 0.3));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4.75rem;
+  height: 4.75rem;
+  transform: translate(-50%, -50%);
+  color: var(--accent2);
+  opacity: 0.95;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(var(--accent2-rgb), 0.45));
+  animation: ward-pulse 3s ease-in-out infinite;
 }
 
 @keyframes ward-pulse {
   0%,
   100% {
-    opacity: 0.35;
     transform: translate(-50%, -50%) scale(1);
   }
   50% {
-    opacity: 0.55;
     transform: translate(-50%, -50%) scale(1.08);
   }
 }
@@ -350,6 +488,20 @@ defineProps<{
 
   .content {
     padding: 0.85rem;
+  }
+
+  .locked-badge {
+    inset: 0;
+  }
+
+  .lock-chain {
+    width: 165%;
+    height: 1.1rem;
+  }
+
+  .ward-sigil {
+    width: 5.15rem;
+    height: 5.15rem;
   }
 }
 </style>
