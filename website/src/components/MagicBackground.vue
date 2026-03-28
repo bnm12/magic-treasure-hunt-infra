@@ -1,80 +1,149 @@
 <template>
   <div class="magic-bg" aria-hidden="true">
-    <!-- Star layers removed for clarity -->
-    <!-- Slow aurora wisps -->
     <div class="aurora-layer">
       <div class="aurora a1"></div>
       <div class="aurora a2"></div>
       <div class="aurora a3"></div>
     </div>
-    <!-- Animated magical runes -->
+
     <div class="motes">
       <span
         v-for="(rune, i) in motes"
-        :key="i"
-        class="mote"
+        :key="rune.id"
+        :class="['mote', `mote-${rune.variant}`]"
         :style="{
           left: rune.startX + '%',
           top: rune.startY + '%',
-          animationDelay: rune.delay + 's',
-          animationDuration: rune.duration + 's',
-          '--end-x': rune.endX + '%',
-          '--end-y': rune.endY + '%',
+          '--mote-duration': rune.duration + 's',
+          '--sway-duration': rune.swayDuration + 's',
+          '--phase': rune.phase + 's',
+          '--drift-scale': rune.driftScale,
+          '--drift-x-1': rune.driftX1 + 'vw',
+          '--drift-y-1': rune.driftY1 + 'vh',
+          '--drift-x-2': rune.driftX2 + 'vw',
+          '--drift-y-2': rune.driftY2 + 'vh',
+          '--drift-x-3': rune.driftX3 + 'vw',
+          '--drift-y-3': rune.driftY3 + 'vh',
           '--rotate': rune.rotate + 'deg',
         }"
+        @animationiteration="handleMoteIteration(i, $event)"
       >
         {{ rune.char }}
       </span>
     </div>
-    <div class="vignette"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 
-// Only magical rune-like Unicode symbols
+type Mote = {
+  id: number;
+  char: string;
+  variant: number;
+  startX: number;
+  startY: number;
+  duration: number;
+  swayDuration: number;
+  phase: number;
+  driftScale: number;
+  driftX1: number;
+  driftY1: number;
+  driftX2: number;
+  driftY2: number;
+  driftX3: number;
+  driftY3: number;
+  rotate: number;
+};
+
 const runeChars = [
-  "ᚠ",
-  "ᚢ",
-  "ᚦ",
-  "ᚱ",
-  "ᚷ",
-  "ᚹ",
-  "ᚺ",
-  "ᛁ",
-  "ᛇ",
-  "ᛈ",
-  "ᛋ",
-  "ᛏ",
-  "ᛒ",
-  "ᛖ",
-  "ᛚ",
-  "ᛟ",
-  "ᛞ",
-  "ᛠ",
-  "ᛣ",
-  "ᛦ",
+  "\u16A0",
+  "\u16A2",
+  "\u16A6",
+  "\u16B1",
+  "\u16B7",
+  "\u16B9",
+  "\u16BA",
+  "\u16C1",
+  "\u16C7",
+  "\u16C8",
+  "\u16CB",
+  "\u16CF",
+  "\u16D2",
+  "\u16D6",
+  "\u16DA",
+  "\u16DE",
+  "\u16DF",
+  "\u16E0",
+  "\u16E3",
+  "\u16E6",
 ];
 
 function randomBetween(a: number, b: number) {
   return a + Math.random() * (b - a);
 }
 
+function shuffledRunes(chars: string[]) {
+  const pool = [...chars];
+
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  return pool;
+}
+
+let nextMoteId = 0;
+
+function pickRuneChar(exclude: string[]) {
+  const available = runeChars.filter((char) => !exclude.includes(char));
+  const pool = available.length > 0 ? available : runeChars;
+
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function createMote(char: string, phase = 0): Mote {
+  return {
+    id: nextMoteId += 1,
+    char,
+    variant: Math.floor(randomBetween(1, 4)),
+    startX: randomBetween(6, 90),
+    startY: randomBetween(10, 84),
+    duration: randomBetween(46, 72),
+    swayDuration: randomBetween(18, 28),
+    phase,
+    driftScale: randomBetween(0.72, 1),
+    driftX1: randomBetween(-4, 4),
+    driftY1: randomBetween(-5, 5),
+    driftX2: randomBetween(-8, 8),
+    driftY2: randomBetween(-9, 9),
+    driftX3: randomBetween(-12, 12),
+    driftY3: randomBetween(-11, 11),
+    rotate: randomBetween(-75, 75),
+  };
+}
+
+function refreshMote(index: number, phase: number) {
+  const activeChars = motes.value
+    .filter((_, moteIndex) => moteIndex !== index)
+    .map((mote) => mote.char);
+
+  motes.value[index] = createMote(pickRuneChar(activeChars), phase);
+}
+
+function handleMoteIteration(index: number, event: AnimationEvent) {
+  if (event.animationName !== "glyph-drift") {
+    return;
+  }
+
+  refreshMote(index, 0);
+}
+
 const motes = ref(
-  Array.from({ length: 12 }, (_, i) => {
-    const char = runeChars[Math.floor(Math.random() * runeChars.length)];
-    return {
-      char,
-      startX: randomBetween(0, 90),
-      startY: randomBetween(0, 90),
-      endX: randomBetween(0, 90),
-      endY: randomBetween(0, 90),
-      delay: randomBetween(0, 24),
-      duration: randomBetween(32, 48),
-      rotate: randomBetween(-90, 90),
-    };
-  }),
+  shuffledRunes(runeChars)
+    .slice(0, 10)
+    .map((char) => createMote(char, randomBetween(-70, 0))),
 );
 </script>
 
@@ -82,8 +151,9 @@ const motes = ref(
 .magic-bg {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
+  pointer-events: none;
   background: radial-gradient(
     ellipse at 50% 0%,
     #1a1040 0%,
@@ -92,67 +162,6 @@ const motes = ref(
   );
 }
 
-/* Star layers using box-shadow for many tiny dots */
-.stars {
-  position: absolute;
-  inset: 0;
-  animation: drift 120s linear infinite;
-}
-
-.mote {
-  position: absolute;
-  font-size: 2.8rem;
-  opacity: 0;
-  color: rgba(212, 168, 67, 0.85);
-  filter: drop-shadow(0 0 16px rgba(212, 168, 67, 0.45))
-    drop-shadow(0 0 32px rgba(155, 109, 255, 0.18));
-  animation-name: rune-float;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-fill-mode: both;
-  will-change: transform, opacity, filter;
-}
-
-@keyframes rune-float {
-  0% {
-    opacity: 0;
-    filter: drop-shadow(0 0 0px rgba(212, 168, 67, 0));
-    transform: translate(0, 0) scale(0.9) rotate(0deg);
-  }
-  10% {
-    opacity: 1;
-    filter: drop-shadow(0 0 24px rgba(212, 168, 67, 0.5));
-  }
-  50% {
-    opacity: 0.85;
-    filter: drop-shadow(0 0 32px rgba(155, 109, 255, 0.25));
-    transform: translate(
-        calc(var(--end-x, 0%) - var(--start-x, 0%)),
-        calc(var(--end-y, 0%) - var(--start-y, 0%))
-      )
-      scale(1.15) rotate(var(--rotate, 0deg));
-  }
-  90% {
-    opacity: 1;
-    filter: drop-shadow(0 0 24px rgba(212, 168, 67, 0.5));
-  }
-  100% {
-    opacity: 0;
-    filter: drop-shadow(0 0 0px rgba(212, 168, 67, 0));
-    transform: translate(0, 0) scale(0.9) rotate(0deg);
-  }
-}
-
-@keyframes drift {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-20px);
-  }
-}
-
-/* ═══ Aurora wisps ═══ */
 .aurora-layer {
   position: absolute;
   inset: 0;
@@ -251,135 +260,122 @@ const motes = ref(
   }
 }
 
-/* ═══ Floating magical glyphs ═══ */
 .motes {
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  z-index: 1;
 }
 
 .mote {
   position: absolute;
-  left: var(--mx);
-  top: var(--my);
-  font-size: 2.8rem;
+  font-family: var(--heading);
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1;
+  color: var(--mote-color-a);
   opacity: 0;
-  animation-delay: var(--md, 0s);
-  animation-fill-mode: both;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-  will-change: transform, opacity;
+  text-shadow:
+    0 0 8px var(--mote-glow-soft),
+    0 0 18px var(--mote-glow-main);
+  animation:
+    glyph-drift var(--mote-duration, 56s) cubic-bezier(0.38, 0.04, 0.18, 1)
+      infinite both,
+    glyph-sway var(--sway-duration, 22s) ease-in-out infinite alternate;
+  animation-delay: var(--phase, 0s), var(--phase, 0s);
+  will-change: transform, opacity, filter;
 }
 
-/* Three distinct lazy drift paths so they feel random */
 .mote-a {
-  color: rgba(212, 168, 67, 0.65);
-  filter: drop-shadow(0 0 8px rgba(212, 168, 67, 0.45))
-    drop-shadow(0 0 16px rgba(212, 168, 67, 0.18));
-  animation-name: glyph-drift-a;
-  animation-duration: 45s;
+  color: var(--mote-color-a);
+  filter: drop-shadow(0 0 10px var(--mote-shadow-a))
+    drop-shadow(0 0 26px var(--mote-shadow-deep-a));
 }
 
 .mote-b {
-  color: rgba(155, 109, 255, 0.55);
-  filter: drop-shadow(0 0 8px rgba(155, 109, 255, 0.35))
-    drop-shadow(0 0 16px rgba(155, 109, 255, 0.15));
-  animation-name: glyph-drift-b;
-  animation-duration: 55s;
+  color: var(--mote-color-b);
+  filter: drop-shadow(0 0 8px var(--mote-shadow-b))
+    drop-shadow(0 0 20px var(--mote-shadow-deep-b));
 }
 
 .mote-c {
-  color: rgba(180, 150, 220, 0.5);
-  filter: drop-shadow(0 0 8px rgba(180, 150, 220, 0.28))
-    drop-shadow(0 0 16px rgba(180, 150, 220, 0.12));
-  animation-name: glyph-drift-c;
-  animation-duration: 50s;
+  color: var(--mote-color-c);
+  filter: drop-shadow(0 0 10px var(--mote-shadow-c))
+    drop-shadow(0 0 24px var(--mote-shadow-deep-c));
 }
 
-@keyframes glyph-drift-a {
+@keyframes glyph-drift {
   0% {
     opacity: 0;
-    transform: translate(0, 0) rotate(0deg) scale(0.7);
+    filter: blur(1px);
+    transform: translate3d(0, 0, 0) scale(0.72) rotate(0deg);
   }
-  8% {
-    opacity: 0.25;
+  14% {
+    opacity: 0.06;
+    filter: blur(0.5px);
   }
-  25% {
-    opacity: 0.35;
-    transform: translate(12px, -20px) rotate(30deg) scale(1);
+  28% {
+    opacity: 0.2;
+    transform: translate3d(
+        calc(var(--drift-x-1) * var(--drift-scale, 1)),
+        calc(var(--drift-y-1) * var(--drift-scale, 1)),
+        0
+      )
+      scale(0.94)
+      rotate(calc(var(--rotate) * 0.22));
+  }
+  47% {
+    opacity: 0.12;
+    transform: translate3d(
+        calc(var(--drift-x-1) * 0.55 * var(--drift-scale, 1)),
+        calc(var(--drift-y-1) * 1.25 * var(--drift-scale, 1)),
+        0
+      )
+      scale(1.02) rotate(calc(var(--rotate) * 0.45));
+  }
+  63% {
+    opacity: 0.26;
+    filter: blur(0);
+    transform: translate3d(
+        calc(var(--drift-x-2) * var(--drift-scale, 1)),
+        calc(var(--drift-y-2) * var(--drift-scale, 1)),
+        0
+      )
+      scale(1.08)
+      rotate(calc(var(--rotate) * 0.72));
+  }
+  82% {
+    opacity: 0.1;
+    transform: translate3d(
+        calc(var(--drift-x-3) * var(--drift-scale, 1)),
+        calc(var(--drift-y-3) * var(--drift-scale, 1)),
+        0
+      )
+      scale(0.96)
+      rotate(var(--rotate));
+  }
+  100% {
+    opacity: 0;
+    filter: blur(1px);
+    transform: translate3d(
+        calc(var(--drift-x-3) * 1.15 * var(--drift-scale, 1)),
+        calc(var(--drift-y-3) * 1.15 * var(--drift-scale, 1)),
+        0
+      )
+      scale(0.72) rotate(calc(var(--rotate) * 1.2));
+  }
+}
+
+@keyframes glyph-sway {
+  0% {
+    margin-left: -0.4vw;
+    margin-top: -0.3vh;
   }
   50% {
-    opacity: 0.2;
-    transform: translate(-8px, -45px) rotate(-15deg) scale(0.9);
-  }
-  75% {
-    opacity: 0.3;
-    transform: translate(18px, -30px) rotate(20deg) scale(1.05);
-  }
-  92% {
-    opacity: 0.15;
+    margin-left: 0.45vw;
+    margin-top: 0.5vh;
   }
   100% {
-    opacity: 0;
-    transform: translate(5px, -60px) rotate(45deg) scale(0.6);
-  }
-}
-
-@keyframes glyph-drift-b {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) rotate(0deg) scale(0.8);
-  }
-  10% {
-    opacity: 0.2;
-  }
-  30% {
-    opacity: 0.3;
-    transform: translate(-15px, -18px) rotate(-25deg) scale(1.1);
-  }
-  55% {
-    opacity: 0.15;
-    transform: translate(10px, -40px) rotate(10deg) scale(0.85);
-  }
-  80% {
-    opacity: 0.25;
-    transform: translate(-5px, -55px) rotate(-35deg) scale(1);
-  }
-  95% {
-    opacity: 0.1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-12px, -70px) rotate(-50deg) scale(0.65);
-  }
-}
-
-@keyframes glyph-drift-c {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) rotate(0deg) scale(0.75);
-  }
-  12% {
-    opacity: 0.2;
-  }
-  20% {
-    opacity: 0.3;
-    transform: translate(20px, -12px) rotate(15deg) scale(1);
-  }
-  45% {
-    opacity: 0.15;
-    transform: translate(-12px, -35px) rotate(-20deg) scale(0.95);
-  }
-  70% {
-    opacity: 0.25;
-    transform: translate(8px, -50px) rotate(35deg) scale(1.1);
-  }
-  90% {
-    opacity: 0.1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(15px, -65px) rotate(50deg) scale(0.7);
+    margin-left: -0.2vw;
+    margin-top: 0.25vh;
   }
 }
 </style>

@@ -19,6 +19,17 @@
   --accent2-rgb: 155, 109, 255;
   --accent2-bg: rgba(155, 109, 255, 0.1);
   --accent2-border: rgba(155, 109, 255, 0.3);
+  --mote-color-a: rgba(212, 168, 67, 0.66);
+  --mote-color-b: rgba(240, 208, 120, 0.58);
+  --mote-color-c: rgba(224, 184, 92, 0.5);
+  --mote-glow-soft: rgba(240, 208, 120, 0.12);
+  --mote-glow-main: rgba(212, 168, 67, 0.24);
+  --mote-shadow-a: rgba(212, 168, 67, 0.42);
+  --mote-shadow-b: rgba(240, 208, 120, 0.38);
+  --mote-shadow-c: rgba(240, 208, 120, 0.24);
+  --mote-shadow-deep-a: rgba(212, 168, 67, 0.2);
+  --mote-shadow-deep-b: rgba(212, 168, 67, 0.18);
+  --mote-shadow-deep-c: rgba(212, 168, 67, 0.14);
   --social-bg: rgba(22, 22, 50, 0.6);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(100, 60, 200, 0.1);
   --glow-gold:
@@ -224,7 +235,8 @@ code {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  isolation: isolate;
+  overflow-x: hidden;
 }
 
 /* ─── Page Content Area ─── */
