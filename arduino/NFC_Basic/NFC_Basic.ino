@@ -352,6 +352,10 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
 void setup() {
   Serial.begin(115200);
   delay(200);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH); // Off (active low)
+
   loadConfig();
 
   Serial.println();
@@ -370,6 +374,7 @@ void setup() {
 
   if (!tryInitPn532()) {
     Serial.println("PN532 not detected. Will retry every 2 s.");
+    digitalWrite(LED_BUILTIN, LOW); // ON (Active low)
     return;
   }
 
@@ -388,6 +393,9 @@ void loop() {
       lastRetryAt = now;
       if (!tryInitPn532()) {
         Serial.println("PN532 still not detected, retrying...");
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Flash/Toggle
+      } else {
+        digitalWrite(LED_BUILTIN, HIGH); // Off
       }
     }
     yield();
