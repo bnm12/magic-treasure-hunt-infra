@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="app">
     <MagicBackground />
 
@@ -36,7 +36,7 @@
 
     <div class="page-content">
       <Transition name="page-fade" mode="out-in">
-        <!-- ═══ HUNT PAGE ═══ -->
+        <!-- --- HUNT PAGE --- -->
         <div v-if="currentPage === 'hunt'" key="hunt" class="page">
           <header class="hero-panel">
             <component
@@ -76,30 +76,10 @@
           </template>
 
           <div v-else class="empty-state">
-            <!-- Pulsating magic circle while awaiting scan -->
-            <div
-              v-if="!hasScannedWand"
-              class="magic-circle-wrap"
-              aria-hidden="true"
-            >
-              <div class="magic-ring ring-outer">
-                <span class="rune-track rune-outer"
-                  >ᚠ·ᚱ·ᛇ·ᛖ·ᚢ·ᚷ·ᛁ·ᛞ·ᚠ·ᚱ·ᛇ·ᛖ</span
-                >
-              </div>
-              <div class="magic-ring ring-middle">
-                <span class="rune-track rune-middle">ᛁ‧ᛞ‧ᚢ‧ᚷ‧ᛖ‧ᛇ‧ᚱ‧ᚠ</span>
-              </div>
-              <div class="magic-ring ring-inner">
-                <span class="rune-track rune-inner">ᚠᚱᛇᛖᚢᚷ</span>
-              </div>
-              <div class="magic-ring ring-core"></div>
-              <span class="circle-star s1">&#10022;</span>
-              <span class="circle-star s2">&#10038;</span>
-              <span class="circle-star s3">&#10047;</span>
-              <span class="circle-star s4">&#10022;</span>
-            </div>
-            <IconSeeking class="empty-icon" aria-hidden="true" />
+            <MagicScanCircle v-if="!hasScannedWand">
+              <IconSeeking class="scan-circle__icon" aria-hidden="true" />
+            </MagicScanCircle>
+            <IconSeeking v-else class="empty-icon" aria-hidden="true" />
             <p>
               {{
                 hasScannedWand
@@ -112,7 +92,7 @@
           </div>
         </div>
 
-        <!-- ═══ ARCHIVE PAGE ═══ -->
+        <!-- --- ARCHIVE PAGE --- -->
         <div v-else-if="currentPage === 'archive'" key="archive" class="page">
           <header class="hero-panel">
             <IconArchive class="hero-sparkle hero-no-spin" aria-hidden="true" />
@@ -143,7 +123,7 @@
           </div>
         </div>
 
-        <!-- ═══ TOYBOX PAGE ═══ -->
+        <!-- --- TOYBOX PAGE --- -->
         <div v-else-if="currentPage === 'toybox'" key="toybox" class="page">
           <ToyboxPanel
             :is-writing="isWriting"
@@ -182,6 +162,7 @@ import { useNfc } from "./composables/useNfc";
 import { loadHunts } from "./utils/spotLoader";
 import type { HuntYear } from "./utils/spotLoader";
 import MagicBackground from "./components/MagicBackground.vue";
+import MagicScanCircle from "./components/MagicScanCircle.vue";
 import BottomNav from "./components/BottomNav.vue";
 import HuntView from "./components/HuntView.vue";
 import YearSelector from "./components/YearSelector.vue";
@@ -326,7 +307,7 @@ const yearProgress = computed(() => {
 </script>
 
 <style scoped>
-/* ═══ Hero Section ═══ */
+/* --- Hero Section --- */
 .hero-panel {
   text-align: center;
   padding: 2.5rem 1.5rem 2rem;
@@ -373,7 +354,7 @@ const yearProgress = computed(() => {
   margin: 0 auto;
 }
 
-/* ═══ NFC Indicator ═══ */
+/* --- NFC Indicator --- */
 .nfc-indicator {
   display: inline-flex;
   align-items: center;
@@ -423,7 +404,7 @@ const yearProgress = computed(() => {
   }
 }
 
-/* ═══ NFC Banner (errors) ═══ */
+/* --- NFC Banner (errors) --- */
 .nfc-banner {
   position: sticky;
   top: 0;
@@ -437,7 +418,7 @@ const yearProgress = computed(() => {
   backdrop-filter: blur(12px);
 }
 
-/* ═══ NFC Toast ═══ */
+/* --- NFC Toast --- */
 .nfc-toast {
   position: fixed;
   top: 0.75rem;
@@ -514,7 +495,7 @@ const yearProgress = computed(() => {
   transform: translateX(-50%) translateY(-6px);
 }
 
-/* ═══ Empty State ═══ */
+/* --- Empty State --- */
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;
@@ -525,6 +506,7 @@ const yearProgress = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1.25rem;
 }
 
 .empty-icon {
@@ -533,250 +515,25 @@ const yearProgress = computed(() => {
   display: block;
   margin-bottom: 1rem;
   animation: float 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px rgba(212, 168, 67, 0.4));
+  filter:
+    drop-shadow(0 0 3px rgba(11, 11, 26, 0.9))
+    drop-shadow(0 0 8px rgba(212, 168, 67, 0.25));
   position: relative;
   z-index: 2;
-}
-
-/* When magic circle is showing, center the star on it */
-.magic-circle-wrap ~ .empty-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: 0;
-  translate: -50% -50%;
-  animation: float-centered 3s ease-in-out infinite;
-}
-
-.magic-circle-wrap ~ .empty-icon + p {
-  margin-top: min(240px, 50vw);
-}
-
-@keyframes float-centered {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
 }
 
 .empty-state p {
   position: relative;
   z-index: 1;
+  max-width: 34ch;
 }
 
-/* ═══ Magic Circle (pre-scan) ═══ */
-.magic-circle-wrap {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(420px, 90vw);
-  height: min(420px, 90vw);
-  pointer-events: none;
-}
-
-.magic-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1.5px solid transparent;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Rune text tracks */
-.rune-track {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  letter-spacing: 0.35em;
-  opacity: 0.35;
-  white-space: nowrap;
-}
-
-.rune-outer {
-  font-size: 0.7rem;
-  color: rgba(155, 109, 255, 0.5);
-  animation: rune-fade 4s ease-in-out infinite;
-}
-
-.rune-middle {
-  font-size: 0.6rem;
-  color: rgba(212, 168, 67, 0.5);
-  animation: rune-fade 4s ease-in-out 1.2s infinite;
-}
-
-.rune-inner {
-  font-size: 0.55rem;
-  color: rgba(155, 109, 255, 0.6);
-  animation: rune-fade 4s ease-in-out 2.4s infinite;
-}
-
-@keyframes rune-fade {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.55;
-  }
-}
-
-.ring-outer {
-  width: 100%;
-  height: 100%;
-  border-color: rgba(155, 109, 255, 0.15);
-  animation:
-    ring-pulse 4s ease-in-out infinite,
-    ring-spin-cw 25s linear infinite;
-  box-shadow:
-    0 0 40px rgba(155, 109, 255, 0.08),
-    inset 0 0 40px rgba(155, 109, 255, 0.05);
-}
-
-.ring-middle {
-  width: 72%;
-  height: 72%;
-  border-color: rgba(212, 168, 67, 0.18);
-  border-style: dashed;
-  animation:
-    ring-pulse 4s ease-in-out 0.8s infinite,
-    ring-spin-ccw 18s linear infinite;
-  box-shadow:
-    0 0 25px rgba(212, 168, 67, 0.08),
-    inset 0 0 25px rgba(212, 168, 67, 0.05);
-}
-
-.ring-inner {
-  width: 46%;
-  height: 46%;
-  border-color: rgba(155, 109, 255, 0.22);
-  border-width: 1px;
-  animation:
-    ring-pulse 4s ease-in-out 1.6s infinite,
-    ring-spin-cw 12s linear infinite;
-  box-shadow:
-    0 0 18px rgba(155, 109, 255, 0.1),
-    inset 0 0 18px rgba(155, 109, 255, 0.06);
-}
-
-.ring-core {
-  width: 20%;
-  height: 20%;
-  border-color: rgba(212, 168, 67, 0.3);
-  border-width: 1px;
-  animation:
-    ring-pulse 4s ease-in-out 2.4s infinite,
-    ring-spin-ccw 8s linear infinite;
-  box-shadow:
-    0 0 16px rgba(212, 168, 67, 0.15),
-    inset 0 0 16px rgba(212, 168, 67, 0.1);
-}
-
-/* Stars orbiting the rings */
-.circle-star {
-  position: absolute;
-  font-size: 0.7rem;
-  color: var(--accent);
-  opacity: 0;
-  filter: drop-shadow(0 0 4px rgba(212, 168, 67, 0.6));
-  animation: orbit-star 6s ease-in-out infinite;
-}
-
-.s1 {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  animation-delay: 0s;
-}
-
-.s2 {
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  animation-delay: 1.5s;
-  color: var(--accent2);
-  filter: drop-shadow(0 0 4px rgba(155, 109, 255, 0.6));
-}
-
-.s3 {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  animation-delay: 3s;
-}
-
-.s4 {
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  animation-delay: 4.5s;
-  color: var(--accent2);
-  filter: drop-shadow(0 0 4px rgba(155, 109, 255, 0.6));
-}
-
-@keyframes ring-pulse {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.06);
-  }
-}
-
-@keyframes ring-spin-cw {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-@keyframes ring-spin-ccw {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(-360deg);
-  }
-}
-
-@keyframes orbit-star {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  20% {
-    opacity: 0.9;
-    transform: scale(1.2);
-  }
-  80% {
-    opacity: 0.6;
-    transform: scale(0.9);
-  }
-}
-
-/* ═══ Page layout ═══ */
+/* --- Page layout --- */
 .page {
   animation: reveal-up 0.35s ease;
 }
 
-/* ═══ NFC Consent Overlay ═══ */
+/* --- NFC Consent Overlay --- */
 .nfc-consent-overlay {
   position: fixed;
   inset: 0;
@@ -865,3 +622,5 @@ const yearProgress = computed(() => {
   opacity: 1;
 }
 </style>
+
+
