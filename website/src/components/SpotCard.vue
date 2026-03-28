@@ -91,21 +91,28 @@ defineProps<{
   display: flex;
   gap: 0;
   overflow: hidden;
+  background: var(--bg-surface);
+  position: relative;
   transition:
     box-shadow 0.3s ease,
     border-color 0.3s ease,
-    opacity 0.3s ease,
     transform 0.3s ease;
-  opacity: 0.5;
 }
 
 .spot-card.collected {
   border-color: rgba(212, 168, 67, 0.3);
-  opacity: 1;
   box-shadow:
     var(--shadow),
     0 0 20px rgba(212, 168, 67, 0.08),
     inset 0 0 30px rgba(212, 168, 67, 0.03);
+}
+
+.spot-card:not(.collected)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 20, 0.42);
+  pointer-events: none;
 }
 
 .spot-card:hover {
@@ -279,6 +286,8 @@ defineProps<{
   justify-content: center;
   gap: 0.25rem;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .name {

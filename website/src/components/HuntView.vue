@@ -142,6 +142,7 @@ const progressPercent = computed(() =>
 .hunt-header {
   overflow: hidden;
   margin-bottom: 1.5rem;
+  background: var(--bg-surface);
 }
 
 .banner-wrapper {
@@ -388,6 +389,11 @@ const progressPercent = computed(() =>
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 1rem;
   padding-bottom: 1rem;
+  border-radius: 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 </style>
