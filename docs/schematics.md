@@ -204,9 +204,9 @@ flowchart LR
 flowchart TB
   R1[Record 1\nUser toy action] --> EX1[URL, text, or common NFC action]
 
-  H1[Hunt record\nMIME: app/vnd.tryllestav.hunt.year-2026\nBytes: [64-bit mask]]
-  H2[Hunt record\nMIME: app/vnd.tryllestav.hunt.year-2027\nBytes: [64-bit mask]]
-  H3[Hunt record\nMIME: app/vnd.tryllestav.hunt.year-2028\nBytes: [64-bit mask]]
+  H1[Hunt record\nMIME: x-hunt:2026\nBytes: [64-bit mask]]
+  H2[Hunt record\nMIME: x-hunt:2027\nBytes: [64-bit mask]]
+  H3[Hunt record\nMIME: x-hunt:2028\nBytes: [64-bit mask]]
 
   Note1[Physical order may vary]
   Note2[Website discovers by MIME and year]

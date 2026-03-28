@@ -16,7 +16,7 @@ uint8_t spotId = 3;
 uint16_t huntYear = 2026;
 // Record 1: default wand link URL.
 const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
-const char kHuntMimePrefix[] = "application/vnd.tryllestav.hunt.year-";
+const char kHuntMimePrefix[] = "x-hunt:";
 
 String serialBuffer;
 constexpr uint8_t kI2cSdaPin = 4;
@@ -185,7 +185,7 @@ bool tryInitPn532() {
 }
 
 void buildHuntMimeType(char* out, size_t outSize) {
-  snprintf(out, outSize, "application/vnd.tryllestav.hunt.year-%u", (unsigned)huntYear);
+  snprintf(out, outSize, "x-hunt:%u", (unsigned)huntYear);
 }
 
 void printHuntPayload(const uint8_t* payload) {

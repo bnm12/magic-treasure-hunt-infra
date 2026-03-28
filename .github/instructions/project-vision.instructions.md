@@ -18,7 +18,7 @@ Before making meaningful changes, check `VISION.md` and `docs/schematics.md`.
 7. Preserve the v1.0 data model: one hunt record per year with only spot IDs, plus external `(year, spotId)` lookup in the website.
 8. Never rely on hunt record index order; discover hunt records by MIME type and year metadata.
 9. Preserve storage compactness assumptions for target tags: design within an approximately 888-byte total writable budget.
-10. Keep hunt payloads strictly compact: media type carries year (`application/vnd.tryllestav.hunt.year-<YYYY>`) and payload stays exactly 8 bytes (64-bit mask).
+10. Keep hunt payloads strictly compact: media type carries year (`x-hunt:<YYYY>`) and payload stays exactly 8 bytes (64-bit mask).
 11. Avoid introducing legacy on-tag compatibility branches unless there is real migrated production data that requires it.
 
 ## Documentation updates

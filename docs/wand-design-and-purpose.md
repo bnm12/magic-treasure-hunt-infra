@@ -155,6 +155,7 @@ While the wand stores all hunt data offline, the website serves as a **companion
 ### Features for Kids
 
 #### Progress Tracker
+
 - **Scan your wand** via your phone's browser using Web NFC (requires Android or compatible phones)
 - **See your collected spots** across all hunt years
 - **Track multi-year progress**: "You've visited 12 spots in 2024 and 8 in 2025"
@@ -163,6 +164,7 @@ While the wand stores all hunt data offline, the website serves as a **companion
 - **Compare with friends**: Show a friend your wand's progress (via a shared link or direct scan)
 
 #### The Toybox Panel
+
 - **Customize Record 1**: Configure the URL your wand links to
 - **Options**: personal site, a social media profile, a YouTube channel showing your wand story, or a maker portfolio
 - **Safety**: The Toybox preserves your hunt records while letting you update your link
@@ -212,7 +214,7 @@ The wand stores **two types of records**:
 
 ### Hunt Records (One Per Year)
 
-- Media type: `application/vnd.tryllestav.hunt.year-<YYYY>`
+- Media type: `x-hunt:<YYYY>`
 - Payload: 8 bytes (64-bit spot mask, big-endian)
 - Discovery: automatic by parsing the MIME type
 - Support: up to 64 spots per year (one bit per spot ID)

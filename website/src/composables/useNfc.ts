@@ -1,6 +1,6 @@
 import { ref } from "vue";
 
-const HUNT_MIME_PREFIX = "application/vnd.tryllestav.hunt.year-";
+const HUNT_MIME_PREFIX = "x-hunt:";
 const HUNT_MASK_LENGTH = 8;
 
 interface HuntLedgerEntry {

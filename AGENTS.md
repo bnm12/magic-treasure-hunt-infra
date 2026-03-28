@@ -27,20 +27,20 @@ Current conceptual capability notes:
 - `website/src/components/YearSelector.vue` renders year picker tabs when multiple hunt years are available.
 - `website/src/components/ToyboxPanel.vue` provides the record 1 toy configuration UI with input validation and hunt-record preservation warning.
 - `website/public/hunts/README.md` is the non-technical organizer guide for creating and updating yearly hunts.
-- `arduino/` now includes a PN532-first NFC spot-writer sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini. It scans NTAG21x tags, upserts a yearly hunt MIME record (`application/vnd.tryllestav.hunt.year-<YYYY>`) with an 8-byte 64-bit spot mask payload, and keeps warm-reset-safe I2C recovery behavior (SDA unstick, Wire re-init, buffered response drain). Serial commands (`setSpot: X`, `setYear: YYYY`) allow dynamic configuration without recompile. Record 1 (URI wand link) support is handled via the NDEF library message builder.
+- `arduino/` now includes a PN532-first NFC spot-writer sketch at `arduino/NFC_Basic/NFC_Basic.ino` for Wemos D1 Mini. It scans NTAG21x tags, upserts a yearly hunt MIME record (`x-hunt:<YYYY>`) with an 8-byte 64-bit spot mask payload, and keeps warm-reset-safe I2C recovery behavior (SDA unstick, Wire re-init, buffered response drain). Serial commands (`setSpot: X`, `setYear: YYYY`) allow dynamic configuration without recompile. Record 1 (URI wand link) support is handled via the NDEF library message builder.
 - `arduino/RC522_Basic/RC522_Basic.ino` adds an RC522 SPI variant of the same spot-writer behavior for Wemos D1 Mini: stable CC preflight reads, record 1 URI fill when missing, yearly hunt MIME upsert with 8-byte spot mask payload, and serial runtime configuration (`setSpot: X`, `setYear: YYYY`).
 - `arduino/` includes setup documentation in `arduino/README.md`.
 - Vision alignment is now explicitly documented around a kids treasure-hunt experience with city "magic spots" and a wand-based offline ledger.
 - The intended long-term loop is year-over-year hunt continuity, where the same wand can retain prior years while joining new hunts.
 - Record allocation intent is documented: wand record 1 remains available for normal user NFC use, while hunt ledger data uses dedicated yearly records discovered by MIME plus year metadata.
 - The website direction now includes a "toybox" section to configure common record 1 NFC actions (for example opening links).
-- Hunt ledger data model: spot IDs are numeric (1, 2, 3...) and stored on-tag in a compact 8-byte binary MIME payload (64-bit spot mask). Year is encoded in the MIME media type as `application/vnd.tryllestav.hunt.year-<YYYY>`. This supports up to 64 spots per year with minimal storage overhead.
+- Hunt ledger data model: spot IDs are numeric (1, 2, 3...) and stored on-tag in a compact 8-byte binary MIME payload (64-bit spot mask). Year is encoded in the MIME media type as `x-hunt:<YYYY>`. This supports up to 64 spots per year with minimal storage overhead.
 - Hunt asset design is decoupled from code: non-technical organizers manage JSON and images; website auto-detects new hunt years at build time; no backend server required.
 
 ## Session Learnings (2026-03-27)
 
 - Treat writable NFC space as constrained: assume roughly 888 bytes total available on target tags and design for strict compactness.
-- Hunt records must use the compact format: media type `application/vnd.tryllestav.hunt.year-<YYYY>` with payload exactly 8 bytes (64-bit spot mask only).
+- Hunt records must use the compact format: media type `x-hunt:<YYYY>` with payload exactly 8 bytes (64-bit spot mask only).
 - Do not duplicate year inside the payload; derive year from the MIME media type suffix.
 - Spot IDs are numeric and map directly to mask bits: spot 1 -> bit 0, ..., spot 64 -> bit 63.
 - Until launch data exists, prefer a single strict on-tag format over compatibility branches (no legacy read/write paths by default).

@@ -88,7 +88,7 @@ Deliver a dependable "find, tap, collect" loop where:
 
 Hunt records use MIME payloads where year is encoded in the media type:
 
-`application/vnd.tryllestav.hunt.year-<YYYY>`
+`x-hunt:<YYYY>`
 
 Payload shape is fixed-width binary (8 bytes total):
 

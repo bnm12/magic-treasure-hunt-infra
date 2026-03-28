@@ -19,7 +19,7 @@ constexpr uint8_t kRfidRstPin = 0;   // D3
 uint8_t spotId = 3;
 uint16_t huntYear = 2026;
 const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
-const char kHuntMimePrefix[] = "application/vnd.tryllestav.hunt.year-";
+const char kHuntMimePrefix[] = "x-hunt:";
 
 String serialBuffer;
 
@@ -199,7 +199,7 @@ bool probeBlankUserArea(bool* isBlank) {
 }
 
 void buildHuntMimeType(char* out, size_t outSize) {
-  snprintf(out, outSize, "application/vnd.tryllestav.hunt.year-%u", (unsigned)huntYear);
+  snprintf(out, outSize, "x-hunt:%u", (unsigned)huntYear);
 }
 
 void setSpotBit(uint8_t* payload, uint8_t id) {
