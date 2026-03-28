@@ -130,7 +130,7 @@ export function useNfc() {
   }
 
   function parseWandMetadata(record: NDEFRecord): WandMetadata | null {
-    if (record.recordType !== "mime" || record.mediaType !== "x-meta") {
+    if (record.recordType !== "mime" || record.mediaType !== "x-hunt-meta") {
       return null;
     }
 
@@ -183,6 +183,27 @@ export function useNfc() {
       mediaType: mediaTypeForYear(Number(year)),
       data: encodeBinaryHuntPayload(spots),
     }));
+  }
+
+  function buildMetaRecordInits(records: NDEFRecord[]): NDEFRecordInit[] {
+    const meta = extractWandMetadata(records);
+    if (!meta) return [];
+
+    const nameBytes = new TextEncoder().encode(meta.name);
+    const payload = new ArrayBuffer(2 + 1 + nameBytes.length);
+    const view = new Uint8Array(payload);
+    view[0] = (meta.creationYear >> 8) & 0xff;
+    view[1] = meta.creationYear & 0xff;
+    view[2] = nameBytes.length;
+    view.set(nameBytes, 3);
+
+    return [{ recordType: "mime", mediaType: "x-hunt-meta", data: payload }];
+  }
+
+  async function keepReaderActive(): Promise<void> {
+    // Reclaim an active scan session after writes so the browser keeps NFC handling.
+    if (isScanning.value) return;
+    await startScan();
   }
 
   async function startScan(): Promise<void> {
@@ -267,10 +288,12 @@ export function useNfc() {
           : { recordType: "text", data: payload };
 
       const huntRecords = buildHuntRecordInits(lastReadRecords);
-      await ndef.write({ records: [toyRecord, ...huntRecords] });
+      const metaRecords = buildMetaRecordInits(lastReadRecords);
+      await ndef.write({ records: [toyRecord, ...metaRecords, ...huntRecords] });
       status.value = lastReadRecords.length
-        ? "Record 1 written! Hunt records were preserved."
+        ? "Record 1 written! Hunt + x-hunt-meta records were preserved."
         : "Record 1 written!";
+      await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;
       status.value = `Write failed: ${err.message}`;
@@ -315,12 +338,13 @@ export function useNfc() {
 
       const records: NDEFRecordInit[] = [
         { recordType: "url", data: "https://192.168.1.131:5173" },
-        { recordType: "mime", mediaType: "x-meta", data: metaPayload },
+        { recordType: "mime", mediaType: "x-hunt-meta", data: metaPayload },
       ];
 
       await ndef.write({ records });
       status.value = `SUCCESS: Wand "${name}" initialized (year ${creationYear})!`;
       wandMetadata.value = { creationYear, name };
+      await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;
       status.value = `Initialization failed: ${err.message}`;

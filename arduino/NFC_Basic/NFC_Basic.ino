@@ -17,7 +17,7 @@ uint16_t huntYear = 2026;
 // Record 1: default wand link URL.
 const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
 const char kHuntMimePrefix[] = "x-hunt:";
-const char kWandMetaMimeType[] = "x-meta";
+const char kWandMetaMimeType[] = "x-hunt-meta";
 
 String serialBuffer;
 constexpr uint8_t kI2cSdaPin = 4;
@@ -383,7 +383,8 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
       Serial.println("Existing tag data is unreadable; refusing write to avoid data loss.");
       return false;
     }
-    Serial.println("Blank tag detected (no readable NDEF). Initializing new message.");
+    Serial.println("ERROR: Blank tag detected; missing wand metadata (x-hunt-meta). Refusing write.");
+    return false;
   }
 
   // Parse existing records to preserve URI and other-year hunt data.
@@ -391,6 +392,8 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   // that crash the NdefMessage constructor when given an unaligned pointer.
   NdefRecord uriRecord;
   bool hasUri = false;
+  NdefRecord metaRecord;
+  bool hasMeta = false;
   String otherYearMimeTypes[MAX_NDEF_RECORDS];
   uint8_t otherYearPayloads[MAX_NDEF_RECORDS][8] = {{0}};
   int otherYearCount = 0;
@@ -404,7 +407,7 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
     String metaName = "";
     if (!hasValidWandMetadata(existingMsg, &metaYear, &metaName)) {
       Serial.println("ERROR: Tag does not have valid wand metadata. Not an official wand.");
-      Serial.println("Use 'initWand: <name>' to initialize a blank tag as a new wand.");
+      Serial.println("Initialize wands in website Toybox (writes x-hunt-meta), then retry.");
       return false;
     }
     Serial.print("Wand verified: '");
@@ -418,11 +421,14 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
       if (r.getTnf() == TNF_WELL_KNOWN && r.getType() == "U") {
         hasUri = true;
         uriRecord = r;
-      } else if (r.getTnf() == TNF_MIME_MEDIA && r.getPayloadLength() == 8) {
+      } else if (r.getTnf() == TNF_MIME_MEDIA) {
         String recType = r.getType();
-        if (recType == String(mimeType)) {
+        if (recType == String(kWandMetaMimeType)) {
+          hasMeta = true;
+          metaRecord = r;
+        } else if (r.getPayloadLength() == 8 && recType == String(mimeType)) {
           r.getPayload(huntPayload);
-        } else if (recType.startsWith(String(kHuntMimePrefix)) && otherYearCount < MAX_NDEF_RECORDS) {
+        } else if (r.getPayloadLength() == 8 && recType.startsWith(String(kHuntMimePrefix)) && otherYearCount < MAX_NDEF_RECORDS) {
           otherYearMimeTypes[otherYearCount] = recType;
           r.getPayload(otherYearPayloads[otherYearCount]);
           otherYearCount++;
@@ -438,6 +444,9 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
     outMsg.addRecord(uriRecord);
   } else {
     outMsg.addUriRecord(String(kDefaultWandUrl));
+  }
+  if (hasMeta) {
+    outMsg.addRecord(metaRecord);
   }
   for (int i = 0; i < otherYearCount; i++) {
     outMsg.addMimeMediaRecord(otherYearMimeTypes[i], otherYearPayloads[i], 8);

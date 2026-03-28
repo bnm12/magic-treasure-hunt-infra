@@ -7,7 +7,7 @@
       <h3>Initialize Wand</h3>
       <p class="note">
         Initialize a blank NFC tag as an official wand. The wand can then
-        collect treasures.
+        collect treasures using an x-hunt-meta identity record.
       </p>
 
       <div class="form-group">
@@ -45,12 +45,12 @@
     <div class="toybox-section">
       <h3>Configure Record 1</h3>
       <p class="note">
-        Configure record 1 for a normal NFC action. Hunt records are always
+        Configure record 1 for a normal NFC action. Hunt and x-hunt-meta records are always
         preserved when writing.
       </p>
 
       <div v-if="!hasScannedWand" class="warning">
-        Scan a wand first so hunt records can be read and preserved during the
+        Scan a wand first so hunt and x-hunt-meta records can be read and preserved during the
         write.
       </div>
 
