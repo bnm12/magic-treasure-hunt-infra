@@ -4,7 +4,10 @@ The firmware path is now PN532-first on Wemos D1 Mini to improve Type A/NFC Foru
 
 ## Sketch
 
-- `NFC_Basic/NFC_Basic.ino`
+- `NFC_Basic/NFC_Basic.ino` (PN532 + I2C)
+- `RC522_Basic/RC522_Basic.ino` (RC522 + SPI)
+
+### PN532 (I2C)
 
 This sketch initializes a PN532 in I2C mode and performs:
 
@@ -16,13 +19,28 @@ This sketch initializes a PN532 in I2C mode and performs:
 - Serial command interface for dynamic spotId and huntYear configuration (`setSpot: X`, `setYear: YYYY`)
 - NDEF TLV parsing, record building, and idempotent record upsert
 
+### RC522 (SPI)
+
+This sketch initializes an MFRC522 over SPI and performs:
+
+- ISO14443A polling with max RX antenna gain (`RxGain_max`)
+- UID reporting over serial (`115200`)
+- NTAG21x page reads and writes using Ultralight commands (`MIFARE_Read`, `MIFARE_Ultralight_Write`)
+- Stable CC preflight checks (double-read matching) before write attempts
+- Record 1 URI fill if missing (`https://192.168.1.131:5173`)
+- Yearly hunt MIME upsert with compact 8-byte 64-bit spot mask payload
+- Serial command interface for dynamic spotId and huntYear configuration (`setSpot: X`, `setYear: YYYY`)
+
 ## Library dependencies
 
 Install these libraries in your Arduino environment:
 
 - `PN532`
 - `PN532_I2C`
+- `MFRC522`
+- `NDEF`
 - `Wire` (built-in)
+- `SPI` (built-in)
 
 ## Wiring (Wemos D1 Mini + PN532, I2C)
 
@@ -38,6 +56,24 @@ Notes:
 - Keep wiring short and stable.
 - Ensure the PN532 module is configured to I2C before powering.
 - Most PN532 breakouts are safe and stable at 3.3V with ESP8266 logic levels.
+
+## Wiring (Wemos D1 Mini + RC522, SPI)
+
+Use RC522 in **SPI mode**:
+
+- `D8 (GPIO15)` -> `SDA/SS`
+- `D3 (GPIO0)` -> `RST`
+- `D5 (GPIO14)` -> `SCK`
+- `D7 (GPIO13)` -> `MOSI` (`SDI` on some RC522 boards)
+- `D6 (GPIO12)` -> `MISO` (`SDO` on some RC522 boards)
+- `3V3` -> `VCC`
+- `GND` -> `GND`
+
+Notes:
+
+- RC522 must run at **3.3V** on ESP8266.
+- Keep SPI wires short; weak coupling is often wiring and antenna alignment, not software.
+- If a board labels pin `SDA`, that is the **SS/CS** pin for SPI in this context.
 
 Common module-specific gotchas:
 
