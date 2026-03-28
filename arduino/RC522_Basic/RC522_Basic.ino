@@ -18,7 +18,7 @@ constexpr uint8_t kRfidRstPin = 0;   // D3
 // Spot configuration for this board (configurable via serial).
 uint8_t spotId = 3;
 uint16_t huntYear = 2026;
-const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
+
 const char kHuntMimePrefix[] = "x-hunt:";
 const char kWandMetaMimeType[] = "x-hunt-meta";
 
@@ -404,8 +404,6 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
 
   NdefMessage outMsg;
   if (hasUri) outMsg.addRecord(uriRecord);
-  else outMsg.addUriRecord(String(kDefaultWandUrl));
-
   if (hasMeta) outMsg.addRecord(metaRecord);
 
   for (int i = 0; i < otherYearCount; i++) {

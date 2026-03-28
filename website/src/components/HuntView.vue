@@ -17,35 +17,51 @@
         <p class="hunt-description">{{ hunt.description }}</p>
         <div class="progress-row">
           <div class="progress-bar-track">
+            <!-- Milestone rune markers -->
+            <span
+              v-for="i in totalCount - 1"
+              :key="i"
+              class="milestone-mark"
+              :class="{ reached: i <= collectedCount }"
+              :style="{ left: (i / totalCount) * 100 + '%' }"
+              aria-hidden="true"
+            />
             <div
               class="progress-bar-fill"
               :class="{ complete: progressPercent === 100 }"
               :style="{ width: progressPercent + '%' }"
             >
+              <!-- Glowing orb at leading edge -->
               <span
                 v-if="progressPercent > 0 && progressPercent < 100"
-                class="bar-star"
+                class="bar-orb"
                 aria-hidden="true"
-                >&#10022;</span
-              >
+              />
             </div>
             <div class="progress-shimmer" />
+            <!-- Celebration burst at 100% -->
             <span
               v-if="progressPercent === 100"
               class="complete-sparkles"
               aria-hidden="true"
             >
-              <span class="cs" style="--sx: -12px; --sy: -18px; --d: 0s"
+              <span class="cs" style="--sx: -14px; --sy: -20px; --d: 0s"
                 >&#10022;</span
               >
-              <span class="cs" style="--sx: 14px; --sy: -22px; --d: 0.15s"
+              <span class="cs" style="--sx: 12px; --sy: -24px; --d: 0.12s"
                 >&#10038;</span
               >
-              <span class="cs" style="--sx: -6px; --sy: -26px; --d: 0.3s"
+              <span class="cs" style="--sx: -4px; --sy: -28px; --d: 0.25s"
                 >&#10047;</span
               >
-              <span class="cs" style="--sx: 8px; --sy: -16px; --d: 0.1s"
+              <span class="cs" style="--sx: 8px; --sy: -16px; --d: 0.08s"
                 >&#10022;</span
+              >
+              <span class="cs" style="--sx: -18px; --sy: -14px; --d: 0.18s"
+                >&#10038;</span
+              >
+              <span class="cs" style="--sx: 16px; --sy: -12px; --d: 0.3s"
+                >&#10047;</span
               >
             </span>
           </div>
@@ -201,38 +217,111 @@ const progressPercent = computed(() =>
 
 .progress-bar-track {
   flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(120, 90, 180, 0.2);
-  overflow: hidden;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(120, 90, 180, 0.15);
   position: relative;
+  border: 1px solid rgba(155, 109, 255, 0.12);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Rune-like milestone tick marks along the track */
+.milestone-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-1px);
+  background: rgba(155, 109, 255, 0.15);
+  z-index: 1;
+  transition: background 0.4s ease;
+}
+.milestone-mark.reached {
+  background: rgba(212, 168, 67, 0.35);
 }
 
 .progress-bar-fill {
   height: 100%;
-  border-radius: 3px;
-  background: var(--gradient-gold);
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    #9b6dff 0%,
+    var(--accent) 45%,
+    #f0d078 100%
+  );
+  background-size: 200% 100%;
+  animation: enchanted-flow 3s ease-in-out infinite;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: visible;
+  box-shadow:
+    0 0 8px rgba(212, 168, 67, 0.3),
+    0 0 20px rgba(155, 109, 255, 0.15);
 }
 
 .progress-bar-fill.complete {
-  background: linear-gradient(135deg, var(--collected), #6ee7b7);
-  box-shadow: var(--glow-green);
+  background: linear-gradient(
+    90deg,
+    #34d399 0%,
+    #6ee7b7 40%,
+    #34d399 70%,
+    #a7f3d0 100%
+  );
+  background-size: 200% 100%;
+  box-shadow:
+    0 0 10px rgba(52, 211, 153, 0.4),
+    0 0 25px rgba(52, 211, 153, 0.15);
 }
 
-/* Sparkle star riding the leading edge of the bar */
-.bar-star {
+@keyframes enchanted-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Glowing orb riding the leading edge */
+.bar-orb {
   position: absolute;
-  right: -5px;
+  right: -6px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.7rem;
-  color: var(--accent);
-  filter: drop-shadow(0 0 4px rgba(212, 168, 67, 0.8));
-  animation: star-trail 1.8s ease-in-out infinite;
-  z-index: 2;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #f0d078 0%,
+    var(--accent) 50%,
+    transparent 70%
+  );
+  box-shadow:
+    0 0 6px rgba(212, 168, 67, 0.8),
+    0 0 14px rgba(212, 168, 67, 0.4),
+    0 0 24px rgba(155, 109, 255, 0.2);
+  animation: orb-pulse 2s ease-in-out infinite;
+  z-index: 3;
+}
+
+@keyframes orb-pulse {
+  0%,
+  100% {
+    transform: translateY(-50%) scale(1);
+    box-shadow:
+      0 0 6px rgba(212, 168, 67, 0.8),
+      0 0 14px rgba(212, 168, 67, 0.4),
+      0 0 24px rgba(155, 109, 255, 0.2);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+    box-shadow:
+      0 0 8px rgba(212, 168, 67, 1),
+      0 0 20px rgba(212, 168, 67, 0.6),
+      0 0 32px rgba(155, 109, 255, 0.3);
+  }
 }
 
 /* Celebratory sparkles when bar hits 100% */
@@ -241,30 +330,32 @@ const progressPercent = computed(() =>
   right: 0;
   top: 50%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 .cs {
   position: absolute;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   color: var(--collected);
-  animation: sparkle-float 1.2s ease-out forwards;
+  animation: sparkle-float 1.4s ease-out forwards;
   animation-delay: var(--d, 0s);
   opacity: 0;
-  filter: drop-shadow(0 0 3px rgba(52, 211, 153, 0.6));
+  filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.7));
 }
 
 .progress-shimmer {
   position: absolute;
   inset: 0;
+  border-radius: 5px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.12) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2.5s infinite;
+  pointer-events: none;
 }
 
 .progress-label {

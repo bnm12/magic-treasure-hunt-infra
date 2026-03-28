@@ -1,13 +1,81 @@
 <template>
   <div class="magic-bg" aria-hidden="true">
-    <div class="stars stars-small"></div>
-    <div class="stars stars-medium"></div>
-    <div class="stars stars-large"></div>
+    <!-- Star layers removed for clarity -->
+    <!-- Slow aurora wisps -->
+    <div class="aurora-layer">
+      <div class="aurora a1"></div>
+      <div class="aurora a2"></div>
+      <div class="aurora a3"></div>
+    </div>
+    <!-- Animated magical runes -->
+    <div class="motes">
+      <span
+        v-for="(rune, i) in motes"
+        :key="i"
+        class="mote"
+        :style="{
+          left: rune.startX + '%',
+          top: rune.startY + '%',
+          animationDelay: rune.delay + 's',
+          animationDuration: rune.duration + 's',
+          '--end-x': rune.endX + '%',
+          '--end-y': rune.endY + '%',
+          '--rotate': rune.rotate + 'deg',
+        }"
+      >
+        {{ rune.char }}
+      </span>
+    </div>
     <div class="vignette"></div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+
+// Only magical rune-like Unicode symbols
+const runeChars = [
+  "ᚠ",
+  "ᚢ",
+  "ᚦ",
+  "ᚱ",
+  "ᚷ",
+  "ᚹ",
+  "ᚺ",
+  "ᛁ",
+  "ᛇ",
+  "ᛈ",
+  "ᛋ",
+  "ᛏ",
+  "ᛒ",
+  "ᛖ",
+  "ᛚ",
+  "ᛟ",
+  "ᛞ",
+  "ᛠ",
+  "ᛣ",
+  "ᛦ",
+];
+
+function randomBetween(a: number, b: number) {
+  return a + Math.random() * (b - a);
+}
+
+const motes = ref(
+  Array.from({ length: 12 }, (_, i) => {
+    const char = runeChars[Math.floor(Math.random() * runeChars.length)];
+    return {
+      char,
+      startX: randomBetween(0, 90),
+      startY: randomBetween(0, 90),
+      endX: randomBetween(0, 90),
+      endY: randomBetween(0, 90),
+      delay: randomBetween(0, 24),
+      duration: randomBetween(32, 48),
+      rotate: randomBetween(-90, 90),
+    };
+  }),
+);
 </script>
 
 <style scoped>
@@ -16,7 +84,12 @@
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 0%, #1a1040 0%, #0b0b1a 60%, #050510 100%);
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    #1a1040 0%,
+    #0b0b1a 60%,
+    #050510 100%
+  );
 }
 
 /* Star layers using box-shadow for many tiny dots */
@@ -26,82 +99,287 @@
   animation: drift 120s linear infinite;
 }
 
-.stars-small {
-  width: 1px;
-  height: 1px;
-  background: transparent;
-  box-shadow:
-    42px 18px #ffffff44, 130px 60px #ffffff33, 218px 92px #ffffff55,
-    315px 25px #ffffff22, 420px 130px #ffffff44, 520px 45px #ffffff33,
-    610px 180px #ffffff22, 725px 70px #ffffff44, 50px 250px #ffffff33,
-    160px 310px #ffffff22, 280px 200px #ffffff55, 390px 350px #ffffff33,
-    500px 280px #ffffff44, 630px 320px #ffffff22, 740px 210px #ffffff33,
-    80px 420px #ffffff22, 200px 480px #ffffff44, 340px 440px #ffffff33,
-    480px 510px #ffffff22, 590px 460px #ffffff55, 710px 500px #ffffff33,
-    30px 600px #ffffff22, 150px 650px #ffffff44, 270px 590px #ffffff33,
-    400px 670px #ffffff22, 550px 620px #ffffff44, 680px 700px #ffffff33,
-    100px 780px #ffffff22, 220px 750px #ffffff44, 370px 820px #ffffff33,
-    510px 760px #ffffff22, 650px 830px #ffffff55, 760px 780px #ffffff33,
-    45px 900px #ffffff22, 180px 870px #ffffff44, 320px 940px #ffffff33,
-    460px 880px #ffffff22, 600px 950px #ffffff44, 730px 890px #ffffff33;
-  animation: twinkle-small 4s ease-in-out infinite alternate;
-}
-
-.stars-medium {
-  width: 2px;
-  height: 2px;
-  background: transparent;
-  box-shadow:
-    90px 45px #ffffff66, 240px 120px #ffffff55, 400px 80px #ffffff77,
-    560px 200px #ffffff55, 700px 150px #ffffff66, 120px 340px #ffffff55,
-    310px 280px #ffffff77, 490px 380px #ffffff55, 650px 440px #ffffff66,
-    70px 520px #ffffff55, 250px 600px #ffffff77, 430px 550px #ffffff55,
-    620px 620px #ffffff66, 180px 740px #ffffff55, 380px 700px #ffffff77,
-    550px 800px #ffffff55, 730px 740px #ffffff66, 100px 880px #ffffff55,
-    300px 850px #ffffff77, 500px 920px #ffffff55, 680px 870px #ffffff66;
-  animation: twinkle-medium 5s ease-in-out infinite alternate;
-}
-
-.stars-large {
-  width: 2.5px;
-  height: 2.5px;
-  border-radius: 50%;
-  background: transparent;
-  box-shadow:
-    180px 90px rgba(212, 168, 67, 0.6), 450px 200px rgba(155, 109, 255, 0.5),
-    650px 350px rgba(212, 168, 67, 0.5), 320px 500px rgba(155, 109, 255, 0.6),
-    100px 650px rgba(212, 168, 67, 0.5), 550px 750px rgba(155, 109, 255, 0.5),
-    700px 100px rgba(212, 168, 67, 0.6), 250px 850px rgba(155, 109, 255, 0.5);
-  animation: twinkle-large 3s ease-in-out infinite alternate;
-}
-
-.vignette {
+.mote {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 40%,
-    rgba(5, 5, 16, 0.6) 100%
-  );
+  font-size: 2.8rem;
+  opacity: 0;
+  color: rgba(212, 168, 67, 0.85);
+  filter: drop-shadow(0 0 16px rgba(212, 168, 67, 0.45))
+    drop-shadow(0 0 32px rgba(155, 109, 255, 0.18));
+  animation-name: rune-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  will-change: transform, opacity, filter;
 }
 
-@keyframes twinkle-small {
-  from { opacity: 1; }
-  to { opacity: 0.5; }
-}
-
-@keyframes twinkle-medium {
-  from { opacity: 0.6; }
-  to { opacity: 1; }
-}
-
-@keyframes twinkle-large {
-  from { opacity: 0.5; transform: scale(1); }
-  to { opacity: 1; transform: scale(1.3); }
+@keyframes rune-float {
+  0% {
+    opacity: 0;
+    filter: drop-shadow(0 0 0px rgba(212, 168, 67, 0));
+    transform: translate(0, 0) scale(0.9) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+    filter: drop-shadow(0 0 24px rgba(212, 168, 67, 0.5));
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 32px rgba(155, 109, 255, 0.25));
+    transform: translate(
+        calc(var(--end-x, 0%) - var(--start-x, 0%)),
+        calc(var(--end-y, 0%) - var(--start-y, 0%))
+      )
+      scale(1.15) rotate(var(--rotate, 0deg));
+  }
+  90% {
+    opacity: 1;
+    filter: drop-shadow(0 0 24px rgba(212, 168, 67, 0.5));
+  }
+  100% {
+    opacity: 0;
+    filter: drop-shadow(0 0 0px rgba(212, 168, 67, 0));
+    transform: translate(0, 0) scale(0.9) rotate(0deg);
+  }
 }
 
 @keyframes drift {
-  from { transform: translateY(0); }
-  to { transform: translateY(-20px); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-20px);
+  }
+}
+
+/* ═══ Aurora wisps ═══ */
+.aurora-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.85;
+}
+
+.aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px) drop-shadow(0 0 60px rgba(180, 150, 255, 0.25));
+  will-change: transform, opacity;
+}
+
+.a1 {
+  width: 50vw;
+  height: 30vh;
+  top: 10%;
+  left: -10%;
+  background: radial-gradient(
+    ellipse,
+    rgba(155, 109, 255, 0.4),
+    transparent 70%
+  );
+  animation: aurora-drift-1 25s ease-in-out infinite alternate;
+}
+
+.a2 {
+  width: 45vw;
+  height: 25vh;
+  top: 50%;
+  right: -15%;
+  background: radial-gradient(
+    ellipse,
+    rgba(212, 168, 67, 0.3),
+    transparent 70%
+  );
+  animation: aurora-drift-2 30s ease-in-out infinite alternate;
+}
+
+.a3 {
+  width: 40vw;
+  height: 20vh;
+  bottom: 5%;
+  left: 20%;
+  background: radial-gradient(
+    ellipse,
+    rgba(110, 90, 200, 0.3),
+    transparent 70%
+  );
+  animation: aurora-drift-3 22s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(15vw, 8vh) scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(5vw, -5vh) scale(0.9);
+    opacity: 0.25;
+  }
+}
+
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-12vw, -10vh) scale(1.15);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(-5vw, 5vh) scale(0.95);
+    opacity: 0.2;
+  }
+}
+
+@keyframes aurora-drift-3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(10vw, -6vh) scale(1.3);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(-8vw, 3vh) scale(0.85);
+    opacity: 0.15;
+  }
+}
+
+/* ═══ Floating magical glyphs ═══ */
+.motes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mote {
+  position: absolute;
+  left: var(--mx);
+  top: var(--my);
+  font-size: 2.8rem;
+  opacity: 0;
+  animation-delay: var(--md, 0s);
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  will-change: transform, opacity;
+}
+
+/* Three distinct lazy drift paths so they feel random */
+.mote-a {
+  color: rgba(212, 168, 67, 0.65);
+  filter: drop-shadow(0 0 8px rgba(212, 168, 67, 0.45))
+    drop-shadow(0 0 16px rgba(212, 168, 67, 0.18));
+  animation-name: glyph-drift-a;
+  animation-duration: 45s;
+}
+
+.mote-b {
+  color: rgba(155, 109, 255, 0.55);
+  filter: drop-shadow(0 0 8px rgba(155, 109, 255, 0.35))
+    drop-shadow(0 0 16px rgba(155, 109, 255, 0.15));
+  animation-name: glyph-drift-b;
+  animation-duration: 55s;
+}
+
+.mote-c {
+  color: rgba(180, 150, 220, 0.5);
+  filter: drop-shadow(0 0 8px rgba(180, 150, 220, 0.28))
+    drop-shadow(0 0 16px rgba(180, 150, 220, 0.12));
+  animation-name: glyph-drift-c;
+  animation-duration: 50s;
+}
+
+@keyframes glyph-drift-a {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.7);
+  }
+  8% {
+    opacity: 0.25;
+  }
+  25% {
+    opacity: 0.35;
+    transform: translate(12px, -20px) rotate(30deg) scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: translate(-8px, -45px) rotate(-15deg) scale(0.9);
+  }
+  75% {
+    opacity: 0.3;
+    transform: translate(18px, -30px) rotate(20deg) scale(1.05);
+  }
+  92% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(5px, -60px) rotate(45deg) scale(0.6);
+  }
+}
+
+@keyframes glyph-drift-b {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.8);
+  }
+  10% {
+    opacity: 0.2;
+  }
+  30% {
+    opacity: 0.3;
+    transform: translate(-15px, -18px) rotate(-25deg) scale(1.1);
+  }
+  55% {
+    opacity: 0.15;
+    transform: translate(10px, -40px) rotate(10deg) scale(0.85);
+  }
+  80% {
+    opacity: 0.25;
+    transform: translate(-5px, -55px) rotate(-35deg) scale(1);
+  }
+  95% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-12px, -70px) rotate(-50deg) scale(0.65);
+  }
+}
+
+@keyframes glyph-drift-c {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.75);
+  }
+  12% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 0.3;
+    transform: translate(20px, -12px) rotate(15deg) scale(1);
+  }
+  45% {
+    opacity: 0.15;
+    transform: translate(-12px, -35px) rotate(-20deg) scale(0.95);
+  }
+  70% {
+    opacity: 0.25;
+    transform: translate(8px, -50px) rotate(35deg) scale(1.1);
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(15px, -65px) rotate(50deg) scale(0.7);
+  }
 }
 </style>

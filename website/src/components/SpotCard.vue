@@ -14,9 +14,54 @@
       <div class="image-overlay"></div>
       <span class="spot-number">#{{ spotId }}</span>
       <span v-if="collected" class="collected-badge">
-        <span class="badge-icon" aria-hidden="true">&#10003;</span> Collected
+        <span class="badge-rune" aria-hidden="true">&#10022;</span>
+        <span class="badge-label">Collected</span>
+        <!-- Sparkle particles -->
+        <span class="badge-sparkles" aria-hidden="true">
+          <span class="bs" style="--bx: -8px; --by: -10px; --bd: 0s"
+            >&#10038;</span
+          >
+          <span class="bs" style="--bx: 10px; --by: -14px; --bd: 0.2s"
+            >&#10047;</span
+          >
+          <span class="bs" style="--bx: 4px; --by: -8px; --bd: 0.35s"
+            >&#10022;</span
+          >
+        </span>
       </span>
-      <span v-else class="locked-badge" aria-hidden="true">&#128274;</span>
+      <span v-else class="locked-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="ward-sigil">
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            opacity="0.4"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="0.8"
+            opacity="0.25"
+          />
+          <path
+            d="M12 3 L12 7 M12 17 L12 21 M3 12 L7 12 M17 12 L21 12"
+            stroke="currentColor"
+            stroke-width="0.8"
+            opacity="0.3"
+          />
+          <path
+            d="M12 9 L13.5 11 L12 13 L10.5 11 Z"
+            fill="currentColor"
+            opacity="0.3"
+          />
+        </svg>
+      </span>
     </div>
     <div class="content">
       <h3 class="name">{{ spot.name }}</h3>
@@ -59,7 +104,8 @@ defineProps<{
   opacity: 1;
   box-shadow:
     var(--shadow),
-    0 0 20px rgba(212, 168, 67, 0.08);
+    0 0 20px rgba(212, 168, 67, 0.08),
+    inset 0 0 30px rgba(212, 168, 67, 0.03);
 }
 
 .spot-card:hover {
@@ -119,7 +165,11 @@ defineProps<{
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(52, 211, 153, 0.9);
+  background: linear-gradient(
+    135deg,
+    rgba(52, 211, 153, 0.85),
+    rgba(110, 231, 183, 0.85)
+  );
   color: #fff;
   padding: 3px 10px;
   border-radius: 12px;
@@ -127,10 +177,64 @@ defineProps<{
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  box-shadow: var(--glow-green);
+  gap: 0.3rem;
+  box-shadow:
+    0 0 8px rgba(52, 211, 153, 0.4),
+    0 0 20px rgba(52, 211, 153, 0.15);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  overflow: visible;
+}
+
+.badge-rune {
+  font-size: 0.7rem;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6));
+  animation: badge-rune-spin 4s linear infinite;
+}
+
+@keyframes badge-rune-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.badge-label {
+  line-height: 1;
+}
+
+/* Floating sparks off the badge */
+.badge-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bs {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 0.4rem;
+  color: rgba(255, 255, 255, 0.8);
+  animation: badge-spark 2.4s ease-in-out infinite;
+  animation-delay: var(--bd, 0s);
+  opacity: 0;
+}
+@keyframes badge-spark {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(var(--bx), var(--by)) scale(1);
+  }
+  80% {
+    opacity: 0;
+    transform: translate(var(--bx), calc(var(--by) - 6px)) scale(0.3);
+  }
 }
 
 .badge-icon {
@@ -142,9 +246,29 @@ defineProps<{
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.5rem;
-  opacity: 0.3;
-  filter: grayscale(100%);
+  width: 3rem;
+  height: 3rem;
+  opacity: 0.5;
+  animation: ward-pulse 3s ease-in-out infinite;
+}
+
+.ward-sigil {
+  width: 100%;
+  height: 100%;
+  color: var(--accent2, #9b6dff);
+  filter: drop-shadow(0 0 4px rgba(155, 109, 255, 0.3));
+}
+
+@keyframes ward-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
 }
 
 .content {
