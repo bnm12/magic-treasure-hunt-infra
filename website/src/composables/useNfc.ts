@@ -203,18 +203,23 @@ export function useNfc() {
   async function keepReaderActive(): Promise<void> {
     // Reclaim an active scan session after writes so the browser keeps NFC handling.
     if (isScanning.value) return;
-    await startScan();
+    await beginScanning();
   }
 
-  async function startScan(): Promise<void> {
+  /**
+   * Start always-on background scanning. This is intended to be called once
+   * on app mount. The scan stays active until the page is closed. On phones
+   * this means any time a wand is tapped, the app reads it automatically.
+   */
+  type ScanResult = "ok" | "needs-gesture" | "unsupported";
+
+  async function beginScanning(): Promise<ScanResult> {
     if (!nfcSupported()) {
       nfcCompatMessage.value =
         "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
-      return;
+      return "unsupported";
     }
-    if (isScanning.value) return;
-
-    let readSucceeded = false;
+    if (isScanning.value) return "ok";
 
     try {
       const ndef = new NDEFReader();
@@ -222,11 +227,9 @@ export function useNfc() {
 
       abortController.signal.addEventListener("abort", () => {
         isScanning.value = false;
-        if (!readSucceeded) status.value = "Scan stopped.";
       });
 
       ndef.onreading = (event: NDEFReadingEvent) => {
-        readSucceeded = true;
         lastReadRecords = [...event.message.records];
         collectedSpots.value = extractHuntYears(lastReadRecords);
         wandMetadata.value = extractWandMetadata(lastReadRecords);
@@ -236,8 +239,7 @@ export function useNfc() {
           ? decodeData(first.data) || `(${first.recordType})`
           : "";
 
-        status.value =
-          "Wand read successfully! Tap to scan again or tap Stop Scan.";
+        status.value = "Wand detected!";
       };
 
       ndef.onreadingerror = () => {
@@ -245,27 +247,21 @@ export function useNfc() {
       };
 
       isScanning.value = true;
-      status.value = "Bring the wand close to your device...";
       await ndef.scan({ signal: abortController.signal });
+      return "ok";
     } catch (error) {
       isScanning.value = false;
       const err = error as DOMException;
-      if (err.name === "AbortError") return;
+      if (err.name === "AbortError") return "ok";
       if (err.name === "NotAllowedError") {
-        status.value = "NFC permission denied.";
-        return;
+        return "needs-gesture";
       }
       if (err.name === "NotSupportedError") {
         nfcCompatMessage.value = "Web NFC is not supported on this device.";
-        return;
+        return "unsupported";
       }
       status.value = `Scan failed: ${err.message}`;
-    }
-  }
-
-  function stopScan(): void {
-    if (abortController && !abortController.signal.aborted) {
-      abortController.abort();
+      return "unsupported";
     }
   }
 
@@ -365,8 +361,7 @@ export function useNfc() {
     wandMetadata,
     hasScannedWand: (): boolean => lastReadRecords.length > 0,
     nfcSupported,
-    startScan,
-    stopScan,
+    beginScanning,
     writeRecord1,
     initializeWand,
   };

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="100%" stop-color="#0d2b1a"/>
+        </linearGradient>
+        <radialGradient id="glow" cx="0.5" cy="0.5" r="0.35">
+            <stop offset="0%" stop-color="#d4a84315"/>
+            <stop offset="100%" stop-color="#d4a84300"/>
+        </radialGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <!-- Garden wall with archway -->
+    <rect x="0" y="200" width="150" height="200" fill="#1a2a20"/>
+    <rect x="280" y="200" width="120" height="200" fill="#1a2a20"/>
+    <!-- Archway (red door) -->
+    <rect x="155" y="210" width="120" height="160" rx="60" fill="#5a1a1a"/>
+    <rect x="160" y="215" width="110" height="155" rx="55" fill="#7a2a2a"/>
+    <!-- Golden door knocker -->
+    <circle cx="215" cy="290" r="8" fill="none" stroke="#d4a843" stroke-width="2.5"/>
+    <circle cx="215" cy="282" r="3" fill="#d4a843"/>
+    <!-- Vines on walls -->
+    <path d="M30 200 Q40 170 25 140 Q35 120 20 90" stroke="#1a4a28" stroke-width="4" fill="none"/>
+    <path d="M350 200 Q340 175 355 150 Q345 125 360 100" stroke="#1a4a28" stroke-width="4" fill="none"/>
+    <!-- Leaves -->
+    <ellipse cx="22" cy="135" rx="8" ry="4" fill="#1f5530" transform="rotate(-20,22,135)"/>
+    <ellipse cx="30" cy="165" rx="7" ry="3" fill="#1a4a28" transform="rotate(15,30,165)"/>
+    <ellipse cx="358" cy="145" rx="8" ry="4" fill="#1f5530" transform="rotate(20,358,145)"/>
+    <!-- Garden glow through door -->
+    <rect x="175" y="290" width="80" height="80" fill="#1a4a28" opacity="0.4"/>
+    <circle cx="215" cy="320" r="25" fill="#d4a843" opacity="0.08">
+        <animate attributeName="opacity" values="0.08;0.15;0.08" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Stone path -->
+    <ellipse cx="215" cy="380" rx="20" ry="6" fill="#2a2a3a"/>
+    <ellipse cx="215" cy="395" rx="25" ry="7" fill="#2a2a3a"/>
+    <!-- Stars -->
+    <circle cx="60" cy="40" r="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="340" cy="50" r="1" fill="#d4a843" opacity="0.5"/>
+</svg>

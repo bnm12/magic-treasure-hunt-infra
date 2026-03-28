@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="100%" stop-color="#0a1a20"/>
+        </linearGradient>
+        <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2a5a7a"/>
+            <stop offset="100%" stop-color="#1a3a5a"/>
+        </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <!-- Cliff walls -->
+    <path d="M0 100 L0 400 L60 400 L60 100" fill="#1a2a20"/>
+    <path d="M340 120 L340 400 L400 400 L400 120" fill="#1a2a20"/>
+    <!-- Waterfall -->
+    <rect x="150" y="80" width="100" height="200" fill="#3a6a8a" opacity="0.4"/>
+    <rect x="170" y="80" width="60" height="200" fill="#4a7a9a" opacity="0.3"/>
+    <!-- Mist at base -->
+    <ellipse cx="200" cy="290" rx="100" ry="30" fill="#fff" opacity="0.08">
+        <animate attributeName="rx" values="100;110;100" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Pool -->
+    <ellipse cx="200" cy="330" rx="140" ry="50" fill="url(#water)" opacity="0.7"/>
+    <!-- Water sparkles -->
+    <circle cx="160" cy="320" r="2" fill="#9b6dff" opacity="0.3">
+        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="220" cy="340" r="1.5" fill="#d4a843" opacity="0.4">
+        <animate attributeName="opacity" values="0.4;0.7;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Vines on cliff -->
+    <path d="M50 120 Q60 160 45 200 Q55 240 40 280" stroke="#1a4a28" stroke-width="3" fill="none" opacity="0.6"/>
+    <path d="M355 130 Q345 170 360 210 Q350 250 365 290" stroke="#1a4a28" stroke-width="3" fill="none" opacity="0.6"/>
+    <!-- Stars -->
+    <circle cx="100" cy="40" r="1.5" fill="#fff" opacity="0.7"/>
+    <circle cx="300" cy="50" r="1" fill="#d4a843" opacity="0.5"/>
+</svg>

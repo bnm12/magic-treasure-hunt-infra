@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="100%" stop-color="#1a1030"/>
+        </linearGradient>
+        <radialGradient id="crystal" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stop-color="#9b6dff15"/>
+            <stop offset="100%" stop-color="#9b6dff00"/>
+        </radialGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <!-- Tower -->
+    <rect x="160" y="100" width="80" height="260" fill="#2a2a3a"/>
+    <rect x="165" y="105" width="70" height="255" fill="#3a3a4a"/>
+    <!-- Tower top (cone) -->
+    <polygon points="200,40 145,110 255,110" fill="#2a1a3a"/>
+    <!-- Crystal panels -->
+    <rect x="175" y="140" width="20" height="35" fill="#9b6dff" opacity="0.2" rx="2">
+        <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="205" y="140" width="20" height="35" fill="#9b6dff" opacity="0.3">
+        <animate attributeName="opacity" values="0.3;0.5;0.3" dur="2.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="175" y="200" width="20" height="35" fill="#9b6dff" opacity="0.25">
+        <animate attributeName="opacity" values="0.25;0.45;0.25" dur="3.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="205" y="200" width="20" height="35" fill="#9b6dff" opacity="0.2">
+        <animate attributeName="opacity" values="0.2;0.4;0.2" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="175" y="260" width="50" height="40" fill="#9b6dff" opacity="0.15" rx="3"/>
+    <!-- Tower glow -->
+    <circle cx="200" cy="200" r="60" fill="url(#crystal)"/>
+    <!-- Blue mosaic path -->
+    <ellipse cx="200" cy="380" rx="50" ry="10" fill="#1a2a4a"/>
+    <ellipse cx="250" cy="385" rx="15" ry="5" fill="#1a3a5a" opacity="0.6"/>
+    <ellipse cx="300" cy="388" rx="12" ry="4" fill="#1a3a5a" opacity="0.4"/>
+    <!-- Stars -->
+    <circle cx="60" cy="50" r="1.5" fill="#fff" opacity="0.7"/>
+    <circle cx="340" cy="70" r="1.5" fill="#d4a843" opacity="0.5"/>
+    <circle cx="100" cy="100" r="1" fill="#9b6dff" opacity="0.4"/>
+</svg>

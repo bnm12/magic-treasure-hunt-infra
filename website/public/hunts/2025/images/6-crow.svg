@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="100%" stop-color="#141428"/>
+        </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <!-- Statue silhouette -->
+    <rect x="185" y="300" width="30" height="80" fill="#2a2a3a"/>
+    <rect x="170" y="350" width="60" height="30" fill="#2a2a3a"/>
+    <!-- Crow -->
+    <ellipse cx="200" cy="190" rx="25" ry="18" fill="#1a1a2a"/>
+    <polygon points="200,175 195,160 205,160" fill="#1a1a2a"/>
+    <!-- head -->
+    <polygon points="230,190 260,180 250,195" fill="#1a1a2a"/>
+    <!-- tail -->
+    <polygon points="195,180 185,175" stroke="#3a3a2a" stroke-width="2" fill="none"/>
+    <!-- beak -->
+    <!-- Crow eye -->
+    <circle cx="192" cy="177" r="2" fill="#d4a843">
+        <animate attributeName="opacity" values="1;0;1" dur="5s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Wings -->
+    <path d="M175 190 Q160 170 170 160" stroke="#1a1a2a" stroke-width="6" fill="none"/>
+    <path d="M225 185 Q240 170 235 155" stroke="#1a1a2a" stroke-width="6" fill="none"/>
+    <!-- City silhouette below -->
+    <path d="M0 400 L0 340 L40 340 L40 320 L60 320 L60 340 L100 340 L100 310 L120 310 L120 340 L160 340 L160 330 L180 330 L180 340 L220 340 L220 320 L240 320 L240 340 L280 340 L280 300 L300 300 L300 340 L340 340 L340 330 L360 330 L360 340 L400 340 L400 400Z" fill="#0f0f20" opacity="0.5"/>
+    <!-- Stars -->
+    <circle cx="60" cy="50" r="1.5" fill="#fff" opacity="0.7"/>
+    <circle cx="340" cy="80" r="1" fill="#d4a843" opacity="0.5"/>
+    <circle cx="150" cy="60" r="1.5" fill="#9b6dff" opacity="0.4"/>
+    <circle cx="280" cy="40" r="1" fill="#fff" opacity="0.5"/>
+</svg>

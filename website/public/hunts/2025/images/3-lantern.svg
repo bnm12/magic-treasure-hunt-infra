@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f0a2e"/>
+            <stop offset="100%" stop-color="#1a1030"/>
+        </linearGradient>
+        <radialGradient id="glow" cx="0.5" cy="0.45" r="0.3">
+            <stop offset="0%" stop-color="#d4a84340"/>
+            <stop offset="100%" stop-color="#d4a84300"/>
+        </radialGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <circle cx="200" cy="180" r="120" fill="url(#glow)"/>
+    <!-- Lantern post -->
+    <rect x="196" y="180" width="8" height="180" fill="#3a3a4a"/>
+    <!-- Lantern head -->
+    <rect x="175" y="140" width="50" height="60" rx="5" fill="#2a2a3a" stroke="#4a4a5a" stroke-width="2"/>
+    <!-- Lantern glass glow -->
+    <rect x="180" y="148" width="40" height="44" rx="3" fill="#d4a843" opacity="0.3"/>
+    <!-- Light rays -->
+    <line x1="200" y1="170" x2="140" y2="220" stroke="#d4a843" stroke-width="1" opacity="0.15"/>
+    <line x1="200" y1="170" x2="260" y2="220" stroke="#d4a843" stroke-width="1" opacity="0.15"/>
+    <line x1="200" y1="170" x2="200" y2="240" stroke="#d4a843" stroke-width="1" opacity="0.1"/>
+    <!-- Fireflies -->
+    <circle cx="160" cy="200" r="2" fill="#d4a843" opacity="0.8">
+        <animate attributeName="cy" values="200;190;200" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="240" cy="210" r="2" fill="#d4a843" opacity="0.6">
+        <animate attributeName="cy" values="210;200;210" dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="180" cy="230" r="1.5" fill="#d4a843" opacity="0.4">
+        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Cobblestones -->
+    <ellipse cx="150" cy="370" rx="30" ry="10" fill="#1a1a2a" stroke="#2a2a3a" stroke-width="1"/>
+    <ellipse cx="220" cy="375" rx="25" ry="8" fill="#1a1a2a" stroke="#2a2a3a" stroke-width="1"/>
+    <ellipse cx="290" cy="368" rx="28" ry="9" fill="#1a1a2a" stroke="#2a2a3a" stroke-width="1"/>
+    <!-- Stars -->
+    <circle cx="60" cy="40" r="1.5" fill="#9b6dff" opacity="0.5"/>
+    <circle cx="340" cy="50" r="1" fill="#fff" opacity="0.6"/>
+</svg>

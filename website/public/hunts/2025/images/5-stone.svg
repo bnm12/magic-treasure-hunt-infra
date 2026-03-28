@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="100%" stop-color="#101828"/>
+        </linearGradient>
+        <radialGradient id="glow" cx="0.5" cy="0.55" r="0.25">
+            <stop offset="0%" stop-color="#d4a84325"/>
+            <stop offset="100%" stop-color="#d4a84300"/>
+        </radialGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <circle cx="200" cy="260" r="100" fill="url(#glow)"/>
+    <!-- Stone -->
+    <ellipse cx="200" cy="280" rx="70" ry="45" fill="#4a4a58"/>
+    <ellipse cx="200" cy="275" rx="65" ry="40" fill="#5a5a68"/>
+    <ellipse cx="200" cy="272" rx="55" ry="30" fill="#6a6a78"/>
+    <!-- Rune markings -->
+    <text x="200" y="280" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="#d4a843" opacity="0.5">&#x16A0; &#x16B1; &#x16C1;</text>
+    <!-- Water spray from fountain behind -->
+    <path d="M300 250 Q310 200 300 160 Q290 120 310 100" stroke="#4a7a9a" stroke-width="2" fill="none" opacity="0.3"/>
+    <path d="M320 260 Q330 210 320 170 Q310 130 330 110" stroke="#4a7a9a" stroke-width="1.5" fill="none" opacity="0.2"/>
+    <!-- Water droplets -->
+    <circle cx="305" cy="150" r="2" fill="#6a9aba" opacity="0.3">
+        <animate attributeName="cy" values="150;160;150" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Glow from stone -->
+    <circle cx="200" cy="275" r="30" fill="#d4a843" opacity="0.06">
+        <animate attributeName="opacity" values="0.06;0.12;0.06" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Stars -->
+    <circle cx="50" cy="50" r="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="350" cy="70" r="1" fill="#d4a843" opacity="0.5"/>
+    <circle cx="150" cy="40" r="1" fill="#9b6dff" opacity="0.4"/>
+</svg>

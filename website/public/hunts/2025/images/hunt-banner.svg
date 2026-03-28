@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+    <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="60%" stop-color="#1a0e3a"/>
+            <stop offset="100%" stop-color="#0d2b1a"/>
+        </linearGradient>
+        <radialGradient id="moon" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stop-color="#f0e8c0"/>
+            <stop offset="70%" stop-color="#d4c480"/>
+            <stop offset="100%" stop-color="#d4c48000"/>
+        </radialGradient>
+        <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stop-color="#9b6dff20"/>
+            <stop offset="100%" stop-color="#9b6dff00"/>
+        </radialGradient>
+    </defs>
+    <rect width="800" height="400" fill="url(#sky)"/>
+    <circle cx="650" cy="80" r="120" fill="url(#glow)"/>
+    <circle cx="650" cy="80" r="30" fill="url(#moon)"/>
+    <!-- Stars -->
+    <circle cx="100" cy="50" r="1.5" fill="#fff" opacity="0.8"/>
+    <circle cx="200" cy="30" r="1" fill="#fff" opacity="0.6"/>
+    <circle cx="350" cy="60" r="1.5" fill="#d4a843" opacity="0.7"/>
+    <circle cx="500" cy="40" r="1" fill="#fff" opacity="0.5"/>
+    <circle cx="720" cy="140" r="1" fill="#fff" opacity="0.6"/>
+    <circle cx="150" cy="120" r="1" fill="#9b6dff" opacity="0.5"/>
+    <circle cx="450" cy="100" r="1.5" fill="#fff" opacity="0.7"/>
+    <circle cx="300" cy="150" r="1" fill="#d4a843" opacity="0.4"/>
+    <!-- Trees -->
+    <path d="M0 400 L0 280 Q50 220 100 260 Q120 200 160 250 Q180 190 220 240 Q250 180 280 240 Q310 210 340 260 Q360 230 380 270 Q410 240 440 280 Q460 250 500 290 Q530 270 560 300 Q580 280 620 310 Q650 290 700 320 Q740 300 780 330 L800 340 L800 400Z" fill="#0d1f15" opacity="0.8"/>
+    <path d="M0 400 L0 320 Q80 280 140 310 Q180 270 230 300 Q270 260 320 290 Q360 250 420 300 Q460 280 520 320 Q560 300 620 340 Q660 320 720 350 L800 370 L800 400Z" fill="#0a1a10" opacity="0.9"/>
+    <!-- Fireflies -->
+    <circle cx="120" cy="300" r="3" fill="#d4a843" opacity="0.6">
+        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="350" cy="280" r="2" fill="#d4a843" opacity="0.4">
+        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="550" cy="310" r="3" fill="#9b6dff" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="680" cy="340" r="2" fill="#d4a843" opacity="0.3">
+        <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Title area glow -->
+    <text x="400" y="220" text-anchor="middle" font-family="Georgia,serif" font-size="28" fill="#d4a843" opacity="0.15">The Enchanted Forest</text>
+</svg>

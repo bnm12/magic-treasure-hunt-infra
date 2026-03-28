@@ -2,14 +2,14 @@
   "year": 2026,
   "title": "The Dragon's Quest",
   "description": "Help the dragons find their lost treasures scattered across the city! Collect all the magical spots to complete the hunt.",
-  "image": "images/hunt-banner.jpg",
+  "image": "images/hunt-banner.svg",
   "imageAlt": "Dragons flying over a magical city",
   "spots": {
     "1": {
       "name": "The Dragon's Garden",
       "hint": "Look for the red door with a golden knocker.",
       "collectedText": "You found the magical garden! 🎭",
-      "image": "images/1-garden.jpg",
+      "image": "images/1-garden.svg",
       "imageAlt": "Lush green garden with stone statues",
       "location": "Central Park, North Gate"
     },
@@ -17,7 +17,7 @@
       "name": "The Crystal Tower",
       "hint": "Follow the blue mosaic path east.",
       "collectedText": "The tower shimmers with enchantment! ✨",
-      "image": "images/2-tower.jpg",
+      "image": "images/2-tower.svg",
       "imageAlt": "Tall tower with sparkling crystal panels",
       "location": "Market Square"
     },
@@ -25,7 +25,7 @@
       "name": "The Whispering Well",
       "hint": "Listen carefully by the stone well.",
       "collectedText": "The well echoes with ancient magic! 🌊",
-      "image": "images/3-well.jpg",
+      "image": "images/3-well.svg",
       "imageAlt": "Old stone well with glowing water",
       "location": "Forest Edge"
     }

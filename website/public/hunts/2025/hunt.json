@@ -2,14 +2,14 @@
   "year": 2025,
   "title": "The Enchanted Forest Trail",
   "description": "A mysterious forest spirit has hidden magical tokens all over the city. Seek them out and prove your worth as a true forest guardian!",
-  "image": "images/hunt-banner.jpg",
+  "image": "images/hunt-banner.svg",
   "imageAlt": "A glowing forest path winding through the city",
   "spots": {
     "1": {
       "name": "The Ancient Oak",
       "hint": "Find the oldest tree in the park — rumour has it the spirit carved runes into its roots.",
       "collectedText": "The oak welcomes you, young guardian! 🌳",
-      "image": "images/1-oak.jpg",
+      "image": "images/1-oak.svg",
       "imageAlt": "A massive old oak tree with gnarled roots",
       "location": "Byparken, Main Entrance"
     },
@@ -17,7 +17,7 @@
       "name": "The Mossy Bridge",
       "hint": "Cross the water where the trolls are said to hide, and check underneath.",
       "collectedText": "The bridge troll nods in approval! 🧌",
-      "image": "images/2-bridge.jpg",
+      "image": "images/2-bridge.svg",
       "imageAlt": "An old stone bridge covered in soft green moss",
       "location": "Åparken, Stone Bridge"
     },
@@ -25,7 +25,7 @@
       "name": "The Firefly Lantern",
       "hint": "When dusk falls, this lantern post glows like a thousand fireflies — find it in the square.",
       "collectedText": "The fireflies dance around you! ✨",
-      "image": "images/3-lantern.jpg",
+      "image": "images/3-lantern.svg",
       "imageAlt": "A decorative iron lantern post in a cobbled square",
       "location": "Torvet, East Corner"
     },
@@ -33,7 +33,7 @@
       "name": "The Mushroom Circle",
       "hint": "Fairy rings are portals — look for the flower bed shaped like a ring near the library.",
       "collectedText": "You stepped through the fairy ring! 🍄",
-      "image": "images/4-mushroom.jpg",
+      "image": "images/4-mushroom.svg",
       "imageAlt": "A circular flower bed resembling a fairy ring",
       "location": "Bibliotekshaven"
     },
@@ -41,7 +41,7 @@
       "name": "The Wishing Stone",
       "hint": "A smooth grey stone sits by the fountain. Knock three times and listen.",
       "collectedText": "Your wish has been heard by the stone! 🪨",
-      "image": "images/5-stone.jpg",
+      "image": "images/5-stone.svg",
       "imageAlt": "A large smooth grey stone beside a fountain",
       "location": "Rådhuspladsen Fountain"
     },
@@ -49,7 +49,7 @@
       "name": "The Crow's Perch",
       "hint": "The spirit's crow watches the whole city from the highest statue. Look near its feet.",
       "collectedText": "The crow caws its approval — you are worthy! 🐦‍⬛",
-      "image": "images/6-crow.jpg",
+      "image": "images/6-crow.svg",
       "imageAlt": "A stone statue with a carved crow perched on top",
       "location": "Stortorget, Central Statue"
     },
@@ -57,7 +57,7 @@
       "name": "The Hidden Waterfall",
       "hint": "Behind the old mill there is a secret garden — follow the sound of rushing water.",
       "collectedText": "The waterfall spirits cheer for you! 💧",
-      "image": "images/7-waterfall.jpg",
+      "image": "images/7-waterfall.svg",
       "imageAlt": "A small waterfall cascading behind an old stone mill",
       "location": "Mølleparken, Behind the Mill"
     },
@@ -65,7 +65,7 @@
       "name": "The Spirit Shrine",
       "hint": "The forest spirit rests where the city meets the wild — seek the old boundary marker at the forest edge.",
       "collectedText": "The forest spirit grants you the Guardian's seal! 🌟",
-      "image": "images/8-shrine.jpg",
+      "image": "images/8-shrine.svg",
       "imageAlt": "An old carved boundary stone at the edge of the tree line",
       "location": "Skovkanten, Trail Head"
     }

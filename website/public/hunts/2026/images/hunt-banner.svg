@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+    <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0a0a2e"/>
+            <stop offset="50%" stop-color="#1a102e"/>
+            <stop offset="100%" stop-color="#1a1020"/>
+        </linearGradient>
+        <radialGradient id="fire" cx="0.5" cy="0.5" r="0.4">
+            <stop offset="0%" stop-color="#d4684330"/>
+            <stop offset="100%" stop-color="#d4684300"/>
+        </radialGradient>
+    </defs>
+    <rect width="800" height="400" fill="url(#sky)"/>
+    <!-- Mountain silhouettes -->
+    <polygon points="0,400 100,200 200,350 300,180 400,300 500,150 600,280 700,200 800,350 800,400" fill="#0f0f20" opacity="0.6"/>
+    <polygon points="0,400 80,280 200,380 350,260 500,350 650,250 800,380 800,400" fill="#0a0a18" opacity="0.8"/>
+    <!-- Dragon 1 silhouette -->
+    <g transform="translate(200,120) scale(0.8)" opacity="0.7">
+        <ellipse cx="0" cy="0" rx="40" ry="18" fill="#1a0a2a"/>
+        <polygon points="-30,-15 -60,-40 -20,-10" fill="#1a0a2a"/>
+        <!-- wing -->
+        <polygon points="20,-12 50,-35 30,-8" fill="#1a0a2a"/>
+        <!-- wing -->
+        <polygon points="40,0 70,5 65,-5" fill="#1a0a2a"/>
+        <!-- tail -->
+        <polygon points="-40,0 -50,-5 -48,5" fill="#1a0a2a"/>
+        <!-- head -->
+        <!-- Eye -->
+        <circle cx="-46" cy="-1" r="2" fill="#d4a843" opacity="0.7"/>
+        <!-- Fire breath -->
+        <circle cx="-58" cy="0" r="8" fill="url(#fire)">
+            <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+        </circle>
+    </g>
+    <!-- Dragon 2 -->
+    <g transform="translate(580,80) scale(0.6) scaleX(-1)" opacity="0.5">
+        <ellipse cx="0" cy="0" rx="40" ry="18" fill="#2a102a"/>
+        <polygon points="-30,-15 -60,-40 -20,-10" fill="#2a102a"/>
+        <polygon points="20,-12 50,-35 30,-8" fill="#2a102a"/>
+        <polygon points="40,0 70,5 65,-5" fill="#2a102a"/>
+        <polygon points="-40,0 -50,-5 -48,5" fill="#2a102a"/>
+    </g>
+    <!-- Stars -->
+    <circle cx="100" cy="50" r="1.5" fill="#fff" opacity="0.7"/>
+    <circle cx="250" cy="70" r="1" fill="#d4a843" opacity="0.5"/>
+    <circle cx="450" cy="40" r="1.5" fill="#9b6dff" opacity="0.4"/>
+    <circle cx="650" cy="60" r="1" fill="#fff" opacity="0.6"/>
+    <circle cx="750" cy="30" r="1.5" fill="#d4a843" opacity="0.5"/>
+    <circle cx="400" cy="90" r="1" fill="#9b6dff" opacity="0.3"/>
+    <!-- Treasure sparkles on ground -->
+    <circle cx="350" cy="350" r="3" fill="#d4a843" opacity="0.4">
+        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="500" cy="340" r="2" fill="#d4a843" opacity="0.3">
+        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <text x="400" y="320" text-anchor="middle" font-family="Georgia,serif" font-size="24" fill="#d4a843" opacity="0.1">The Dragon's Quest</text>
+</svg>

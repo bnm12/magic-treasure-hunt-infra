@@ -2,6 +2,17 @@
   <div id="app">
     <MagicBackground />
 
+    <!-- NFC status indicator -->
+    <div v-if="nfcCompatMessage" class="nfc-banner">
+      {{ nfcCompatMessage }}
+    </div>
+    <Transition name="nfc-toast">
+      <div v-if="nfcToastVisible" class="nfc-toast" aria-live="polite">
+        <span class="nfc-toast-icon" aria-hidden="true">&#10024;</span>
+        {{ status }}
+      </div>
+    </Transition>
+
     <div class="page-content">
       <Transition name="page-fade" mode="out-in">
         <!-- ═══ HUNT PAGE ═══ -->
@@ -14,6 +25,12 @@
               Tap your wand at a magic spot to collect it.
               <br />Scan your wand here to see your progress and hints.
             </p>
+            <div class="nfc-indicator" :class="{ active: isScanning }">
+              <span class="nfc-dot"></span>
+              <span class="nfc-label">{{
+                isScanning ? "NFC Active" : "NFC Off"
+              }}</span>
+            </div>
           </header>
 
           <WandInfo :metadata="wandMetadata" />
@@ -34,68 +51,19 @@
 
           <div v-else class="empty-state">
             <span class="empty-icon" aria-hidden="true">&#9733;</span>
-            <p>Scan your wand to begin your magical adventure!</p>
+            <p>
+              {{
+                isScanning
+                  ? "Hold your wand close to begin your magical adventure!"
+                  : "Preparing NFC scanner..."
+              }}
+            </p>
           </div>
-        </div>
-
-        <!-- ═══ SCAN PAGE ═══ -->
-        <div v-else-if="currentPage === 'scan'" key="scan" class="page">
-          <section class="scan-section">
-            <div class="section-title">
-              <span class="icon" aria-hidden="true">&#10024;</span>
-              <h2>Wand Scan</h2>
-            </div>
-            <p class="nfc-note">
-              Web NFC works on compatible Android browsers in secure contexts
-              (HTTPS).
-            </p>
-
-            <div v-if="nfcCompatMessage" class="nfc-compat">
-              {{ nfcCompatMessage }}
-            </div>
-
-            <div class="scan-visual">
-              <div class="wand-animation" :class="{ scanning: isScanning }">
-                <span class="wand-emoji" aria-hidden="true">&#10035;</span>
-              </div>
-              <p class="scan-hint">
-                {{
-                  isScanning
-                    ? "Hold your wand close..."
-                    : "Tap scan and hold your wand to your phone"
-                }}
-              </p>
-            </div>
-
-            <div class="nfc-controls">
-              <button
-                :disabled="isScanning"
-                @click="startScan"
-                type="button"
-                class="counter"
-              >
-                {{ isScanning ? "&#10024; Scanning..." : "&#9733; Scan Wand" }}
-              </button>
-              <button
-                :disabled="!isScanning"
-                @click="stopScan"
-                type="button"
-                class="counter btn-secondary"
-              >
-                Stop
-              </button>
-            </div>
-
-            <p v-if="status" class="nfc-status" aria-live="polite">
-              {{ status }}
-            </p>
-          </section>
         </div>
 
         <!-- ═══ TOYBOX PAGE ═══ -->
         <div v-else-if="currentPage === 'toybox'" key="toybox" class="page">
           <ToyboxPanel
-            :has-scanned-wand="hasScannedWand()"
             :is-writing="isWriting"
             :initialize-wand="initializeWand"
             @write="({ action, payload }) => writeRecord1(action, payload)"
@@ -105,11 +73,28 @@
     </div>
 
     <BottomNav v-model="currentPage" :tabs="navTabs" />
+
+    <!-- NFC consent popup -->
+    <div v-if="showNfcConsent" class="nfc-consent-overlay">
+      <div class="nfc-consent-card">
+        <span class="consent-wand" aria-hidden="true">&#10024;</span>
+        <h2 class="consent-title">Enable Wand Scanner?</h2>
+        <p class="consent-desc">
+          Allow NFC scanning so your phone can read magic wands automatically.
+        </p>
+        <button class="consent-btn" @click="handleNfcConsent">
+          Enable NFC
+        </button>
+        <button class="consent-skip" @click="showNfcConsent = false">
+          Skip for now
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useNfc } from "./composables/useNfc";
 import { loadHunts } from "./utils/spotLoader";
 import type { HuntYear } from "./utils/spotLoader";
@@ -128,24 +113,49 @@ const {
   nfcCompatMessage,
   collectedSpots,
   wandMetadata,
-  hasScannedWand,
-  startScan,
-  stopScan,
+  nfcSupported,
+  beginScanning,
   writeRecord1,
   initializeWand,
 } = useNfc();
 
 const currentPage = ref("hunt");
+const showNfcConsent = ref(false);
 
 const navTabs: NavTab[] = [
   { id: "hunt", label: "Hunt", icon: "&#9733;" },
-  { id: "scan", label: "Scan", icon: "&#10024;" },
   { id: "toybox", label: "Toybox", icon: "&#9881;" },
 ];
 
 const hunts = ref<Record<number, HuntYear>>({});
 
+// Show NFC status toast briefly when status changes
+const nfcToastVisible = ref(false);
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+watch(status, (val) => {
+  if (!val) return;
+  nfcToastVisible.value = true;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    nfcToastVisible.value = false;
+  }, 3000);
+});
+
+async function handleNfcConsent() {
+  showNfcConsent.value = false;
+  await beginScanning();
+}
+
 onMounted(async () => {
+  // Try to start scanning silently; only show consent popup if a gesture is needed
+  if (nfcSupported()) {
+    const result = await beginScanning();
+    if (result === "needs-gesture") {
+      showNfcConsent.value = true;
+    }
+  }
+
   hunts.value = await loadHunts();
   if (availableYears.value.length > 0) {
     selectedYear.value = availableYears.value[0];
@@ -223,8 +233,121 @@ const yearProgress = computed(() => {
   color: var(--text);
   font-size: 0.9rem;
   line-height: 1.6;
-  max-width: 32ch;
+  max-width: 48ch;
   margin: 0 auto;
+}
+
+/* ═══ NFC Indicator ═══ */
+.nfc-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  background: rgba(120, 90, 180, 0.1);
+  border: 1px solid var(--border);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  transition: all 0.5s ease;
+}
+
+.nfc-indicator.active {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.nfc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text);
+  transition:
+    background 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.nfc-indicator.active .nfc-dot {
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(212, 168, 67, 0.6);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ═══ NFC Banner (errors) ═══ */
+.nfc-banner {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 0.6rem 1rem;
+  background: rgba(248, 113, 113, 0.12);
+  border-bottom: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--danger);
+  font-size: 0.8rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+/* ═══ NFC Toast ═══ */
+.nfc-toast {
+  position: fixed;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 0.5rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(11, 11, 26, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: var(--glow-gold);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.nfc-toast-icon {
+  font-size: 0.9rem;
+}
+
+.nfc-toast-enter-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.nfc-toast-leave-active {
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+.nfc-toast-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.nfc-toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-6px);
 }
 
 /* ═══ Empty State ═══ */
@@ -243,88 +366,97 @@ const yearProgress = computed(() => {
   filter: drop-shadow(0 0 12px rgba(212, 168, 67, 0.4));
 }
 
-/* ═══ Scan Page ═══ */
-.scan-section {
-  padding: 2rem 1.5rem;
-}
-
-.scan-visual {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem 0;
-  gap: 1rem;
-}
-
-.wand-animation {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 2px solid var(--accent-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.5s ease;
-  position: relative;
-}
-
-.wand-animation::before {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  transition: border-color 0.5s ease;
-}
-
-.wand-animation.scanning {
-  border-color: var(--accent);
-  box-shadow: var(--glow-gold);
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.wand-animation.scanning::before {
-  border-color: var(--accent-border);
-  animation: spin-ring 3s linear infinite;
-}
-
-.wand-emoji {
-  font-size: 2.5rem;
-  transition: transform 0.5s ease;
-}
-
-.wand-animation.scanning .wand-emoji {
-  animation: float 2s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px rgba(212, 168, 67, 0.6));
-}
-
-.scan-hint {
-  font-size: 0.9rem;
-  color: var(--text);
-  text-align: center;
-}
-
-.btn-secondary {
-  color: var(--text) !important;
-  border-color: var(--border) !important;
-}
-
-.btn-secondary:hover {
-  border-color: var(--text) !important;
-  box-shadow: none !important;
-}
-
-@keyframes spin-ring {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* ═══ Page layout ═══ */
 .page {
   animation: reveal-up 0.35s ease;
+}
+
+/* ═══ NFC Consent Overlay ═══ */
+.nfc-consent-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 5, 15, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 1.5rem;
+}
+
+.nfc-consent-card {
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  padding: 2.5rem 2rem 2rem;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--accent-border);
+  box-shadow:
+    var(--glow-gold),
+    0 16px 48px rgba(0, 0, 0, 0.6);
+  animation: reveal-up 0.4s ease;
+}
+
+.consent-wand {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 0.75rem;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(212, 168, 67, 0.5));
+}
+
+.consent-title {
+  font-size: 1.3rem;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 0.75rem;
+  line-height: 1.3;
+}
+
+.consent-desc {
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.consent-btn {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--gradient-gold);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(212, 168, 67, 0.3);
+}
+
+.consent-btn:active {
+  transform: scale(0.97);
+}
+
+.consent-skip {
+  display: block;
+  margin-top: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.consent-skip:hover {
+  opacity: 1;
 }
 </style>

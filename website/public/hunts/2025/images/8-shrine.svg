@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f0a2e"/>
+            <stop offset="100%" stop-color="#1a1020"/>
+        </linearGradient>
+        <radialGradient id="glow" cx="0.5" cy="0.4" r="0.3">
+            <stop offset="0%" stop-color="#d4a84320"/>
+            <stop offset="100%" stop-color="#d4a84300"/>
+        </radialGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#bg)"/>
+    <circle cx="200" cy="200" r="120" fill="url(#glow)"/>
+    <!-- Shrine base -->
+    <rect x="130" y="280" width="140" height="20" fill="#3a3a4a"/>
+    <rect x="140" y="260" width="120" height="25" fill="#4a4a5a"/>
+    <!-- Pillars -->
+    <rect x="145" y="160" width="12" height="100" fill="#4a4a5a"/>
+    <rect x="243" y="160" width="12" height="100" fill="#4a4a5a"/>
+    <!-- Roof -->
+    <polygon points="200,120 130,165 270,165" fill="#3a3040"/>
+    <polygon points="200,130 140,165 260,165" fill="#4a3a50"/>
+    <!-- Altar inside -->
+    <rect x="175" y="230" width="50" height="30" fill="#3a3a4a"/>
+    <!-- Glowing orb on altar -->
+    <circle cx="200" cy="220" r="12" fill="#d4a843" opacity="0.2">
+        <animate attributeName="r" values="12;15;12" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="220" r="6" fill="#d4a843" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Steps -->
+    <rect x="160" y="300" width="80" height="8" fill="#3a3a4a"/>
+    <rect x="150" y="308" width="100" height="8" fill="#2a2a3a"/>
+    <rect x="140" y="316" width="120" height="8" fill="#2a2a3a"/>
+    <!-- Stars -->
+    <circle cx="60" cy="60" r="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="350" cy="40" r="1" fill="#d4a843" opacity="0.5"/>
+    <circle cx="300" cy="100" r="1.5" fill="#9b6dff" opacity="0.4"/>
+</svg>
