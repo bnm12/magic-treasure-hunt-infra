@@ -1,9 +1,8 @@
 #include <Wire.h>
 #include <PN532_I2C.h>
 #include <PN532.h>
-#include <NdefMessage.h>
-#include <NdefRecord.h>
 #include <MifareUltralight.h>
+#include "../HuntShared.h"
 
 // Wemos D1 Mini I2C wiring:
 // D2 (GPIO4) -> SDA
@@ -11,13 +10,6 @@
 // 3V3 -> VCC
 // GND -> GND
 
-// Spot configuration for this board (configurable via serial).
-uint8_t spotId = 3;
-uint16_t huntYear = 2026;
-const char kHuntMimePrefix[] = "x-hunt:";
-const char kWandMetaMimeType[] = "x-hunt-meta";
-
-String serialBuffer;
 constexpr uint8_t kI2cSdaPin = 4;
 constexpr uint8_t kI2cSclPin = 5;
 constexpr uint8_t kPn532I2cAddress = 0x24;  // 7-bit address
@@ -27,48 +19,11 @@ constexpr uint16_t kRetryIntervalMs = 2000;
 constexpr uint8_t kPassiveActivationRetries = 0x20;  // ESP8266 watchdog safe
 constexpr uint16_t kCiuRfCfgRegister = 0x6316;
 
-constexpr uint16_t kPollIntervalMs = 50;
-constexpr uint16_t kReadDebounceMs = 400;
-constexpr uint8_t kCcPage = 3;
-constexpr uint8_t kUserStartPage = 4;
-constexpr size_t kMaxUserAreaBytes = 888;
-
 PN532_I2C pn532I2c(Wire);
 PN532 pn532(pn532I2c);
 
-uint8_t lastUid[7] = {0};
-uint8_t lastUidLength = 0;
-uint32_t lastSeenAt = 0;
 uint32_t lastRetryAt = 0;
 bool initialized = false;
-
-void printHexByte(uint8_t value) {
-  if (value < 0x10) Serial.print('0');
-  Serial.print(value, HEX);
-}
-
-void printUid(const uint8_t* uid, uint8_t uidLength) {
-  for (uint8_t i = 0; i < uidLength; i++) {
-    printHexByte(uid[i]);
-    if (i + 1 < uidLength) Serial.print(':');
-  }
-}
-
-bool sameUid(const uint8_t* uid, uint8_t uidLength) {
-  if (uidLength != lastUidLength) return false;
-  for (uint8_t i = 0; i < uidLength; i++) {
-    if (uid[i] != lastUid[i]) return false;
-  }
-  return true;
-}
-
-void rememberUid(const uint8_t* uid, uint8_t uidLength) {
-  for (uint8_t i = 0; i < uidLength && i < sizeof(lastUid); i++) {
-    lastUid[i] = uid[i];
-  }
-  lastUidLength = uidLength;
-  lastSeenAt = millis();
-}
 
 bool readPage(uint8_t page, uint8_t* data) {
   // Try twice to handle transient RF coupling issues.
@@ -183,59 +138,6 @@ bool tryInitPn532() {
   return true;
 }
 
-void buildHuntMimeType(char* out, size_t outSize) {
-  snprintf(out, outSize, "x-hunt:%u", (unsigned)huntYear);
-}
-
-void printHuntPayload(const uint8_t* payload) {
-  Serial.print("  Payload (hex): ");
-  for (uint8_t i = 0; i < 8; i++) {
-    printHexByte(payload[i]);
-    if (i < 7) Serial.print(" ");
-  }
-  Serial.println();
-
-  Serial.print("  Payload (binary): ");
-  for (uint8_t i = 0; i < 8; i++) {
-    for (uint8_t b = 7; b < 8; --b) {
-      Serial.print((payload[i] >> b) & 1);
-    }
-    if (i < 7) Serial.print(" ");
-  }
-  Serial.println();
-}
-
-void setSpotBit(uint8_t* payload, uint8_t id) {
-  // Spot N → bit (N-1) in 64-bit big-endian bitmask.
-  // Byte 7 = LSB (spots 1-8), byte 6 (spots 9-16), ..., byte 0 = MSB (spots 57-64)
-  const uint8_t bitIndex = id - 1;
-  const uint8_t byteIndex = 7 - (bitIndex / 8);
-  const uint8_t bitInByte = bitIndex % 8;
-  payload[byteIndex] |= (uint8_t)(1u << bitInByte);
-}
-
-bool findNdefTlv(const uint8_t* data, size_t dataLen, size_t* valueOffset, size_t* valueLen) {
-  size_t i = 0;
-  while (i < dataLen) {
-    const uint8_t t = data[i++];
-    if (t == 0x00) continue;
-    if (t == 0xFE) return false;
-    if (i >= dataLen) return false;
-    size_t len = 0;
-    if (data[i] == 0xFF) {
-      if (i + 2 >= dataLen) return false;
-      len = ((size_t)data[i + 1] << 8) | data[i + 2];
-      i += 3;
-    } else {
-      len = data[i++];
-    }
-    if (i + len > dataLen) return false;
-    if (t == 0x03) { *valueOffset = i; *valueLen = len; return true; }
-    i += len;
-  }
-  return false;
-}
-
 bool readRawNdefFromTag(uint8_t* outMessage, size_t outCap, size_t* outLen) {
   uint8_t cc[4] = {0};
   if (!readCcPageStable(cc)) {
@@ -304,51 +206,6 @@ bool probeBlankUserArea(bool* isBlank) {
   }
 
   return true;
-}
-
-// Parse wand metadata from payload buffer.
-// Returns true if payload is valid (>=3 bytes, name length matches payload length).
-bool parseWandMetadataPayload(const uint8_t* payload, size_t payloadLen, uint16_t* outYear, String* outName) {
-  if (!payload || payloadLen < 3) return false;
-  
-  // Big-endian year from first 2 bytes
-  *outYear = ((uint16_t)payload[0] << 8) | payload[1];
-  
-  uint8_t nameLen = payload[2];
-  if (3 + nameLen != payloadLen) return false;  // Strict: payload size must match exactly
-  
-  *outName = "";
-  for (uint8_t i = 0; i < nameLen; i++) {
-    *outName += (char)payload[3 + i];
-  }
-  
-  return true;
-}
-
-// Check if a parsed NDEF message contains a valid wand metadata record.
-// Returns true if found and valid; outYear and outName are populated on success.
-bool hasValidWandMetadata(NdefMessage& msg, uint16_t* outYear, String* outName) {
-  if (!outYear || !outName) return false;
-  
-  for (int i = 0; i < (int)msg.getRecordCount(); i++) {
-    NdefRecord r = msg.getRecord(i);
-    if (r.getTnf() == TNF_MIME_MEDIA) {
-      String recType = r.getType();
-      if (recType == String(kWandMetaMimeType)) {
-        uint8_t payload[256] = {0};
-        size_t payloadLen = r.getPayloadLength();
-        if (payloadLen > sizeof(payload)) return false;
-        r.getPayload(payload);
-        
-        uint16_t year = 0;
-        if (!parseWandMetadataPayload(payload, payloadLen, &year, outName)) return false;
-        *outYear = year;
-        return true;
-      }
-    }
-  }
-  
-  return false;
 }
 
 bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
@@ -492,60 +349,10 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   return true;
 }
 
-void handleSerialInput() {
-  while (Serial.available()) {
-    char c = Serial.read();
-    if (c == '\n' || c == '\r') {
-      if (serialBuffer.length() > 0) {
-        processSerialCommand(serialBuffer);
-        serialBuffer = "";
-      }
-    } else if (serialBuffer.length() < 50) {
-      serialBuffer += c;
-    }
-  }
-}
-
-void processSerialCommand(const String& cmd) {
-  String trimmed = cmd;
-  trimmed.trim();
-  
-  if (trimmed.startsWith("setSpot:")) {
-    String valStr = trimmed.substring(8);
-    valStr.trim();
-    uint8_t val = valStr.toInt();
-    if (val >= 1 && val <= 64) {
-      spotId = val;
-      Serial.print("OK: spotId = ");
-      Serial.println(spotId);
-    } else {
-      Serial.println("ERROR: spot must be 1-64");
-    }
-    return;
-  }
-  
-  if (trimmed.startsWith("setYear:")) {
-    String valStr = trimmed.substring(8);
-    valStr.trim();
-    uint16_t val = valStr.toInt();
-    if (val >= 2000 && val <= 2100) {
-      huntYear = val;
-      Serial.print("OK: huntYear = ");
-      Serial.println(huntYear);
-    } else {
-      Serial.println("ERROR: year must be 2000-2100");
-    }
-    return;
-  }
-  
-  Serial.println("Commands:");
-  Serial.println("  'setSpot: X' (1-64)");
-  Serial.println("  'setYear: YYYY' (2000-2100)");
-}
-
 void setup() {
   Serial.begin(115200);
   delay(200);
+  loadConfig();
 
   Serial.println();
   Serial.println("PN532 spot writer (D1 Mini, I2C only)");

@@ -124,7 +124,7 @@ setSpot: X          # Set spotId to X (1-64). Example: "setSpot: 5"
 setYear: YYYY       # Set huntYear to YYYY (2000-2100). Example: "setYear: 2027"
 ```
 
-Configuration persists for the session. Reset the board to return to default values (`spotId=3`, `huntYear=2026`).
+Configuration is persisted to EEPROM and will survive a reset or power cycle.
 
 ### Future: Record 1 (Wand Link) via NDEF Library
 
