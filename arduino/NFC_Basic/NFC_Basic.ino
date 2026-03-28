@@ -2,7 +2,7 @@
 #include <PN532_I2C.h>
 #include <PN532.h>
 #include <MifareUltralight.h>
-#include "../HuntShared.h"
+#include "HuntShared.h"
 
 // Wemos D1 Mini I2C wiring:
 // D2 (GPIO4) -> SDA

@@ -14,7 +14,8 @@
         "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\Wire/**",
         "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532_I2C/**",
         "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532/**",
-        "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\NDEF/**"
+        "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\NDEF/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\EEPROM/**"
       ],
       "forcedInclude": [
         "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\cores\\esp8266\\Arduino.h"
@@ -68,6 +69,7 @@
         "-IC:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532_I2C",
         "-IC:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532",
         "-IC:\\Users\\Benja\\Documents\\Arduino\\libraries\\NDEF",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\3.1.2\\libraries\\EEPROM",
         "D:\\Git\\Tryllestavsprojekt\\arduino\\NFC_Basic\\build\\sketch\\NFC_Basic.ino.cpp",
         "-o",
         "D:\\Git\\Tryllestavsprojekt\\arduino\\NFC_Basic\\build\\sketch\\NFC_Basic.ino.cpp.o"
