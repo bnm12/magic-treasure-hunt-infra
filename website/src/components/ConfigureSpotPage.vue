@@ -44,6 +44,9 @@
                   {{ year }}
                 </option>
               </select>
+              <div v-if="currentHuntTitle" class="selection-info">
+                {{ currentHuntTitle }}
+              </div>
             </div>
             <div class="form-group">
               <label for="spot-select">Spot ID</label>
@@ -58,6 +61,9 @@
                   Spot {{ id }}
                 </option>
               </select>
+              <div v-if="currentSpotName" class="selection-info">
+                {{ currentSpotName }}
+              </div>
             </div>
           </div>
         </div>
@@ -119,11 +125,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from "vue";
+import { ref, watch, nextTick, onMounted, computed } from "vue";
 import PageHero from "./PageHero.vue";
 import IconWandTweaker from "./icons/IconWandTweaker.vue";
 import { useSerial } from "../composables/useSerial";
-import { getAvailableYears, getSpotIdsForYear } from "../utils/spotLoader";
+import { loadHunts, type HuntYear } from "../utils/spotLoader";
 
 const { isConnected, receivedText, error, connect, disconnect, send } =
   useSerial();
@@ -131,13 +137,27 @@ const { isConnected, receivedText, error, connect, disconnect, send } =
 const inputText = ref("");
 const terminalContent = ref<HTMLElement | null>(null);
 
+const hunts = ref<Record<number, HuntYear>>({});
 const availableYears = ref<number[]>([]);
 const availableSpots = ref<number[]>([]);
 const deviceHuntYear = ref<number>(0);
 const deviceSpotId = ref<number>(0);
 
+const currentHuntTitle = computed(() => {
+  return hunts.value[deviceHuntYear.value]?.title || "";
+});
+
+const currentSpotName = computed(() => {
+  const hunt = hunts.value[deviceHuntYear.value];
+  if (!hunt) return "";
+  return hunt.spots[String(deviceSpotId.value)]?.name || "";
+});
+
 onMounted(async () => {
-  availableYears.value = await getAvailableYears();
+  hunts.value = await loadHunts();
+  availableYears.value = Object.keys(hunts.value)
+    .map(Number)
+    .sort((a, b) => b - a);
 });
 
 watch(isConnected, (connected) => {
@@ -179,9 +199,11 @@ function updateSpot() {
   }
 }
 
-watch(deviceHuntYear, async (year) => {
-  if (year) {
-    availableSpots.value = await getSpotIdsForYear(year);
+watch(deviceHuntYear, (year) => {
+  if (year && hunts.value[year]) {
+    availableSpots.value = Object.keys(hunts.value[year].spots)
+      .map(Number)
+      .sort((a, b) => a - b);
   } else {
     availableSpots.value = [];
   }
@@ -331,6 +353,14 @@ watch(receivedText, (text) => {
   color: var(--text-h);
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.selection-info {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-style: italic;
+  margin-top: -0.4rem;
+  min-height: 1rem;
 }
 
 .input-with-button {
