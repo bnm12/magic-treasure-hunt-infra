@@ -11,7 +11,8 @@
     <div class="configure-content glass-card">
       <div v-if="!isConnected" class="connect-section">
         <p class="instruction-text">
-          Connect your device via USB and click the button below to start configuration.
+          Connect your device via USB and click the button below to start
+          configuration.
         </p>
         <button @click="connect" class="primary-btn">
           🔌 Connect to Device
@@ -35,7 +36,11 @@
                 class="nfc-input"
               >
                 <option disabled :value="0">Select Year</option>
-                <option v-for="year in availableYears" :key="year" :value="year">
+                <option
+                  v-for="year in availableYears"
+                  :key="year"
+                  :value="year"
+                >
                   {{ year }}
                 </option>
               </select>
@@ -61,8 +66,16 @@
 
         <div class="terminal glass-card">
           <div class="terminal-header">Received Data</div>
-          <pre ref="terminalContent" class="terminal-content">{{ receivedText || 'Waiting for data...' }}</pre>
-          <button @click="clearTerminal" class="clear-terminal-btn" v-if="receivedText">Clear</button>
+          <pre ref="terminalContent" class="terminal-content">{{
+            receivedText || "Waiting for data..."
+          }}</pre>
+          <button
+            @click="clearTerminal"
+            class="clear-terminal-btn"
+            v-if="receivedText"
+          >
+            Clear
+          </button>
         </div>
 
         <div class="form-group">
@@ -76,13 +89,24 @@
               placeholder="e.g., setSpot: 5"
               @keyup.enter="handleSend"
             />
-            <button @click="handleSend" :disabled="!inputText.trim()" class="send-btn">
+            <button
+              @click="handleSend"
+              :disabled="!inputText.trim()"
+              class="send-btn"
+            >
               Send
             </button>
           </div>
           <div class="quick-commands">
-            <button @click="quickSend('setSpot: ')" class="chip">setSpot: </button>
-            <button @click="quickSend('setYear: ')" class="chip">setYear: </button>
+            <button @click="quickSend('setSpot: ')" class="chip">
+              setSpot:
+            </button>
+            <button @click="quickSend('setYear: ')" class="chip">
+              setYear:
+            </button>
+            <button @click="quickSend('getConfig')" class="chip">
+              getConfig
+            </button>
           </div>
         </div>
       </div>
@@ -275,7 +299,7 @@ watch(receivedText, (text) => {
   height: 200px;
   overflow-y: auto;
   padding: 1rem;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   font-size: 0.85rem;
   color: #a3e635; /* Terminal green */
   white-space: pre-wrap;
