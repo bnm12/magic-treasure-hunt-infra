@@ -165,9 +165,9 @@ While the wand stores all hunt data offline, the website serves as a **companion
 
 #### The Toybox Panel
 
-- **Customize Record 1**: Configure the URL your wand links to
-- **Options**: personal site, a social media profile, a YouTube channel showing your wand story, or a maker portfolio
-- **Safety**: The Toybox preserves your hunt records while letting you update your link
+- **Customize Record 1**: Configure the action your wand performs, including links, messages, contact cards, and map pins
+- **Options**: personal site, a social media profile, a YouTube channel showing your wand story, a guardian contact card, or a meetup location
+- **Safety**: The Toybox preserves your hunt records while letting you update that first NFC action
 - **Instant activation**: Changes take effect immediately; no re-writes needed
 
 ### Kiosk Mode at Events
@@ -205,10 +205,11 @@ The website serves the **hunt definitions** (what spots exist, where they are, w
 
 The wand stores **two types of records**:
 
-### Record 1: User Link (Optional)
+### Record 1: User Action (Optional)
 
-- A standard NFC URI record (clickable URL)
-- Points to the hunt website, a personal blog, or a maker portfolio
+- A standard NFC record owned by the wand holder
+- Often a URI record, but it can also be text or selected MIME payloads like contacts and calendar invites
+- Points to the hunt website, a personal blog, a map location, or another creative utility
 - Preserved during hunts and free for the child to configure
 - Can be updated via the website's "Toybox" panel
 - During wand initialization, Toybox writes the hunt website URL here by default

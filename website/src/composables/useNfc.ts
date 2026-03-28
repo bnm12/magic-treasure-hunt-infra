@@ -1,5 +1,9 @@
 import { ref } from "vue";
 import { resolveAppUrl } from "../utils/appUrl";
+import {
+  buildToyRecord,
+  type ToyRecordWriteRequest,
+} from "../utils/toyboxRecord1";
 
 const HUNT_MIME_PREFIX = "x-hunt:";
 const HUNT_MASK_LENGTH = 8;
@@ -343,7 +347,7 @@ export function useNfc() {
     }
   }
 
-  async function writeRecord1(action: string, payload: string): Promise<void> {
+  async function writeRecord1(request: ToyRecordWriteRequest): Promise<void> {
     if (!nfcSupported()) {
       nfcCompatMessage.value =
         "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
@@ -359,10 +363,7 @@ export function useNfc() {
         "Hold the wand near your device to verify its current records...",
       );
       const ndef = new NDEFReader();
-      const toyRecord: NDEFRecordInit =
-        action === "url"
-          ? { recordType: "url", data: payload }
-          : { recordType: "text", data: payload };
+      const toyRecord = buildToyRecord(request);
 
       const huntRecords = buildHuntRecordInits(currentRecords);
       const metaRecords = buildMetaRecordInits(currentRecords);

@@ -34,25 +34,46 @@
       <div class="form-group">
         <label for="toy-action">Action type</label>
         <select v-model="toyAction" id="toy-action" class="nfc-input">
-          <option value="url">Open URL</option>
-          <option value="text">Show text</option>
+          <option
+            v-for="action in toyboxActions"
+            :key="action.id"
+            :value="action.id"
+          >
+            {{ action.label }}
+          </option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="toy-payload">{{
-          toyAction === "url" ? "URL" : "Text"
-        }}</label>
+      <p class="action-summary">
+        {{ selectedActionDefinition?.description }}
+      </p>
+
+      <div
+        v-for="field in selectedActionDefinition?.fields ?? []"
+        :key="field.key"
+        class="form-group"
+      >
+        <label :for="`toy-${field.key}`">
+          {{ field.label }}
+          <span v-if="field.optional" class="optional-mark">(optional)</span>
+        </label>
+
+        <textarea
+          v-if="field.type === 'textarea'"
+          :id="`toy-${field.key}`"
+          v-model="toyFields[field.key]"
+          class="nfc-input nfc-textarea"
+          :placeholder="field.placeholder"
+          rows="3"
+        ></textarea>
+
         <input
-          v-model="toyPayload"
-          id="toy-payload"
+          v-else
+          :id="`toy-${field.key}`"
+          v-model="toyFields[field.key]"
           class="nfc-input"
-          type="text"
-          :placeholder="
-            toyAction === 'url'
-              ? 'https://example.org/magic'
-              : 'Your magic message'
-          "
+          :type="field.type ?? 'text'"
+          :placeholder="field.placeholder"
         />
       </div>
 
@@ -136,7 +157,9 @@
             class="counter"
           >
             {{
-              isWriting ? "&#10024; Initializing..." : "&#10022; Initialize Wand"
+              isWriting
+                ? "&#10024; Initializing..."
+                : "&#10022; Initialize Wand"
             }}
           </button>
         </div>
@@ -163,7 +186,11 @@
 
         <div class="form-group">
           <label for="debug-spot">Spot</label>
-          <select v-model.number="debugSpotId" id="debug-spot" class="nfc-input">
+          <select
+            v-model.number="debugSpotId"
+            id="debug-spot"
+            class="nfc-input"
+          >
             <option
               v-for="spotId in availableSpotIds"
               :key="spotId"
@@ -199,6 +226,15 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import {
+  buildToyRecord,
+  createEmptyToyRecordFields,
+  TOYBOX_ACTIONS,
+  TOYBOX_PRESETS,
+  type ToyRecordAction,
+  type ToyRecordPreset,
+  type ToyRecordWriteRequest,
+} from "../utils/toyboxRecord1";
 
 const props = defineProps<{
   isWriting: boolean;
@@ -211,25 +247,34 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  write: [payload: { action: string; payload: string }];
+  write: [payload: ToyRecordWriteRequest];
   install: [];
 }>();
 
 const wandName = ref("");
 const wandInitError = ref("");
-const toyAction = ref("url");
-const toyPayload = ref("");
+const toyboxActions = TOYBOX_ACTIONS;
+const toyboxPresets = TOYBOX_PRESETS;
+const toyAction = ref<ToyRecordAction>("url");
+const toyFields = ref<Record<string, string>>(
+  createEmptyToyRecordFields("url"),
+);
 const validationError = ref("");
 const wandCreationYear = ref(0);
 const debugYear = ref(0);
 const debugSpotId = ref(0);
 const debugUnlockError = ref("");
 
+const selectedActionDefinition = computed(() =>
+  toyboxActions.find((action) => action.id === toyAction.value),
+);
+
 const availableSpotIds = computed(
   () => props.availableSpotIdsByYear[debugYear.value] ?? [],
 );
 
-watch([toyAction, toyPayload], () => {
+watch(toyAction, (action) => {
+  toyFields.value = createEmptyToyRecordFields(action);
   validationError.value = "";
 });
 
@@ -238,17 +283,22 @@ watch(wandName, () => {
 });
 
 watch(
+  toyFields,
+  () => {
+    validationError.value = "";
+  },
+  { deep: true },
+);
+
+watch(
   [() => props.activeHuntYear, () => props.availableYears],
   ([activeHuntYear, availableYears]) => {
     const preferredYear =
       activeHuntYear && availableYears.includes(activeHuntYear)
         ? activeHuntYear
-        : availableYears[0] ?? 0;
+        : (availableYears[0] ?? 0);
 
-    if (
-      preferredYear > 0 &&
-      !availableYears.includes(wandCreationYear.value)
-    ) {
+    if (preferredYear > 0 && !availableYears.includes(wandCreationYear.value)) {
       wandCreationYear.value = preferredYear;
     }
   },
@@ -313,27 +363,35 @@ async function handleInitWand() {
 
 function handleWrite() {
   validationError.value = "";
-  const payload = toyPayload.value.trim();
+  const request: ToyRecordWriteRequest = {
+    action: toyAction.value,
+    fields: { ...toyFields.value },
+  };
 
-  if (!payload) {
-    validationError.value = "Please enter a value.";
+  try {
+    buildToyRecord(request);
+  } catch (error) {
+    validationError.value = (error as Error).message;
     return;
   }
 
-  if (toyAction.value === "url") {
-    try {
-      const parsed = new URL(payload);
-      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        validationError.value = "URL must start with http:// or https://";
-        return;
-      }
-    } catch {
-      validationError.value = "Please enter a valid URL.";
-      return;
-    }
-  }
+  emit("write", request);
+}
 
-  emit("write", { action: toyAction.value, payload });
+function applyPreset(presetId: string) {
+  const preset = toyboxPresets.find((entry) => entry.id === presetId);
+  if (!preset) return;
+
+  toyAction.value = preset.action;
+  toyFields.value = buildPresetFields(preset);
+  validationError.value = "";
+}
+
+function buildPresetFields(preset: ToyRecordPreset): Record<string, string> {
+  return {
+    ...createEmptyToyRecordFields(preset.action),
+    ...preset.fields,
+  };
 }
 
 async function handleUnlockSpot() {
@@ -392,6 +450,13 @@ async function handleUnlockSpot() {
   line-height: 1.5;
 }
 
+.action-summary {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  opacity: 0.85;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -405,6 +470,14 @@ async function handleUnlockSpot() {
   color: var(--text-h);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.optional-mark {
+  color: var(--text);
+  opacity: 0.7;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .form-group small {
@@ -421,6 +494,38 @@ async function handleUnlockSpot() {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.preset-chip {
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-h);
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.preset-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(244, 217, 122, 0.55);
+  background: rgba(244, 217, 122, 0.08);
+}
+
+.nfc-textarea {
+  min-height: 5.25rem;
+  resize: vertical;
 }
 
 .nfc-controls {

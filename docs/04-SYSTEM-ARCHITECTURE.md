@@ -219,7 +219,7 @@ One wand contains multiple hunt years:
 flowchart TB
   Wand["🪄 Wand (NTAG216)"]
 
-  R1["Record 1\nURI to website"]
+  R1["Record 1\nUser NFC action\n(URL, text, vCard, etc.)"]
   R2["Record 2\nx-hunt-meta\n(2026, Alice)"]
   R3["Record 3\nx-hunt:2025\n(4 spots collected)"]
   R4["Record 4\nx-hunt:2026\n(2 spots collected)"]
@@ -255,7 +255,7 @@ Typical wand over 10 years of hunts:
 ```
 Total writable space (assumption): ~888 bytes
 
-Record 1 (URI):
+Record 1 (user NFC action):
   NDEF TLV overhead: ~12 bytes
   Payload: "https://example.com" (~20–40 bytes)
   Subtotal: ~35 bytes
@@ -338,14 +338,14 @@ sequenceDiagram
   Kid->>BlankTag: Hold blank tag to device
 
   Browser->>BlankTag: Write NDEF message:
-  note over Browser: Record 1: URI (website link)<br/>Record 2: x-hunt-meta (2026, "Alice")
+  note over Browser: Record 1: default website link<br/>Record 2: x-hunt-meta (2026, "Alice")
 
   BlankTag-->>Browser: Write confirm (OK)
   Browser-->>Website: Success
 
   Website->>Kid: ✓ "Wand initialized! You're ready to hunt."
 
-  note over BlankTag: Tag now contains:<br/>Record 1: Website link<br/>Record 2: Metadata (official wand)<br/>No hunt records yet (will be added by spots)
+  note over BlankTag: Tag now contains:<br/>Record 1: Default website link<br/>Record 2: Metadata (official wand)<br/>No hunt records yet (will be added by spots)
 ```
 
 **After initialization:** Wand is "official" (has metadata) and can be written to by spot readers.

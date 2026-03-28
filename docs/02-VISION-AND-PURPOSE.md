@@ -47,7 +47,7 @@ We measure success by whether we achieve these outcomes for the people who use T
 3. **Website companion:** Scan wand → see collected spots, missing spots, contextual hints.
 4. **Year-over-year continuity:** New yearly hunts coexist with previous years on one wand.
 5. **Open wand utility:** Record 1 remains free for normal everyday NFC use outside the hunt.
-6. **Website toybox:** Kids (or guardians) can configure record 1 for common NFC actions (opening a link, sharing contact info, etc.)
+6. **Website toybox:** Kids (or guardians) can configure record 1 for common NFC actions (opening a link, showing a spell message, sharing contact info, opening maps, drafting messages, and similar playful utilities)
 
 ---
 
@@ -89,6 +89,8 @@ Wand data is the source of truth for progression. The system works:
 ### 5. Keep Record 1 Free
 The wand's first NFC record is reserved for user-defined actions. Hunt internals never touch it. This enables:
 - Opening a website link
+- Showing a text spell or clue
+- Opening a map pin, phone number, or message draft
 - Sharing contact or school project info
 - Any future kid-defined NFC use case
 

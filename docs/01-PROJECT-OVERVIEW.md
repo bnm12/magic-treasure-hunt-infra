@@ -40,7 +40,7 @@ Key files:
 - `src/composables/useNfc.ts` — All Web NFC logic (scan, MIME hunt parsing, bitmask decode/encode)
 - `src/components/HuntView.vue` — Single year hunt rendering
 - `src/components/SpotCard.vue` — Individual spot visualization
-- `src/components/ToyboxPanel.vue` — Record 1 configuration UI
+- `src/components/ToyboxPanel.vue` — Record 1 configuration UI with multi-action presets
 - `src/utils/spotLoader.ts` — Hunt asset loading and caching
 - `public/hunts/` — Hunt JSON + images (edited by non-technical organizers)
 
@@ -86,7 +86,7 @@ Core documents:
 - ✅ **Hunt asset system:** JSON + images per year; website auto-discovers; organizers don't code
 - ✅ **Web NFC and wand scanning:** Vue app scans wands, displays collected/missing spots, shows hints
 - ✅ **Spot writers:** PN532 and RC522 firmware skethces that verify metadata and write yearly hunt records
-- ✅ **Record 1 reserved:** Wand link (URI) separate from hunt data; Toybox UI to configure it
+- ✅ **Record 1 reserved:** User NFC action stays separate from hunt data; Toybox configures links, text, contact cards, and other common actions
 - ✅ **Wand metadata record:** Authentication via `x-hunt-meta` MIME record (creation year + owner name)
 - ✅ **Compact data model:** Yearly hunt records store only 64-bit spot mask; year in MIME type
 
@@ -105,7 +105,7 @@ Core documents:
 | PN532 spot writer (I2C) | Firmware team | ✅ Functional | NTAG21x verified; awaiting field reliability |
 | RC522 spot writer (SPI) | Firmware team | ✅ Implemented | Works with MIFARE sticker tags; not for wands |
 | Wand hardware (glass ampule NTAG216) | Design team | 🚧 In testing | Tip cavity design + ferrite rod tuning pending |
-| Record 1 toy config UI (Toybox) | Frontend team | ✅ Working | Initializes blank wands with metadata |
+| Record 1 toy config UI (Toybox) | Frontend team | ✅ Working | Initializes blank wands with metadata and writes curated NFC actions |
 | Multi-year wand support | Full stack | ✅ Implemented | Website and firmware both support; untested |
 
 ---

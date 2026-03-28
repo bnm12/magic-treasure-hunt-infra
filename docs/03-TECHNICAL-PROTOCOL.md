@@ -22,15 +22,29 @@ The wand is an NTAG215 or NTAG216 tag. Records are stored as NDEF (NFC Data Exch
 
 ## Record 1: User-Defined NFC Action
 
-**Purpose:** Holds wand's user-facing feature (typically a URL link).
+**Purpose:** Holds wand's user-facing feature (typically a URL link, but may also be text or standards-based MIME content).
 
-**Format:** NDEF URI record (RFC 3986)
+**Supported formats written by the website Toybox UI:**
 
-**Example:**
+- NDEF URI record (RFC 3986)
+- NDEF text record
+- NDEF MIME record for selected formats such as vCard (`text/vcard`) and calendar invites (`text/calendar`)
+
+**Examples:**
 
 ```
 Type: "U" (URI)
 Payload: "https://example.com/hunt"
+```
+
+```
+Type: "T" (text)
+Payload: "By moonlight and maplight, reveal the next clue."
+```
+
+```
+Type: MIME "text/vcard"
+Payload: VCARD contact bytes
 ```
 
 **Constraints:**
@@ -38,6 +52,7 @@ Payload: "https://example.com/hunt"
 - Always preserved by hunt logic
 - Never written to by spot firmware (except during wand initialization)
 - Writable by website Toybox UI
+- Website initialization currently writes the companion website URL by default
 - Must never be lost during hunt record updates
 
 **Toy configurations (examples):**

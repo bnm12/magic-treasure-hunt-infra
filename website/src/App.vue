@@ -135,7 +135,7 @@
             :active-hunt-year="allYears[0] ?? 0"
             :available-years="allYears"
             :available-spot-ids-by-year="availableSpotIdsByYear"
-            @write="({ action, payload }) => writeRecord1(action, payload)"
+            @write="handleToyboxWrite"
             @install="promptInstall"
           />
         </div>
@@ -181,6 +181,7 @@ import IconArchive from "./components/icons/IconArchive.vue";
 import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
 import IconSeeking from "./components/icons/IconSeeking.vue";
 import type { NavTab } from "./components/BottomNav.vue";
+import type { ToyRecordWriteRequest } from "./utils/toyboxRecord1";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -258,6 +259,10 @@ function handleBeforeInstallPrompt(event: Event) {
 function handleAppInstalled() {
   deferredInstallPrompt.value = null;
   updateStandaloneState();
+}
+
+function handleToyboxWrite(request: ToyRecordWriteRequest) {
+  void writeRecord1(request);
 }
 
 async function promptInstall() {
