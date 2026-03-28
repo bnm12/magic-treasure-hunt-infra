@@ -1,6 +1,10 @@
 <template>
   <Transition name="wand-appear">
     <div v-if="metadata" class="wand-info-card glass-card">
+      <div class="ornament ornament-top-left" aria-hidden="true"></div>
+      <div class="ornament ornament-top-right" aria-hidden="true"></div>
+      <div class="ornament ornament-bottom-left" aria-hidden="true"></div>
+      <div class="ornament ornament-bottom-right" aria-hidden="true"></div>
       <div class="sparkle-cascade" aria-hidden="true">
         <span class="sp" style="--sx: -30px; --sy: -45px; --d: 0s"
           >&#10022;</span
@@ -20,10 +24,6 @@
         <span class="sp" style="--sx: 40px; --sy: -48px; --d: 0.16s"
           >&#10047;</span
         >
-      </div>
-      <div class="wand-badge">
-        <IconWand class="wand-icon" aria-hidden="true" />
-        <span class="wand-label">Your Wand</span>
       </div>
       <div class="wand-details">
         <div ref="ownerSectionRef" class="owner-section">
@@ -57,7 +57,6 @@ import {
   ref,
   watch,
 } from "vue";
-import IconWand from "./icons/IconWand.vue";
 
 interface Props {
   metadata: {
@@ -169,7 +168,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .wand-info-card {
   margin: 1rem;
-  padding: 1.1rem 1.25rem 0.95rem;
+  padding: 1.35rem 1.25rem 1rem;
   border-color: var(--accent-border);
   position: relative;
   overflow: visible;
@@ -201,23 +200,101 @@ onBeforeUnmount(() => {
   animation: border-glow 3s ease-in-out infinite;
 }
 
-.wand-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+.wand-info-card::after {
+  content: "";
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 168, 67, 0.12);
+  pointer-events: none;
 }
 
-.wand-icon {
-  font-size: 1.4rem;
-  display: inline-block;
-  color: var(--accent);
-  filter: drop-shadow(0 0 8px rgba(212, 168, 67, 0.5));
+.ornament {
+  position: absolute;
+  width: 2.8rem;
+  height: 2.8rem;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.ornament::before,
+.ornament::after {
+  content: "";
+  position: absolute;
+  border-color: rgba(230, 190, 90, 0.48);
+  filter: drop-shadow(0 0 8px rgba(212, 168, 67, 0.12));
+}
+
+.ornament::before {
+  inset: 0;
+  border-style: solid;
+}
+
+.ornament::after {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid rgba(236, 198, 92, 0.4);
+  border-radius: 999px;
+}
+
+.ornament-top-left {
+  top: 0.5rem;
+  left: 0.5rem;
+}
+
+.ornament-top-left::before {
+  border-width: 1px 0 0 1px;
+  border-top-left-radius: 1.1rem;
+}
+
+.ornament-top-left::after {
+  top: 0.2rem;
+  left: 0.2rem;
+}
+
+.ornament-top-right {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.ornament-top-right::before {
+  border-width: 1px 1px 0 0;
+  border-top-right-radius: 1.1rem;
+}
+
+.ornament-top-right::after {
+  top: 0.2rem;
+  right: 0.2rem;
+}
+
+.ornament-bottom-left {
+  bottom: 0.5rem;
+  left: 0.5rem;
+}
+
+.ornament-bottom-left::before {
+  border-width: 0 0 1px 1px;
+  border-bottom-left-radius: 1.1rem;
+}
+
+.ornament-bottom-left::after {
+  bottom: 0.2rem;
+  left: 0.2rem;
+}
+
+.ornament-bottom-right {
+  right: 0.5rem;
+  bottom: 0.5rem;
+}
+
+.ornament-bottom-right::before {
+  border-width: 0 1px 1px 0;
+  border-bottom-right-radius: 1.1rem;
+}
+
+.ornament-bottom-right::after {
+  right: 0.2rem;
+  bottom: 0.2rem;
 }
 
 .wand-details {
@@ -227,7 +304,7 @@ onBeforeUnmount(() => {
 }
 
 .owner-section {
-  margin-inline: -0.4rem;
+  margin-inline: -0.15rem;
 }
 
 .detail-label {
@@ -293,7 +370,7 @@ onBeforeUnmount(() => {
 @media (max-width: 480px) {
   .wand-info-card {
     margin: 1rem;
-    padding: 0.95rem 1rem 0.85rem;
+    padding: 1.15rem 1rem 0.9rem;
   }
 
   .wand-details {
@@ -302,7 +379,7 @@ onBeforeUnmount(() => {
   }
 
   .owner-section {
-    margin-inline: -0.3rem;
+    margin-inline: -0.1rem;
   }
 
   .year-value {
