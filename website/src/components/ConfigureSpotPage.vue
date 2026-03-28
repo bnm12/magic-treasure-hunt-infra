@@ -142,6 +142,7 @@ const availableYears = ref<number[]>([]);
 const availableSpots = ref<number[]>([]);
 const deviceHuntYear = ref<number>(0);
 const deviceSpotId = ref<number>(0);
+let lastProcessedIndex = -1;
 
 const currentHuntTitle = computed(() => {
   return hunts.value[deviceHuntYear.value]?.title || "";
@@ -185,6 +186,7 @@ function quickSend(cmd: string) {
 
 function clearTerminal() {
   receivedText.value = "";
+  lastProcessedIndex = -1;
 }
 
 function updateYear() {
@@ -215,10 +217,16 @@ watch(receivedText, (text) => {
   const matches = [...text.matchAll(/CONFIG:(\d+),(\d+)/g)];
   if (matches.length > 0) {
     const lastMatch = matches[matches.length - 1];
-    const id = parseInt(lastMatch[1], 10);
-    const year = parseInt(lastMatch[2], 10);
-    deviceSpotId.value = id;
-    deviceHuntYear.value = year;
+    const matchIndex = lastMatch.index ?? -1;
+
+    // Only update if we found a new CONFIG message we haven't processed
+    if (matchIndex > lastProcessedIndex) {
+      const id = parseInt(lastMatch[1], 10);
+      const year = parseInt(lastMatch[2], 10);
+      deviceSpotId.value = id;
+      deviceHuntYear.value = year;
+      lastProcessedIndex = matchIndex;
+    }
   }
 
   nextTick(() => {
