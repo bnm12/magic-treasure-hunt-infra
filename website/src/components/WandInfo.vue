@@ -1,24 +1,48 @@
 <template>
-  <div v-if="metadata" class="wand-info-card glass-card">
-    <div class="wand-badge">
-      <span class="wand-icon" aria-hidden="true">&#10022;</span>
-      <span class="wand-label">Your Wand</span>
-    </div>
-    <div class="wand-details">
-      <div class="owner-section">
-        <p class="detail-label">Owner</p>
-        <p class="owner-name">{{ metadata.name }}</p>
+  <Transition name="wand-appear">
+    <div v-if="metadata" class="wand-info-card glass-card">
+      <div class="sparkle-cascade" aria-hidden="true">
+        <span class="sp" style="--sx: -30px; --sy: -45px; --d: 0s"
+          >&#10022;</span
+        >
+        <span class="sp" style="--sx: 35px; --sy: -40px; --d: 0.12s"
+          >&#10038;</span
+        >
+        <span class="sp" style="--sx: -20px; --sy: -55px; --d: 0.25s"
+          >&#10047;</span
+        >
+        <span class="sp" style="--sx: 25px; --sy: -50px; --d: 0.08s"
+          >&#10022;</span
+        >
+        <span class="sp" style="--sx: -40px; --sy: -35px; --d: 0.2s"
+          >&#10038;</span
+        >
+        <span class="sp" style="--sx: 40px; --sy: -48px; --d: 0.16s"
+          >&#10047;</span
+        >
       </div>
-      <div class="divider"></div>
-      <div class="year-section">
-        <p class="detail-label">Activated</p>
-        <p class="year-value">{{ metadata.creationYear }}</p>
+      <div class="wand-badge">
+        <span class="wand-icon" aria-hidden="true">&#10022;</span>
+        <span class="wand-label">Your Wand</span>
+      </div>
+      <div class="wand-details">
+        <div class="owner-section">
+          <p class="detail-label">Owner</p>
+          <p class="owner-name">{{ metadata.name }}</p>
+        </div>
+        <div class="divider"></div>
+        <div class="year-section">
+          <p class="detail-label">Activated</p>
+          <p class="year-value">{{ metadata.creationYear }}</p>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
+import { Transition } from "vue";
+
 interface Props {
   metadata: {
     name: string;
@@ -111,6 +135,11 @@ defineProps<Props>();
   color: var(--text-h);
   margin: 0;
   word-break: break-word;
+  animation: golden-reveal 0.8s ease 0.2s both;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .year-value {
@@ -161,5 +190,43 @@ defineProps<Props>();
   .year-value {
     font-size: 1.15rem;
   }
+}
+
+/* Sparkle cascade particles */
+.sparkle-cascade {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sp {
+  position: absolute;
+  font-size: 0.8rem;
+  color: var(--accent);
+  animation: sparkle-float 1s ease-out forwards;
+  animation-delay: var(--d, 0s);
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(212, 168, 67, 0.6));
+}
+
+/* Entrance transition */
+.wand-appear-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wand-appear-leave-active {
+  transition: all 0.3s ease;
+}
+
+.wand-appear-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(15px);
+}
+
+.wand-appear-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-8px);
 }
 </style>

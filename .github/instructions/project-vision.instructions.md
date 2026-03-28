@@ -5,20 +5,23 @@ applyTo: "**"
 
 # Project Vision Alignment
 
-Before making meaningful changes, read the relevant documentation:
+Before making meaningful changes, read the relevant documentation in this order:
 
+- **Project scope and current state:** [`docs/01-PROJECT-OVERVIEW.md`](../../docs/01-PROJECT-OVERVIEW.md)
 - **Product vision & design principles:** [`docs/02-VISION-AND-PURPOSE.md`](../../docs/02-VISION-AND-PURPOSE.md)
 - **On-tag data model:** [`docs/03-TECHNICAL-PROTOCOL.md`](../../docs/03-TECHNICAL-PROTOCOL.md)
 - **System architecture & flows:** [`docs/04-SYSTEM-ARCHITECTURE.md`](../../docs/04-SYSTEM-ARCHITECTURE.md)
+- **Build, deploy, and operations:** [`docs/05-BUILD-AND-DEPLOY.md`](../../docs/05-BUILD-AND-DEPLOY.md)
 - **How to keep docs in sync:** [`docs/MAINTENANCE.md`](../../docs/MAINTENANCE.md)
+- **Repository-level responsibilities:** [`AGENTS.md`](../../AGENTS.md)
 
 ## Required Alignment Checks
 
 Before implementing a feature, ensure it meets these criteria:
 
-1. **Connect to a user outcome** in [`docs/02-VISION-AND-PURPOSE.md#primary-user-outcomes`](../../docs/02-VISION-AND-PURPOSE.md#primary-user-outcomes).
+1. **Connect to a user outcome** in the **Primary User Outcomes** section of [`docs/02-VISION-AND-PURPOSE.md`](../../docs/02-VISION-AND-PURPOSE.md).
 
-2. **Confirm scope:** Does this belong to `website/`, `arduino/`, or both? Check responsibility boundaries in [`docs/04-SYSTEM-ARCHITECTURE.md#responsibility-boundaries`](../../docs/04-SYSTEM-ARCHITECTURE.md#responsibility-boundaries).
+2. **Confirm scope:** Does this belong to `website/`, `arduino/`, or both? Check the **Responsibility Boundaries** section in [`docs/04-SYSTEM-ARCHITECTURE.md`](../../docs/04-SYSTEM-ARCHITECTURE.md).
 
 3. **Preserve core loop:** The baseline hunt loop must remain intact:
    - Find spot → Tap wand → Collect → Scan website → View progress
@@ -59,14 +62,27 @@ Before implementing a feature, ensure it meets these criteria:
     - Small, verifiable increments
     - Clear status and failure messaging in NFC flows
 
+11. **Confirm contributor impact**
+
+- If setup, commands, wiring, or deployment flow changes, update [`docs/05-BUILD-AND-DEPLOY.md`](../../docs/05-BUILD-AND-DEPLOY.md)
+- If repository structure or ownership boundaries change, update [`AGENTS.md`](../../AGENTS.md)
+
 ## Documentation Updates
 
 When your change affects the system:
 
-1. **Update the source-of-truth doc** (see [`docs/MAINTENANCE.md#when-to-update-docs`](../../docs/MAINTENANCE.md#when-to-update-docs) for which one)
-2. **Check cross-references** in other docs
-3. **Update `.github/instructions/` files** if new patterns or conventions apply
-4. **Follow the maintenance checklist** in [`docs/MAINTENANCE.md#doc-maintenance-checklist`](../../docs/MAINTENANCE.md#doc-maintenance-checklist)
+1. **Update the source-of-truth doc first** (see the **When to Update Docs** section in [`docs/MAINTENANCE.md`](../../docs/MAINTENANCE.md) for mapping)
+2. **Update cross-references** so links and references remain accurate
+3. **Update `.github/instructions/` files** if contributor workflow or conventions changed
+4. **Update `AGENTS.md`** if repository structure or ownership boundaries changed
+5. **Follow the maintenance checklist** in the **Doc Maintenance Checklist** section of [`docs/MAINTENANCE.md`](../../docs/MAINTENANCE.md)
+
+## Scope Guardrails
+
+- Keep architecture and protocol strict until production migration needs are proven.
+- Prefer references over duplication between docs.
+- Keep record 1 ownership and offline-first behavior non-negotiable.
+- Avoid speculative complexity before reliability is validated in field tests.
 
 ## Before Committing
 

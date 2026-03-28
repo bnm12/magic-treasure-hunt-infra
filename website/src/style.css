@@ -419,6 +419,64 @@ select.nfc-input {
   }
 }
 
+/* ─── Sparkle / Star Particle Effects ─── */
+@keyframes sparkle-float {
+  0% {
+    transform: translate(0, 0) scale(0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--sx, 20px), var(--sy, -40px)) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes star-trail {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.5);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(0) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(6px) scale(0.3);
+  }
+}
+
+@keyframes golden-reveal {
+  0% {
+    opacity: 0;
+    filter: brightness(2) blur(4px);
+    transform: scale(1.1);
+  }
+  60% {
+    filter: brightness(1.4) blur(0);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1) blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes magic-write-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(155, 109, 255, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 24px rgba(155, 109, 255, 0.5),
+      0 0 48px rgba(155, 109, 255, 0.15);
+  }
+}
+
 /* ─── Glass Card Utility ─── */
 .glass-card {
   background: var(--bg-card);

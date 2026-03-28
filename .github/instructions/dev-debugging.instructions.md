@@ -24,13 +24,13 @@ Use the Chrome DevTools MCP tools to inspect the running app:
 
 Use these alternatives instead:
 
-| Need | Tool |
-|------|------|
-| Check layout / DOM structure | `take_snapshot` (returns accessible DOM tree) |
-| Check element visibility | `evaluate_script` with `getComputedStyle()` or `getBoundingClientRect()` |
-| Check CSS values | `evaluate_script` with `getComputedStyle(el).propertyName` |
-| Check for JS errors | `list_console_messages` |
-| Check network failures | `list_network_requests` |
+| Need                         | Tool                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| Check layout / DOM structure | `take_snapshot` (returns accessible DOM tree)                            |
+| Check element visibility     | `evaluate_script` with `getComputedStyle()` or `getBoundingClientRect()` |
+| Check CSS values             | `evaluate_script` with `getComputedStyle(el).propertyName`               |
+| Check for JS errors          | `list_console_messages`                                                  |
+| Check network failures       | `list_network_requests`                                                  |
 
 ## Build Verification
 

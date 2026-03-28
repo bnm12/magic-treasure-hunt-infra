@@ -21,8 +21,33 @@
               class="progress-bar-fill"
               :class="{ complete: progressPercent === 100 }"
               :style="{ width: progressPercent + '%' }"
-            />
+            >
+              <span
+                v-if="progressPercent > 0 && progressPercent < 100"
+                class="bar-star"
+                aria-hidden="true"
+                >&#10022;</span
+              >
+            </div>
             <div class="progress-shimmer" />
+            <span
+              v-if="progressPercent === 100"
+              class="complete-sparkles"
+              aria-hidden="true"
+            >
+              <span class="cs" style="--sx: -12px; --sy: -18px; --d: 0s"
+                >&#10022;</span
+              >
+              <span class="cs" style="--sx: 14px; --sy: -22px; --d: 0.15s"
+                >&#10038;</span
+              >
+              <span class="cs" style="--sx: -6px; --sy: -26px; --d: 0.3s"
+                >&#10047;</span
+              >
+              <span class="cs" style="--sx: 8px; --sy: -16px; --d: 0.1s"
+                >&#10022;</span
+              >
+            </span>
           </div>
           <span class="progress-label">
             {{ collectedCount }}<span class="progress-sep">/</span
@@ -189,11 +214,44 @@ const progressPercent = computed(() =>
   background: var(--gradient-gold);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: visible;
 }
 
 .progress-bar-fill.complete {
   background: linear-gradient(135deg, var(--collected), #6ee7b7);
   box-shadow: var(--glow-green);
+}
+
+/* Sparkle star riding the leading edge of the bar */
+.bar-star {
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--accent);
+  filter: drop-shadow(0 0 4px rgba(212, 168, 67, 0.8));
+  animation: star-trail 1.8s ease-in-out infinite;
+  z-index: 2;
+}
+
+/* Celebratory sparkles when bar hits 100% */
+.complete-sparkles {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cs {
+  position: absolute;
+  font-size: 0.55rem;
+  color: var(--collected);
+  animation: sparkle-float 1.2s ease-out forwards;
+  animation-delay: var(--d, 0s);
+  opacity: 0;
+  filter: drop-shadow(0 0 3px rgba(52, 211, 153, 0.6));
 }
 
 .progress-shimmer {
@@ -232,6 +290,7 @@ const progressPercent = computed(() =>
 .complete-text {
   color: var(--collected);
   font-weight: 600;
+  animation: golden-reveal 0.6s ease both;
 }
 
 .spots-grid {
