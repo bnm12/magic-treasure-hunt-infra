@@ -1,4 +1,6 @@
-const CACHE_NAME = "tryllestavsprojekt-v3";
+const workerUrl = new URL(self.location.href);
+const buildId = workerUrl.searchParams.get("v") ?? "dev";
+const CACHE_NAME = `tryllestavsprojekt-${buildId}`;
 const APP_SCOPE = new URL("./", self.registration.scope);
 const INDEX_URL = new URL("index.html", APP_SCOPE).toString();
 const APP_SHELL_ASSETS = [

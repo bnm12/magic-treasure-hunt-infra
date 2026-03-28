@@ -1,4 +1,4 @@
-import { resolveAppUrl } from "./appUrl";
+import { resolveAppUrl, resolveVersionedAppUrl, withBuildVersion } from "./appUrl";
 
 export interface SpotDefinition {
   name: string;
@@ -32,7 +32,7 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
   for (const year of [2026, 2025, 2024, 2023]) {
     try {
       const huntBaseUrl = resolveAppUrl(`hunts/${year}/`);
-      const response = await fetch(resolveAppUrl(`hunts/${year}/hunt.json`));
+      const response = await fetch(resolveVersionedAppUrl(`hunts/${year}/hunt.json`));
       if (response.ok) {
         const hunt = (await response.json()) as HuntYear;
         // Resolve image paths to absolute URLs relative to the hunt folder
@@ -41,7 +41,9 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
           !hunt.image.startsWith("/") &&
           !hunt.image.startsWith("http")
         ) {
-          hunt.image = new URL(hunt.image, huntBaseUrl).toString();
+          hunt.image = withBuildVersion(
+            new URL(hunt.image, huntBaseUrl).toString(),
+          );
         }
         for (const spot of Object.values(hunt.spots)) {
           if (
@@ -49,7 +51,9 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
             !spot.image.startsWith("/") &&
             !spot.image.startsWith("http")
           ) {
-            spot.image = new URL(spot.image, huntBaseUrl).toString();
+            spot.image = withBuildVersion(
+              new URL(spot.image, huntBaseUrl).toString(),
+            );
           }
         }
         hunts[hunt.year] = hunt;

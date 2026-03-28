@@ -5,3 +5,13 @@ export function resolveAppUrl(path = ""): string {
 
   return new URL(normalizedPath, baseUrl).toString();
 }
+
+export function withBuildVersion(url: string): string {
+  const versionedUrl = new URL(url);
+  versionedUrl.searchParams.set("v", __APP_BUILD_ID__);
+  return versionedUrl.toString();
+}
+
+export function resolveVersionedAppUrl(path = ""): string {
+  return withBuildVersion(resolveAppUrl(path));
+}
