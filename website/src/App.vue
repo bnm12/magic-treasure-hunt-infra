@@ -144,12 +144,20 @@ watch(status, (val) => {
 
 async function handleNfcConsent() {
   showNfcConsent.value = false;
-  await beginScanning();
+  const result = await beginScanning();
+  if (result === "needs-gesture") {
+    // Browser denied again — user probably dismissed the system prompt
+    nfcCompatMessage.value =
+      "NFC permission was denied. Please allow NFC access in your browser settings and refresh.";
+  }
 }
 
 onMounted(async () => {
-  // Try to start scanning silently; only show consent popup if a gesture is needed
-  if (nfcSupported()) {
+  if (!nfcSupported()) {
+    nfcCompatMessage.value =
+      "Web NFC is not available. Open this page in Chrome on Android over HTTPS.";
+  } else {
+    // Try to start scanning silently; show consent popup only if a user gesture is needed
     const result = await beginScanning();
     if (result === "needs-gesture") {
       showNfcConsent.value = true;
