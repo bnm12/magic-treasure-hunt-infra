@@ -40,7 +40,7 @@
         </div>
         <div class="divider"></div>
         <div class="year-section">
-          <p class="detail-label">Activated</p>
+          <p class="detail-label">Crafted</p>
           <p class="year-value">{{ metadata.creationYear }}</p>
         </div>
       </div>
@@ -227,7 +227,7 @@ onBeforeUnmount(() => {
 }
 
 .owner-section {
-  margin-inline: -0.65rem;
+  margin-inline: -0.4rem;
 }
 
 .detail-label {
@@ -282,9 +282,12 @@ onBeforeUnmount(() => {
   background: linear-gradient(
     90deg,
     transparent,
-    var(--accent-border),
+    rgba(212, 168, 67, 0.32) 18%,
+    rgba(236, 198, 92, 0.58) 50%,
+    rgba(212, 168, 67, 0.32) 82%,
     transparent
   );
+  box-shadow: 0 0 10px rgba(212, 168, 67, 0.08);
 }
 
 @media (max-width: 480px) {
@@ -299,7 +302,7 @@ onBeforeUnmount(() => {
   }
 
   .owner-section {
-    margin-inline: -0.55rem;
+    margin-inline: -0.3rem;
   }
 
   .year-value {
