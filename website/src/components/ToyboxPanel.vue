@@ -109,13 +109,28 @@
           <small>{{ wandName.length }}/127 characters</small>
         </div>
 
+        <div class="form-group">
+          <label for="wand-creation-year">Creation year</label>
+          <select
+            v-model.number="wandCreationYear"
+            id="wand-creation-year"
+            class="nfc-input"
+          >
+            <option v-for="year in availableYears" :key="year" :value="year">
+              {{ year }}
+            </option>
+          </select>
+        </div>
+
         <p v-if="wandInitError" class="validation-error" role="alert">
           {{ wandInitError }}
         </p>
 
         <div class="nfc-controls">
           <button
-            :disabled="isWriting || wandName.length === 0"
+            :disabled="
+              isWriting || wandName.length === 0 || wandCreationYear === 0
+            "
             @click="handleInitWand"
             type="button"
             class="counter"
@@ -190,6 +205,7 @@ const props = defineProps<{
   initializeWand: (name: string, year: number) => Promise<void>;
   unlockTestSpot: (year: number, spotId: number) => Promise<void>;
   showInstallAction: boolean;
+  activeHuntYear: number;
   availableYears: number[];
   availableSpotIdsByYear: Record<number, number[]>;
 }>();
@@ -204,6 +220,7 @@ const wandInitError = ref("");
 const toyAction = ref("url");
 const toyPayload = ref("");
 const validationError = ref("");
+const wandCreationYear = ref(0);
 const debugYear = ref(0);
 const debugSpotId = ref(0);
 const debugUnlockError = ref("");
@@ -219,6 +236,24 @@ watch([toyAction, toyPayload], () => {
 watch(wandName, () => {
   wandInitError.value = "";
 });
+
+watch(
+  [() => props.activeHuntYear, () => props.availableYears],
+  ([activeHuntYear, availableYears]) => {
+    const preferredYear =
+      activeHuntYear && availableYears.includes(activeHuntYear)
+        ? activeHuntYear
+        : availableYears[0] ?? 0;
+
+    if (
+      preferredYear > 0 &&
+      !availableYears.includes(wandCreationYear.value)
+    ) {
+      wandCreationYear.value = preferredYear;
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => props.availableYears,
@@ -263,8 +298,13 @@ async function handleInitWand() {
     return;
   }
 
+  if (wandCreationYear.value === 0) {
+    wandInitError.value = "Please choose a creation year.";
+    return;
+  }
+
   try {
-    await props.initializeWand(name, new Date().getFullYear());
+    await props.initializeWand(name, wandCreationYear.value);
     wandName.value = "";
   } catch (error) {
     wandInitError.value = `Error: ${(error as Error).message}`;

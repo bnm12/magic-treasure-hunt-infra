@@ -132,6 +132,7 @@
             :initialize-wand="initializeWand"
             :unlock-test-spot="unlockTestSpot"
             :show-install-action="canInstallPwa"
+            :active-hunt-year="allYears[0] ?? 0"
             :available-years="allYears"
             :available-spot-ids-by-year="availableSpotIdsByYear"
             @write="({ action, payload }) => writeRecord1(action, payload)"
