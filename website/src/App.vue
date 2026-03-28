@@ -41,6 +41,8 @@
       <p v-if="status" class="nfc-status" aria-live="polite">{{ status }}</p>
     </section>
 
+    <WandInfo :metadata="wandMetadata" />
+
     <template v-if="availableYears.length > 0">
       <YearSelector
         v-if="availableYears.length > 1"
@@ -72,6 +74,7 @@ import type { HuntYear } from "./utils/spotLoader";
 import HuntView from "./components/HuntView.vue";
 import YearSelector from "./components/YearSelector.vue";
 import ToyboxPanel from "./components/ToyboxPanel.vue";
+import WandInfo from "./components/WandInfo.vue";
 
 const {
   isScanning,
@@ -79,6 +82,7 @@ const {
   status,
   nfcCompatMessage,
   collectedSpots,
+  wandMetadata,
   hasScannedWand,
   startScan,
   stopScan,
