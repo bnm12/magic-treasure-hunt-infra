@@ -50,8 +50,8 @@
         Companion
       </h3>
       <p class="note">
-        Add the wand companion to your home screen as a standalone app when
-        your browser supports installation.
+        Add the wand companion to your home screen as a standalone app when your
+        browser supports installation.
       </p>
 
       <div class="nfc-controls">
