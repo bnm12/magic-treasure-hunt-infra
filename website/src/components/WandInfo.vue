@@ -22,7 +22,7 @@
         >
       </div>
       <div class="wand-badge">
-        <span class="wand-icon" aria-hidden="true">&#10022;</span>
+        <IconWand class="wand-icon" aria-hidden="true" />
         <span class="wand-label">Your Wand</span>
       </div>
       <div class="wand-details">
@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { Transition } from "vue";
+import IconWand from "./icons/IconWand.vue";
 
 interface Props {
   metadata: {
@@ -101,9 +102,9 @@ defineProps<Props>();
 }
 
 .wand-icon {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   display: inline-block;
-  animation: sparkle-spin 4s linear infinite;
+  color: var(--accent);
   filter: drop-shadow(0 0 8px rgba(212, 168, 67, 0.5));
 }
 

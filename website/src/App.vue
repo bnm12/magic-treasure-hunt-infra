@@ -39,7 +39,7 @@
         <!-- ═══ HUNT PAGE ═══ -->
         <div v-if="currentPage === 'hunt'" key="hunt" class="page">
           <header class="hero-panel">
-            <span class="hero-sparkle" aria-hidden="true">&#10022;</span>
+            <component :is="hasScannedWand ? IconHuntMap : IconSeeking" class="hero-sparkle" aria-hidden="true" />
             <p class="eyebrow">Tryllestavsprojekt</p>
             <h1 class="hero-title">Magic Wand Companion</h1>
             <p class="hero-copy">
@@ -56,7 +56,7 @@
 
           <WandInfo :metadata="wandMetadata" />
 
-          <!-- Show collected hunts only after wand is scanned -->
+          <!-- Show hunts after wand is scanned (active hunt always visible) -->
           <template v-if="hasScannedWand && wandYears.length > 0">
             <YearSelector
               v-if="wandYears.length > 1"
@@ -73,9 +73,15 @@
 
           <div v-else class="empty-state">
             <!-- Pulsating magic circle while awaiting scan -->
-            <div v-if="!hasScannedWand" class="magic-circle-wrap" aria-hidden="true">
+            <div
+              v-if="!hasScannedWand"
+              class="magic-circle-wrap"
+              aria-hidden="true"
+            >
               <div class="magic-ring ring-outer">
-                <span class="rune-track rune-outer">ᚠ·ᚱ·ᛇ·ᛖ·ᚢ·ᚷ·ᛁ·ᛞ·ᚠ·ᚱ·ᛇ·ᛖ</span>
+                <span class="rune-track rune-outer"
+                  >ᚠ·ᚱ·ᛇ·ᛖ·ᚢ·ᚷ·ᛁ·ᛞ·ᚠ·ᚱ·ᛇ·ᛖ</span
+                >
               </div>
               <div class="magic-ring ring-middle">
                 <span class="rune-track rune-middle">ᛁ‧ᛞ‧ᚢ‧ᚷ‧ᛖ‧ᛇ‧ᚱ‧ᚠ</span>
@@ -89,7 +95,7 @@
               <span class="circle-star s3">&#10047;</span>
               <span class="circle-star s4">&#10022;</span>
             </div>
-            <span class="empty-icon" aria-hidden="true">&#9733;</span>
+            <IconSeeking class="empty-icon" aria-hidden="true" />
             <p>
               {{
                 hasScannedWand
@@ -105,7 +111,7 @@
         <!-- ═══ ARCHIVE PAGE ═══ -->
         <div v-else-if="currentPage === 'archive'" key="archive" class="page">
           <header class="hero-panel">
-            <span class="hero-sparkle" aria-hidden="true">&#128218;</span>
+            <IconArchive class="hero-sparkle hero-no-spin" aria-hidden="true" />
             <p class="eyebrow">Past &amp; Present</p>
             <h1 class="hero-title">Hunt Archive</h1>
             <p class="hero-copy">
@@ -137,6 +143,7 @@
         <div v-else-if="currentPage === 'toybox'" key="toybox" class="page">
           <ToyboxPanel
             :is-writing="isWriting"
+            :has-scanned-wand="hasScannedWand"
             :initialize-wand="initializeWand"
             @write="({ action, payload }) => writeRecord1(action, payload)"
           />
@@ -176,6 +183,10 @@ import HuntView from "./components/HuntView.vue";
 import YearSelector from "./components/YearSelector.vue";
 import ToyboxPanel from "./components/ToyboxPanel.vue";
 import WandInfo from "./components/WandInfo.vue";
+import IconHuntMap from "./components/icons/IconHuntMap.vue";
+import IconArchive from "./components/icons/IconArchive.vue";
+import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
+import IconSeeking from "./components/icons/IconSeeking.vue";
 import type { NavTab } from "./components/BottomNav.vue";
 
 const {
@@ -195,9 +206,9 @@ const currentPage = ref("hunt");
 const showNfcConsent = ref(false);
 
 const navTabs: NavTab[] = [
-  { id: "hunt", label: "Hunt", icon: "&#9733;" },
-  { id: "archive", label: "Archive", icon: "&#128218;" },
-  { id: "toybox", label: "Toybox", icon: "&#9881;" },
+  { id: "hunt", label: "Hunt", icon: IconHuntMap },
+  { id: "archive", label: "Archive", icon: IconArchive },
+  { id: "toybox", label: "Toybox", icon: IconWandTweaker },
 ];
 
 const hunts = ref<Record<number, HuntYear>>({});
@@ -245,7 +256,10 @@ onMounted(async () => {
 });
 
 // Whether a wand has been scanned at least once
-const hasScannedWand = computed(() => wandMetadata.value !== null || Object.keys(collectedSpots.value).length > 0);
+const hasScannedWand = computed(
+  () =>
+    wandMetadata.value !== null || Object.keys(collectedSpots.value).length > 0,
+);
 
 // All years from loaded hunt data (for archive)
 const allYears = computed(() =>
@@ -254,13 +268,16 @@ const allYears = computed(() =>
     .sort((a, b) => b - a),
 );
 
-// Only years that appear on the wand (for hunt tab)
+// Years to show on the hunt tab: wand years + latest available hunt (so
+// the active hunt is always visible even with zero collected spots).
 const wandYears = computed(() => {
   const onWand = Object.keys(collectedSpots.value).map(Number);
-  // Only include years we have hunt data for
-  return onWand
-    .filter((y) => y in hunts.value)
-    .sort((a, b) => b - a);
+  const years = onWand.filter((y) => y in hunts.value);
+  // Always include the latest available hunt year
+  if (allYears.value.length > 0 && !years.includes(allYears.value[0])) {
+    years.push(allYears.value[0]);
+  }
+  return years.sort((a, b) => b - a);
 });
 
 // Auto-select default year when wand data arrives
@@ -316,9 +333,13 @@ const yearProgress = computed(() => {
   font-size: 2rem;
   color: var(--accent);
   display: block;
-  margin-bottom: 0.5rem;
-  animation: sparkle-spin 4s linear infinite;
+  margin: 0 auto 0.5rem;
+  animation: float 3s ease-in-out infinite;
   filter: drop-shadow(0 0 10px rgba(212, 168, 67, 0.5));
+}
+
+.hero-no-spin {
+  animation: float 3s ease-in-out infinite;
 }
 
 .eyebrow {
@@ -528,8 +549,13 @@ const yearProgress = computed(() => {
 }
 
 @keyframes float-centered {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 .empty-state p {
@@ -593,15 +619,22 @@ const yearProgress = computed(() => {
 }
 
 @keyframes rune-fade {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.55; }
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .ring-outer {
   width: 100%;
   height: 100%;
   border-color: rgba(155, 109, 255, 0.15);
-  animation: ring-pulse 4s ease-in-out infinite, ring-spin-cw 25s linear infinite;
+  animation:
+    ring-pulse 4s ease-in-out infinite,
+    ring-spin-cw 25s linear infinite;
   box-shadow:
     0 0 40px rgba(155, 109, 255, 0.08),
     inset 0 0 40px rgba(155, 109, 255, 0.05);
@@ -612,7 +645,9 @@ const yearProgress = computed(() => {
   height: 72%;
   border-color: rgba(212, 168, 67, 0.18);
   border-style: dashed;
-  animation: ring-pulse 4s ease-in-out 0.8s infinite, ring-spin-ccw 18s linear infinite;
+  animation:
+    ring-pulse 4s ease-in-out 0.8s infinite,
+    ring-spin-ccw 18s linear infinite;
   box-shadow:
     0 0 25px rgba(212, 168, 67, 0.08),
     inset 0 0 25px rgba(212, 168, 67, 0.05);
@@ -623,7 +658,9 @@ const yearProgress = computed(() => {
   height: 46%;
   border-color: rgba(155, 109, 255, 0.22);
   border-width: 1px;
-  animation: ring-pulse 4s ease-in-out 1.6s infinite, ring-spin-cw 12s linear infinite;
+  animation:
+    ring-pulse 4s ease-in-out 1.6s infinite,
+    ring-spin-cw 12s linear infinite;
   box-shadow:
     0 0 18px rgba(155, 109, 255, 0.1),
     inset 0 0 18px rgba(155, 109, 255, 0.06);
@@ -634,7 +671,9 @@ const yearProgress = computed(() => {
   height: 20%;
   border-color: rgba(212, 168, 67, 0.3);
   border-width: 1px;
-  animation: ring-pulse 4s ease-in-out 2.4s infinite, ring-spin-ccw 8s linear infinite;
+  animation:
+    ring-pulse 4s ease-in-out 2.4s infinite,
+    ring-spin-ccw 8s linear infinite;
   box-shadow:
     0 0 16px rgba(212, 168, 67, 0.15),
     inset 0 0 16px rgba(212, 168, 67, 0.1);
@@ -683,7 +722,8 @@ const yearProgress = computed(() => {
 }
 
 @keyframes ring-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
     transform: translate(-50%, -50%) scale(1);
   }
@@ -694,17 +734,26 @@ const yearProgress = computed(() => {
 }
 
 @keyframes ring-spin-cw {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 @keyframes ring-spin-ccw {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(-360deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
 }
 
 @keyframes orbit-star {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: scale(0.5);
   }

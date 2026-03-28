@@ -273,6 +273,12 @@ export function useNfc() {
     }
     if (isWriting.value) return;
 
+    if (lastReadRecords.length === 0) {
+      status.value =
+        "⚠️ Scan your wand first before writing. This prevents losing your treasure progress.";
+      return;
+    }
+
     isWriting.value = true;
     status.value = "Hold the wand near your device to write...";
 

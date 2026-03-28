@@ -10,7 +10,9 @@
       type="button"
       @click="$emit('update:modelValue', tab.id)"
     >
-      <span class="nav-icon" v-html="tab.icon"></span>
+      <span class="nav-icon">
+        <component :is="tab.icon" />
+      </span>
       <span class="nav-label">{{ tab.label }}</span>
       <span v-if="tab.id === modelValue" class="nav-indicator"></span>
     </button>
@@ -18,10 +20,12 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from "vue";
+
 export interface NavTab {
   id: string;
   label: string;
-  icon: string;
+  icon: Component;
 }
 
 defineProps<{

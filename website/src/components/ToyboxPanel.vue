@@ -60,6 +60,12 @@
         preserved when writing.
       </p>
 
+      <div v-if="!props.hasScannedWand" class="warning" role="alert">
+        <span class="warning-icon" aria-hidden="true">&#9888;</span>
+        Scan your wand first. Writing without a scan will erase your treasure
+        progress.
+      </div>
+
       <div class="form-group">
         <label for="toy-action">Action type</label>
         <select v-model="toyAction" id="toy-action" class="nfc-input">
@@ -91,7 +97,7 @@
 
       <div class="nfc-controls">
         <button
-          :disabled="isWriting"
+          :disabled="isWriting || !props.hasScannedWand"
           @click="handleWrite"
           type="button"
           class="counter"
@@ -108,6 +114,7 @@ import { ref, watch } from "vue";
 
 const props = defineProps<{
   isWriting: boolean;
+  hasScannedWand: boolean;
   initializeWand: (name: string, year: number) => Promise<void>;
 }>();
 
