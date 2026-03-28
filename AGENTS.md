@@ -47,6 +47,7 @@ Current conceptual capability notes:
 - Serial commands allow spotId (1-64) and huntYear (2000-2100) to be reconfigured dynamically without reflash; changes persist for the session.
 - **Record 1 support**: Attempted hand-rolled NDEF URI record encoding which broke tag scanning. Will use the battle-tested don/NDEF library instead for proper encoding. Hand-rolling NDEF is error-prone; use a library.
 - On ESP8266 with intermittent RF reads, `MifareUltralight::read()` can crash due to parsing partial/invalid buffers; prefer guarded raw page reads for parse input, then use library `write()` for final NDEF encode/TLV/page writes.
+- Data-loss guard added for both PN532 and RC522 sketches: if existing NDEF cannot be read, firmware now probes early user pages and refuses writes unless tag is confidently blank.
 
 Keep this structure intentionally minimal for now.
 

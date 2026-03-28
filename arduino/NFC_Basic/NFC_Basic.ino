@@ -284,6 +284,29 @@ bool readRawNdefFromTag(uint8_t* outMessage, size_t outCap, size_t* outLen) {
   return false;
 }
 
+bool probeBlankUserArea(bool* isBlank) {
+  if (!isBlank) return false;
+  *isBlank = true;
+
+  // Only probe the first user pages. If any non-zero byte exists, treat as non-blank.
+  // A blank tag can safely be initialized; a non-blank unreadable tag must not be overwritten.
+  constexpr uint8_t kProbePages = 4;
+  for (uint8_t i = 0; i < kProbePages; i++) {
+    uint8_t pageData[4] = {0};
+    if (!readPage((uint8_t)(kUserStartPage + i), pageData)) {
+      return false;
+    }
+    for (uint8_t b = 0; b < 4; b++) {
+      if (pageData[b] != 0x00) {
+        *isBlank = false;
+        return true;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   if (spotId < 1 || spotId > 64) {
     Serial.println("spotId must be in range 1..64.");
@@ -303,6 +326,19 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   static uint8_t existingNdef[kMaxUserAreaBytes];
   size_t existingNdefLen = 0;
   const bool hasExistingNdef = readRawNdefFromTag(existingNdef, sizeof(existingNdef), &existingNdefLen);
+
+  if (!hasExistingNdef) {
+    bool isBlank = false;
+    if (!probeBlankUserArea(&isBlank)) {
+      Serial.println("Could not safely verify tag blank state; refusing write.");
+      return false;
+    }
+    if (!isBlank) {
+      Serial.println("Existing tag data is unreadable; refusing write to avoid data loss.");
+      return false;
+    }
+    Serial.println("Blank tag detected (no readable NDEF). Initializing new message.");
+  }
 
   // Parse existing records to preserve URI and other-year hunt data.
   // Copy to a 4-byte aligned static buffer first to avoid Xtensa alignment faults

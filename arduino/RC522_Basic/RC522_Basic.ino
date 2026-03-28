@@ -175,6 +175,29 @@ bool readRawNdefFromTag(uint8_t* outMessage, size_t outCap, size_t* outLen) {
   return false;
 }
 
+bool probeBlankUserArea(bool* isBlank) {
+  if (!isBlank) return false;
+  *isBlank = true;
+
+  // Only probe the first user pages. If any non-zero byte exists, treat as non-blank.
+  // A blank tag can safely be initialized; a non-blank unreadable tag must not be overwritten.
+  constexpr uint8_t kProbePages = 4;
+  for (uint8_t i = 0; i < kProbePages; i++) {
+    uint8_t pageData[4] = {0};
+    if (!readPage((uint8_t)(kUserStartPage + i), pageData)) {
+      return false;
+    }
+    for (uint8_t b = 0; b < 4; b++) {
+      if (pageData[b] != 0x00) {
+        *isBlank = false;
+        return true;
+      }
+    }
+  }
+
+  return true;
+}
+
 void buildHuntMimeType(char* out, size_t outSize) {
   snprintf(out, outSize, "application/vnd.tryllestav.hunt.year-%u", (unsigned)huntYear);
 }
@@ -271,6 +294,19 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   static uint8_t existingNdef[kMaxUserAreaBytes];
   size_t existingNdefLen = 0;
   const bool hasExistingNdef = readRawNdefFromTag(existingNdef, sizeof(existingNdef), &existingNdefLen);
+
+  if (!hasExistingNdef) {
+    bool isBlank = false;
+    if (!probeBlankUserArea(&isBlank)) {
+      Serial.println("Could not safely verify tag blank state; refusing write.");
+      return false;
+    }
+    if (!isBlank) {
+      Serial.println("Existing tag data is unreadable; refusing write to avoid data loss.");
+      return false;
+    }
+    Serial.println("Blank tag detected (no readable NDEF). Initializing new message.");
+  }
 
   NdefRecord uriRecord;
   bool hasUri = false;
@@ -419,6 +455,16 @@ void setup() {
   mfrc522.PCD_Init();
   delay(4);  // Allow RC522 to fully stabilize after init (helps with NTAG detection on clone boards).
   mfrc522.PCD_SetAntennaGain(MFRC522::RxGain_max);
+
+  // Boost RF field strength and lower receive threshold to improve NTAG21x detection.
+  // NTAG produces weaker load modulation than MIFARE Classic, so the defaults are too conservative.
+  // GsNReg [7:4]=CWGsN, [3:0]=ModGsN — n-driver conductance. 0xFF = max field strength.
+  mfrc522.PCD_WriteRegister(MFRC522::GsNReg, 0xFF);
+  // CWGsPReg [5:0]=CWGsP — p-driver conductance during carrier wave. 0x3F = max.
+  mfrc522.PCD_WriteRegister(MFRC522::CWGsPReg, 0x3F);
+  // RxThresholdReg [7:4]=MinLevel — minimum signal to trigger bit decode.
+  // Lower from default 0x84 (MinLevel=8) to 0x44 (MinLevel=4) to detect weaker implant-form NTAG responses.
+  mfrc522.PCD_WriteRegister(MFRC522::RxThresholdReg, 0x44);
 
   Serial.println("RFID ready. Present NTAG21x tag.");
   Serial.print("Configured spotId=");
