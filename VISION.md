@@ -1,3 +1,11 @@
+# Tryllestavsprojekt Vision (DEPRECATED)
+
+⚠️ **This file is deprecated.** See [`docs/02-VISION-AND-PURPOSE.md`](docs/02-VISION-AND-PURPOSE.md) for the current vision and design principles.
+
+This file is kept for backwards compatibility but should no longer be considered the source of truth. **All changes should be made to `docs/02-VISION-AND-PURPOSE.md`.**
+
+---
+
 # Tryllestavsprojekt Vision
 
 ## Purpose

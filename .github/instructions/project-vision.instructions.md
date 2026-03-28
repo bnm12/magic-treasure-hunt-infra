@@ -5,35 +5,73 @@ applyTo: "**"
 
 # Project Vision Alignment
 
-Before making meaningful changes, check `VISION.md` and `docs/schematics.md`.
+Before making meaningful changes, read the relevant documentation:
 
-## Required alignment checks
+- **Product vision & design principles:** [`docs/02-VISION-AND-PURPOSE.md`](../../docs/02-VISION-AND-PURPOSE.md)
+- **On-tag data model:** [`docs/03-TECHNICAL-PROTOCOL.md`](../../docs/03-TECHNICAL-PROTOCOL.md)
+- **System architecture & flows:** [`docs/04-SYSTEM-ARCHITECTURE.md`](../../docs/04-SYSTEM-ARCHITECTURE.md)
+- **How to keep docs in sync:** [`docs/MAINTENANCE.md`](../../docs/MAINTENANCE.md)
 
-1. Connect proposed work to at least one primary user outcome in `VISION.md`.
-2. Confirm whether the change belongs to `website/`, `arduino/`, or both, and keep responsibilities clear.
-3. Preserve the baseline treasure-hunt loop (find spot, tap wand, collect, scan wand, get hints).
-4. Preserve offline and decentralized behavior where wand data is the core source of truth.
-5. Keep wand record 1 free for user-controlled NFC actions unless explicitly approved otherwise.
-6. Prefer reliability and clarity over adding speculative features.
-7. Preserve the v1.0 data model: one hunt record per year with only spot IDs, plus external `(year, spotId)` lookup in the website.
-8. Never rely on hunt record index order; discover hunt records by MIME type and year metadata.
-9. Preserve storage compactness assumptions for target tags: design within an approximately 888-byte total writable budget.
-10. Keep hunt payloads strictly compact: media type carries year (`x-hunt:<YYYY>`) and payload stays exactly 8 bytes (64-bit mask).
-11. Avoid introducing legacy on-tag compatibility branches unless there is real migrated production data that requires it.
+## Required Alignment Checks
 
-## Documentation updates
+Before implementing a feature, ensure it meets these criteria:
 
-When architecture, flows, scope, or milestones change:
+1. **Connect to a user outcome** in [`docs/02-VISION-AND-PURPOSE.md#primary-user-outcomes`](../../docs/02-VISION-AND-PURPOSE.md#primary-user-outcomes).
 
-1. Update `VISION.md` if goals, non-goals, or principles changed.
-2. Update `docs/schematics.md` if diagrams or boundaries changed.
-3. Update `AGENTS.md` in the same change to reflect structural or conceptual updates.
+2. **Confirm scope:** Does this belong to `website/`, `arduino/`, or both? Check responsibility boundaries in [`docs/04-SYSTEM-ARCHITECTURE.md#responsibility-boundaries`](../../docs/04-SYSTEM-ARCHITECTURE.md#responsibility-boundaries).
 
-## Delivery expectations
+3. **Preserve core loop:** The baseline hunt loop must remain intact:
+   - Find spot → Tap wand → Collect → Scan website → View progress
 
-1. Favor small, verifiable increments.
-2. Include clear status and failure messaging in NFC user flows.
-3. Keep setup assumptions explicit in docs when hardware or browser constraints apply.
-4. Keep writes idempotent for spots: append spot ID only when missing from that year's list.
-5. Maintain a website "toybox" path for configuring record 1 with common NFC actions.
-6. Prefer byte-budget-conscious data contracts and call out expected on-tag byte cost in design changes.
+4. **Maintain offline/decentralized behavior**
+   - Wand data is source of truth
+   - No central server required for core loop
+   - Works during connectivity blips
+
+5. **Protect record 1**
+   - Wand record 1 stays free for user-controlled NFC actions
+   - Hunt logic never writes to record 1
+
+6. **Respect data model**
+   - One hunt record per year (`x-hunt:<YYYY>`)
+   - 8-byte payload (64-bit spot mask only)
+   - Year in MIME type, not payload
+   - See [`docs/03-TECHNICAL-PROTOCOL.md`](../../docs/03-TECHNICAL-PROTOCOL.md) for exact format
+
+7. **Never rely on record order**
+   - Discover hunt records by MIME type + year
+   - Physical record position is not stable
+   - Skip record 1 by record type, not position
+
+8. **Preserve storage budget**
+   - Total writable space: ~888 bytes per tag
+   - Hunt records: ~18–22 bytes each (per year)
+   - Metadata record: ~20–40 bytes
+   - Design within these constraints
+
+9. **Avoid legacy compatibility branches**
+   - Single strict format until production data exists
+   - No dual-read paths for old/new formats in v1.0
+   - If format must change, update protocol doc and add evolution rule
+
+10. **Prefer reliability & clarity**
+    - Reliability over speculative features
+    - Small, verifiable increments
+    - Clear status and failure messaging in NFC flows
+
+## Documentation Updates
+
+When your change affects the system:
+
+1. **Update the source-of-truth doc** (see [`docs/MAINTENANCE.md#when-to-update-docs`](../../docs/MAINTENANCE.md#when-to-update-docs) for which one)
+2. **Check cross-references** in other docs
+3. **Update `.github/instructions/` files** if new patterns or conventions apply
+4. **Follow the maintenance checklist** in [`docs/MAINTENANCE.md#doc-maintenance-checklist`](../../docs/MAINTENANCE.md#doc-maintenance-checklist)
+
+## Before Committing
+
+- [ ] Alignment checks above are satisfied
+- [ ] Relevant docs have been updated in the same commit
+- [ ] No doc duplication (use references instead)
+- [ ] Examples and diagrams still match code
+- [ ] No breaking changes without note in protocol doc
