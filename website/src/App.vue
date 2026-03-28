@@ -36,8 +36,17 @@
 
     <div class="page-content">
       <Transition name="page-fade" mode="out-in">
+        <!-- --- INITIALIZE PAGE --- -->
+        <InitializePage
+          v-if="currentPage === 'initialize'"
+          key="initialize"
+          :year="initializeYear"
+          :is-writing="isWriting"
+          :initialize-wand="initializeWand"
+        />
+
         <!-- --- HUNT PAGE --- -->
-        <div v-if="currentPage === 'hunt'" key="hunt" class="page">
+        <div v-else-if="currentPage === 'hunt'" key="hunt" class="page">
           <PageHero
             :icon="hasScannedWand ? IconHuntMap : IconSeeking"
             eyebrow="Tryllestavsprojekt"
@@ -142,7 +151,11 @@
       </Transition>
     </div>
 
-    <BottomNav v-model="currentPage" :tabs="navTabs" />
+    <BottomNav
+      v-if="currentPage !== 'initialize'"
+      v-model="currentPage"
+      :tabs="navTabs"
+    />
 
     <!-- NFC consent popup -->
     <div v-if="showNfcConsent" class="nfc-consent-overlay">
@@ -175,6 +188,7 @@ import BottomNav from "./components/BottomNav.vue";
 import HuntView from "./components/HuntView.vue";
 import YearSelector from "./components/YearSelector.vue";
 import ToyboxPanel from "./components/ToyboxPanel.vue";
+import InitializePage from "./components/InitializePage.vue";
 import WandInfo from "./components/WandInfo.vue";
 import IconHuntMap from "./components/icons/IconHuntMap.vue";
 import IconArchive from "./components/icons/IconArchive.vue";
@@ -203,6 +217,7 @@ const {
 } = useNfc();
 
 const currentPage = ref("hunt");
+const initializeYear = ref(new Date().getFullYear());
 const showNfcConsent = ref(false);
 const scanRevealActive = ref(false);
 const scanRevealComplete = ref(false);
@@ -293,6 +308,23 @@ onMounted(async () => {
   updateStandaloneState();
   window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   window.addEventListener("appinstalled", handleAppInstalled);
+
+  // Check for /initialize path or query param
+  const url = new URL(window.location.href);
+  if (
+    url.pathname.endsWith("/initialize") ||
+    url.pathname.endsWith("/initialize/") ||
+    url.searchParams.has("initialize")
+  ) {
+    currentPage.value = "initialize";
+    const yearParam = url.searchParams.get("year");
+    if (yearParam) {
+      const year = parseInt(yearParam, 10);
+      if (!isNaN(year)) {
+        initializeYear.value = year;
+      }
+    }
+  }
 
   if (!nfcSupported()) {
     nfcCompatMessage.value =
