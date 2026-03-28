@@ -58,6 +58,7 @@
     <ToyboxPanel
       :has-scanned-wand="hasScannedWand()"
       :is-writing="isWriting"
+      :initialize-wand="initializeWand"
       @write="({ action, payload }) => writeRecord1(action, payload)"
     />
   </div>
@@ -82,6 +83,7 @@ const {
   startScan,
   stopScan,
   writeRecord1,
+  initializeWand,
 } = useNfc();
 
 const hunts = ref<Record<number, HuntYear>>({});

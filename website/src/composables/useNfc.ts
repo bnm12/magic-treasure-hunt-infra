@@ -15,6 +15,7 @@ export function useNfc() {
   const nfcCompatMessage = ref("");
   const record1Preview = ref("");
   const collectedSpots = ref<Record<number, number[]>>({});
+  const wandMetadata = ref<{ creationYear: number; name: string } | null>(null);
 
   let abortController: AbortController | null = null;
   let lastReadRecords: NDEFRecord[] = [];
@@ -123,6 +124,42 @@ export function useNfc() {
     return { year, spots };
   }
 
+  interface WandMetadata {
+    creationYear: number;
+    name: string;
+  }
+
+  function parseWandMetadata(record: NDEFRecord): WandMetadata | null {
+    if (record.recordType !== "mime" || record.mediaType !== "x-meta") {
+      return null;
+    }
+
+    const bytes = toUint8Array(record.data);
+    if (bytes.length < 3) return null;
+
+    // Payload format: 2 bytes year (big-endian) + 1 byte name length + name string
+    const creationYear = (bytes[0] << 8) | bytes[1];
+    const nameLength = bytes[2];
+
+    if (3 + nameLength !== bytes.length) return null; // Strict length check
+    if (!isValidYear(creationYear)) return null;
+
+    let name = "";
+    for (let i = 0; i < nameLength; i++) {
+      name += String.fromCharCode(bytes[3 + i]);
+    }
+
+    return { creationYear, name };
+  }
+
+  function extractWandMetadata(records: NDEFRecord[]): WandMetadata | null {
+    for (const record of records) {
+      const metadata = parseWandMetadata(record);
+      if (metadata) return metadata;
+    }
+    return null;
+  }
+
   function extractHuntYears(records: NDEFRecord[]): Record<number, number[]> {
     const byYear = new Map<number, Set<number>>();
     for (const record of records) {
@@ -171,6 +208,7 @@ export function useNfc() {
         readSucceeded = true;
         lastReadRecords = [...event.message.records];
         collectedSpots.value = extractHuntYears(lastReadRecords);
+        wandMetadata.value = extractWandMetadata(lastReadRecords);
 
         const first = lastReadRecords[0];
         record1Preview.value = first
@@ -241,6 +279,56 @@ export function useNfc() {
     }
   }
 
+  async function initializeWand(
+    name: string,
+    creationYear: number,
+  ): Promise<void> {
+    if (!nfcSupported()) {
+      nfcCompatMessage.value =
+        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
+      return;
+    }
+    if (isWriting.value) return;
+    if (!name || name.length === 0 || name.length > 127) {
+      status.value = "Wand name must be 1-127 characters.";
+      return;
+    }
+
+    isWriting.value = true;
+    status.value = "Bring blank tag to initialize as wand...";
+
+    try {
+      const ndef = new NDEFReader();
+
+      // Encode metadata payload: year (2 bytes big-endian) + name length + name string
+      const nameBytes = new TextEncoder().encode(name);
+      const metaPayload = new ArrayBuffer(2 + 1 + nameBytes.length);
+      const metaView = new Uint8Array(metaPayload);
+
+      // Year (big-endian)
+      metaView[0] = (creationYear >> 8) & 0xff;
+      metaView[1] = creationYear & 0xff;
+      // Name length
+      metaView[2] = nameBytes.length;
+      // Name string
+      metaView.set(nameBytes, 3);
+
+      const records: NDEFRecordInit[] = [
+        { recordType: "url", data: "https://192.168.1.131:5173" },
+        { recordType: "mime", mediaType: "x-meta", data: metaPayload },
+      ];
+
+      await ndef.write({ records });
+      status.value = `SUCCESS: Wand "${name}" initialized (year ${creationYear})!`;
+      wandMetadata.value = { creationYear, name };
+    } catch (error) {
+      const err = error as DOMException;
+      status.value = `Initialization failed: ${err.message}`;
+    } finally {
+      isWriting.value = false;
+    }
+  }
+
   return {
     isScanning,
     isWriting,
@@ -248,10 +336,12 @@ export function useNfc() {
     nfcCompatMessage,
     record1Preview,
     collectedSpots,
+    wandMetadata,
     hasScannedWand: (): boolean => lastReadRecords.length > 0,
     nfcSupported,
     startScan,
     stopScan,
     writeRecord1,
+    initializeWand,
   };
 }

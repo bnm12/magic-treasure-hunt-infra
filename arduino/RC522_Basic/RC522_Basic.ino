@@ -20,6 +20,7 @@ uint8_t spotId = 3;
 uint16_t huntYear = 2026;
 const char kDefaultWandUrl[] = "https://192.168.1.131:5173";
 const char kHuntMimePrefix[] = "x-hunt:";
+const char kWandMetaMimeType[] = "x-meta";
 
 String serialBuffer;
 
@@ -276,6 +277,51 @@ bool writeEncodedNdefToTag(const uint8_t* message, size_t messageLen) {
   return true;
 }
 
+// Parse wand metadata from payload buffer.
+// Returns true if payload is valid (>=3 bytes, name length matches payload length).
+bool parseWandMetadataPayload(const uint8_t* payload, size_t payloadLen, uint16_t* outYear, String* outName) {
+  if (!payload || payloadLen < 3) return false;
+  
+  // Big-endian year from first 2 bytes
+  *outYear = ((uint16_t)payload[0] << 8) | payload[1];
+  
+  uint8_t nameLen = payload[2];
+  if (3 + nameLen != payloadLen) return false;  // Strict: payload size must match exactly
+  
+  *outName = "";
+  for (uint8_t i = 0; i < nameLen; i++) {
+    *outName += (char)payload[3 + i];
+  }
+  
+  return true;
+}
+
+// Check if a parsed NDEF message contains a valid wand metadata record.
+// Returns true if found and valid; outYear and outName are populated on success.
+bool hasValidWandMetadata(NdefMessage& msg, uint16_t* outYear, String* outName) {
+  if (!outYear || !outName) return false;
+  
+  for (int i = 0; i < (int)msg.getRecordCount(); i++) {
+    NdefRecord r = msg.getRecord(i);
+    if (r.getTnf() == TNF_MIME_MEDIA) {
+      String recType = r.getType();
+      if (recType == String(kWandMetaMimeType)) {
+        uint8_t payload[256] = {0};
+        size_t payloadLen = r.getPayloadLength();
+        if (payloadLen > sizeof(payload)) return false;
+        r.getPayload(payload);
+        
+        uint16_t year = 0;
+        if (!parseWandMetadataPayload(payload, payloadLen, &year, outName)) return false;
+        *outYear = year;
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
 bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   if (spotId < 1 || spotId > 64) {
     Serial.println("spotId must be in range 1..64.");
@@ -317,6 +363,21 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
 
   if (hasExistingNdef && existingNdefLen > 0) {
     NdefMessage existingMsg(existingNdef, (int)existingNdefLen);
+    
+    // Gate spot writes: tag must have valid wand metadata record.
+    uint16_t metaYear = 0;
+    String metaName = "";
+    if (!hasValidWandMetadata(existingMsg, &metaYear, &metaName)) {
+      Serial.println("ERROR: Tag does not have valid wand metadata. Not an official wand.");
+      Serial.println("Use 'initWand: <name>' to initialize a blank tag as a new wand.");
+      return false;
+    }
+    Serial.print("Wand verified: '");
+    Serial.print(metaName);
+    Serial.print("' (created ");
+    Serial.print(metaYear);
+    Serial.println(")");
+    
     for (int i = 0; i < (int)existingMsg.getRecordCount(); i++) {
       NdefRecord r = existingMsg.getRecord(i);
       if (r.getTnf() == TNF_WELL_KNOWN && r.getType() == "U") {
@@ -426,8 +487,10 @@ void processSerialCommand(const String& cmd) {
     }
     return;
   }
-
-  Serial.println("Commands: 'setSpot: X' (1-64) or 'setYear: YYYY' (2000-2100)");
+  
+  Serial.println("Commands:");
+  Serial.println("  'setSpot: X' (1-64)");
+  Serial.println("  'setYear: YYYY' (2000-2100)");
 }
 
 void handleSerialInput() {
