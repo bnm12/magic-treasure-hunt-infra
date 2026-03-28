@@ -9,7 +9,7 @@
       "name": "The Dragon's Garden",
       "hint": "Look for the red door with a golden knocker.",
       "collectedText": "You found the magical garden! 🎭",
-      "image": "images/1-garden.svg",
+      "image": "images/4-ember-arch.svg",
       "imageAlt": "Lush green garden with stone statues",
       "location": "Central Park, North Gate"
     },
@@ -17,7 +17,7 @@
       "name": "The Crystal Tower",
       "hint": "Follow the blue mosaic path east.",
       "collectedText": "The tower shimmers with enchantment! ✨",
-      "image": "images/2-tower.svg",
+      "image": "images/5-moonscale-steps.svg",
       "imageAlt": "Tall tower with sparkling crystal panels",
       "location": "Market Square"
     },
@@ -25,9 +25,89 @@
       "name": "The Whispering Well",
       "hint": "Listen carefully by the stone well.",
       "collectedText": "The well echoes with ancient magic! 🌊",
-      "image": "images/3-well.svg",
+      "image": "images/6-sapphire-basin.svg",
       "imageAlt": "Old stone well with glowing water",
       "location": "Forest Edge"
+    },
+    "4": {
+      "name": "The Ember Arch",
+      "hint": "Search for warm-colored stones near the old lane.",
+      "collectedText": "The arch blazes with dragon fire!",
+      "image": "images/7-lantern-roost.svg",
+      "imageAlt": "A glowing stone arch lit by ember-colored lanterns",
+      "location": "Old Town Passage"
+    },
+    "5": {
+      "name": "The Moonscale Steps",
+      "hint": "Count the silver tiles leading up the hill.",
+      "collectedText": "Moonlight dances across the dragon scales!",
+      "image": "images/8-golden-perch.svg",
+      "imageAlt": "Shimmering tower steps with silver-blue reflections",
+      "location": "Hilltop Walk"
+    },
+    "6": {
+      "name": "The Sapphire Basin",
+      "hint": "Find the quiet pool where the air feels cooler.",
+      "collectedText": "The basin ripples with deep magic!",
+      "image": "images/9-misty-hollow.svg",
+      "imageAlt": "A blue stone basin filled with softly glowing water",
+      "location": "Riverside Court"
+    },
+    "7": {
+      "name": "The Lantern Roost",
+      "hint": "Look above for hanging lights near the market roofs.",
+      "collectedText": "A dragon's lookout glows overhead!",
+      "image": "images/10-ruby-gate.svg",
+      "imageAlt": "A cozy rooftop roost decorated with lanterns and greenery",
+      "location": "East Market"
+    },
+    "8": {
+      "name": "The Golden Perch",
+      "hint": "Seek the place where birds and dragons might both rest.",
+      "collectedText": "You found a perch fit for treasure keepers!",
+      "image": "images/11-starglass-spire.svg",
+      "imageAlt": "A tall golden perch beside a sparkling tower ledge",
+      "location": "Clocktower Square"
+    },
+    "9": {
+      "name": "The Misty Hollow",
+      "hint": "Follow the path where the trees hide the sunlight.",
+      "collectedText": "The hollow swirls with secret dragon whispers!",
+      "image": "images/12-echo-pool.svg",
+      "imageAlt": "A shaded hollow with mist drifting around old stones",
+      "location": "Birch Grove"
+    },
+    "10": {
+      "name": "The Ruby Gate",
+      "hint": "Find the entrance marked by deep red glass.",
+      "collectedText": "The ruby gate opens to hidden wonders!",
+      "image": "images/13-fernfire-nest.svg",
+      "imageAlt": "A red jewel-toned gate framed by vines and carved stone",
+      "location": "South Courtyard"
+    },
+    "11": {
+      "name": "The Starglass Spire",
+      "hint": "Look for the tallest point where the sky feels close.",
+      "collectedText": "The spire shines with captured starlight!",
+      "image": "images/2-tower.svg",
+      "imageAlt": "A crystalline spire catching starlight against the sky",
+      "location": "North Rise"
+    },
+    "12": {
+      "name": "The Echo Pool",
+      "hint": "Pause where every footstep seems to answer back.",
+      "collectedText": "The pool remembers every magical secret!",
+      "image": "images/3-well.svg",
+      "imageAlt": "A reflective pool surrounded by ancient carved stones",
+      "location": "Whisper Court"
+    },
+    "13": {
+      "name": "The Fernfire Nest",
+      "hint": "Search the greenest corner where sparks seem impossible.",
+      "collectedText": "A dragon nest glows beneath the leaves!",
+      "image": "images/1-garden.svg",
+      "imageAlt": "A hidden nest among bright ferns with magical embers",
+      "location": "Garden Maze"
     }
   }
 }

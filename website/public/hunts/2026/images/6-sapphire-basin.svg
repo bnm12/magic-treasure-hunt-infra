@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#061a2a"/>
+      <stop offset="100%" stop-color="#10384b"/>
+    </linearGradient>
+    <radialGradient id="water" cx="0.5" cy="0.55" r="0.4">
+      <stop offset="0%" stop-color="#63d4ff88"/>
+      <stop offset="100%" stop-color="#63d4ff00"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg)"/>
+  <ellipse cx="200" cy="270" rx="118" ry="42" fill="#33556b"/>
+  <ellipse cx="200" cy="260" rx="108" ry="34" fill="#4f738d"/>
+  <ellipse cx="200" cy="258" rx="86" ry="22" fill="#10364a"/>
+  <ellipse cx="200" cy="258" rx="72" ry="18" fill="#1f89bb" opacity="0.65"/>
+  <circle cx="200" cy="258" r="92" fill="url(#water)"/>
+  <rect x="92" y="280" width="216" height="66" rx="12" fill="#46687d"/>
+  <rect x="118" y="306" width="34" height="12" rx="6" fill="#7ea4bc"/>
+  <rect x="166" y="306" width="68" height="12" rx="6" fill="#7ea4bc"/>
+  <rect x="248" y="306" width="34" height="12" rx="6" fill="#7ea4bc"/>
+  <circle cx="112" cy="106" r="2" fill="#fff"/>
+  <circle cx="156" cy="74" r="1.5" fill="#9ddfff"/>
+  <circle cx="286" cy="88" r="2" fill="#fff"/>
+</svg>
