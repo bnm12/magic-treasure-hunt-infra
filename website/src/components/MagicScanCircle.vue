@@ -1,5 +1,9 @@
 <template>
-  <div class="scan-circle" aria-hidden="true">
+  <div
+    class="scan-circle"
+    :class="{ 'scan-circle--activated': activated }"
+    aria-hidden="true"
+  >
     <div class="scan-circle__halo"></div>
     <div class="scan-circle__ring scan-circle__ring--outer">
       <span class="scan-circle__runes scan-circle__runes--outer">
@@ -48,6 +52,10 @@
 </template>
 
 <script setup lang="ts">
+defineProps<{
+  activated?: boolean;
+}>();
+
 const outerRunes = "\u16A0 \u00B7 \u16B1 \u00B7 \u16C7 \u00B7 \u16D6 \u00B7 \u16A2 \u00B7 \u16B7 \u00B7 \u16C1 \u00B7 \u16DE";
 const middleRunes = "\u16C1 \u2027 \u16DE \u2027 \u16A2 \u2027 \u16B7 \u2027 \u16D6 \u2027 \u16C7 \u2027 \u16B1 \u2027 \u16A0";
 const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
@@ -61,6 +69,10 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   display: grid;
   place-items: center;
   pointer-events: none;
+}
+
+.scan-circle--activated {
+  animation: scan-circle-burst 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .scan-circle__halo {
@@ -84,10 +96,20 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   animation: halo-breathe 8s ease-in-out infinite;
 }
 
+.scan-circle--activated .scan-circle__halo {
+  animation:
+    halo-breathe 8s ease-in-out infinite,
+    halo-burst 900ms ease-out forwards;
+}
+
 .scan-circle__geometry {
   position: absolute;
   inset: 0;
   opacity: 0.78;
+}
+
+.scan-circle--activated .scan-circle__geometry {
+  animation: geometry-flare 900ms ease-out forwards;
 }
 
 .scan-circle__axis,
@@ -248,6 +270,13 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
     ring-spin-cw 36s linear infinite;
 }
 
+.scan-circle--activated .scan-circle__ring--outer {
+  animation:
+    ring-pulse 5.6s ease-in-out infinite,
+    ring-spin-cw 36s linear infinite,
+    ring-outer-burst 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
 .scan-circle__ring--mid {
   width: 72%;
   height: 72%;
@@ -260,6 +289,13 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
     ring-spin-ccw 28s linear infinite;
 }
 
+.scan-circle--activated .scan-circle__ring--mid {
+  animation:
+    ring-pulse 4.8s ease-in-out 0.7s infinite,
+    ring-spin-ccw 28s linear infinite,
+    ring-mid-burst 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
 .scan-circle__ring--inner {
   width: 45%;
   height: 45%;
@@ -270,6 +306,13 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   animation:
     ring-pulse 4.2s ease-in-out 1.4s infinite,
     ring-spin-cw 18s linear infinite;
+}
+
+.scan-circle--activated .scan-circle__ring--inner {
+  animation:
+    ring-pulse 4.2s ease-in-out 1.4s infinite,
+    ring-spin-cw 18s linear infinite,
+    ring-inner-burst 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .scan-circle__runes {
@@ -310,6 +353,10 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   display: grid;
   place-items: center;
   z-index: 2;
+}
+
+.scan-circle--activated .scan-circle__core {
+  animation: core-burst 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .scan-circle__seal {
@@ -376,6 +423,12 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   animation: icon-float 3s ease-in-out infinite;
 }
 
+.scan-circle--activated :slotted(.scan-circle__icon) {
+  animation:
+    icon-float 3s ease-in-out infinite,
+    icon-burst 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
 @keyframes halo-breathe {
   0%,
   100% {
@@ -385,6 +438,33 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   50% {
     opacity: 1;
     transform: scale(1.03);
+  }
+}
+
+@keyframes halo-burst {
+  0% {
+    opacity: 1;
+    filter: blur(18px);
+  }
+  45% {
+    opacity: 1;
+    filter: blur(24px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(32px);
+  }
+}
+
+@keyframes geometry-flare {
+  0% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
@@ -408,6 +488,30 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   }
 }
 
+@keyframes icon-burst {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter:
+      drop-shadow(0 0 3px rgba(11, 11, 26, 0.95))
+      drop-shadow(0 0 8px rgba(212, 168, 67, 0.16));
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.12) rotate(12deg);
+    filter:
+      drop-shadow(0 0 4px rgba(11, 11, 26, 0.95))
+      drop-shadow(0 0 18px rgba(240, 208, 120, 0.42));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.36) rotate(30deg);
+    filter:
+      drop-shadow(0 0 2px rgba(11, 11, 26, 0.95))
+      drop-shadow(0 0 24px rgba(240, 208, 120, 0.18));
+  }
+}
+
 @keyframes ring-pulse {
   0%,
   100% {
@@ -417,6 +521,69 @@ const innerRunes = "\u16A0 \u16B1 \u16C7 \u16D6 \u16A2 \u16B7";
   50% {
     opacity: 0.92;
     transform: translate(-50%, -50%) scale(1.03);
+  }
+}
+
+@keyframes ring-outer-burst {
+  0% {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1);
+    border-color: rgba(240, 208, 120, 0.12);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08) rotate(50deg);
+    border-color: rgba(240, 208, 120, 0.42);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.28) rotate(160deg);
+    border-color: rgba(240, 208, 120, 0.08);
+  }
+}
+
+@keyframes ring-mid-burst {
+  0% {
+    opacity: 0.88;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12) rotate(-90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.32) rotate(-220deg);
+  }
+}
+
+@keyframes ring-inner-burst {
+  0% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.18) rotate(110deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.45) rotate(260deg);
+  }
+}
+
+@keyframes core-burst {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
   }
 }
 

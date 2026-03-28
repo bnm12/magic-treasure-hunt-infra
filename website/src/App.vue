@@ -58,10 +58,10 @@
             </div>
           </header>
 
-          <WandInfo :metadata="wandMetadata" />
+          <WandInfo v-if="showScannedView" :metadata="wandMetadata" />
 
           <!-- Show hunts after wand is scanned (active hunt always visible) -->
-          <template v-if="hasScannedWand && wandYears.length > 0">
+          <template v-if="showScannedView && wandYears.length > 0">
             <YearSelector
               v-if="wandYears.length > 1"
               v-model="selectedYear"
@@ -76,15 +76,24 @@
           </template>
 
           <div v-else class="empty-state">
-            <MagicScanCircle v-if="!hasScannedWand">
+            <MagicScanCircle
+              v-if="!showScannedView"
+              :activated="scanRevealActive"
+            >
               <IconSeeking class="scan-circle__icon" aria-hidden="true" />
             </MagicScanCircle>
-            <IconSeeking v-else class="empty-icon" aria-hidden="true" />
+            <IconSeeking
+              v-else
+              class="empty-icon"
+              aria-hidden="true"
+            />
             <p>
               {{
-                hasScannedWand
+                showScannedView
                   ? "No hunt data found on your wand yet. Visit a magic spot!"
-                  : isScanning
+                  : scanRevealActive
+                    ? "Your wand is responding..."
+                    : isScanning
                     ? "Hold your wand close to begin your magical adventure!"
                     : "Preparing NFC scanner..."
               }}
@@ -157,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useNfc } from "./composables/useNfc";
 import { loadHunts } from "./utils/spotLoader";
 import type { HuntYear } from "./utils/spotLoader";
@@ -189,6 +198,9 @@ const {
 
 const currentPage = ref("hunt");
 const showNfcConsent = ref(false);
+const scanRevealActive = ref(false);
+const scanRevealComplete = ref(false);
+let scanRevealTimer: ReturnType<typeof setTimeout> | undefined;
 
 const navTabs: NavTab[] = [
   { id: "hunt", label: "Hunt", icon: IconHuntMap },
@@ -209,6 +221,10 @@ watch(status, (val) => {
   toastTimer = setTimeout(() => {
     nfcToastVisible.value = false;
   }, 3000);
+});
+
+onBeforeUnmount(() => {
+  clearTimeout(scanRevealTimer);
 });
 
 async function handleNfcConsent() {
@@ -244,6 +260,30 @@ onMounted(async () => {
 const hasScannedWand = computed(
   () =>
     wandMetadata.value !== null || Object.keys(collectedSpots.value).length > 0,
+);
+
+watch(
+  () => hasScannedWand.value,
+  (scanned) => {
+    clearTimeout(scanRevealTimer);
+
+    if (!scanned) {
+      scanRevealActive.value = false;
+      scanRevealComplete.value = false;
+      return;
+    }
+
+    scanRevealActive.value = true;
+    scanRevealComplete.value = false;
+    scanRevealTimer = setTimeout(() => {
+      scanRevealActive.value = false;
+      scanRevealComplete.value = true;
+    }, 900);
+  },
+);
+
+const showScannedView = computed(
+  () => hasScannedWand.value && scanRevealComplete.value,
 );
 
 // All years from loaded hunt data (for archive)
