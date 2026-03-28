@@ -410,7 +410,7 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
       Serial.println("Initialize wands in website Toybox (writes x-hunt-meta), then retry.");
       return false;
     }
-    Serial.print("Wand verified: '");
+    Serial.print("Owner verified: '");
     Serial.print(metaName);
     Serial.print("' (created ");
     Serial.print(metaYear);

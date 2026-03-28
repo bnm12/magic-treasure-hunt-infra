@@ -305,7 +305,7 @@ export function useNfc() {
   }
 
   async function initializeWand(
-    name: string,
+    ownerName: string,
     creationYear: number,
   ): Promise<void> {
     if (!nfcSupported()) {
@@ -314,8 +314,8 @@ export function useNfc() {
       return;
     }
     if (isWriting.value) return;
-    if (!name || name.length === 0 || name.length > 127) {
-      status.value = "Wand name must be 1-127 characters.";
+    if (!ownerName || ownerName.length === 0 || ownerName.length > 127) {
+      status.value = "Owner name must be 1-127 characters.";
       return;
     }
 
@@ -326,7 +326,7 @@ export function useNfc() {
       const ndef = new NDEFReader();
 
       // Encode metadata payload: year (2 bytes big-endian) + name length + name string
-      const nameBytes = new TextEncoder().encode(name);
+      const nameBytes = new TextEncoder().encode(ownerName);
       const metaPayload = new ArrayBuffer(2 + 1 + nameBytes.length);
       const metaView = new Uint8Array(metaPayload);
 
@@ -344,8 +344,8 @@ export function useNfc() {
       ];
 
       await ndef.write({ records });
-      status.value = `SUCCESS: Wand "${name}" initialized (year ${creationYear})!`;
-      wandMetadata.value = { creationYear, name };
+      status.value = `SUCCESS: Wand initialized for ${ownerName} (year ${creationYear})!`;
+      wandMetadata.value = { creationYear, name: ownerName };
       await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;

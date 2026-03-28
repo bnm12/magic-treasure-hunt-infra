@@ -11,13 +11,13 @@
       </p>
 
       <div class="form-group">
-        <label for="wand-name">Wand name</label>
+        <label for="wand-name">Owner name</label>
         <input
           v-model="wandName"
           id="wand-name"
           class="nfc-input"
           type="text"
-          placeholder="e.g., Wand 1"
+          placeholder="e.g., Benjamin"
           maxlength="127"
         />
         <small>{{ wandName.length }}/127 characters</small>
@@ -129,12 +129,12 @@ async function handleInitWand() {
   const name = wandName.value.trim();
 
   if (!name) {
-    wandInitError.value = "Please enter a wand name.";
+    wandInitError.value = "Please enter the owner's name.";
     return;
   }
 
   if (name.length > 127) {
-    wandInitError.value = "Wand name is too long (max 127 characters).";
+    wandInitError.value = "Owner name is too long (max 127 characters).";
     return;
   }
 

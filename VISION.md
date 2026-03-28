@@ -83,6 +83,8 @@ Deliver a dependable "find, tap, collect" loop where:
 2. Hunt records: one or more records keyed by MIME type and year marker, each containing spot ID list for that year.
 3. Parsing rule: never rely on record index except preserving record 1 availability.
 4. Lookup rule: website maps `(year, spotId)` to external static hunt content.
+5. Wand metadata record: MIME `x-hunt-meta` with payload `creationYear (2 bytes, big-endian) + ownerNameLength (1 byte) + ownerName (UTF-8)`.
+6. Initialization rule: Toybox initialization writes the website URL to record 1 and writes `x-hunt-meta` (owner name + creation year) in the same operation.
 
 ## Formal Ledger MIME Schema (Draft v1)
 

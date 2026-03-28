@@ -211,6 +211,15 @@ The wand stores **two types of records**:
 - Points to the hunt website, a personal blog, or a maker portfolio
 - Preserved during hunts and free for the child to configure
 - Can be updated via the website's "Toybox" panel
+- During wand initialization, Toybox writes the hunt website URL here by default
+
+### Wand Metadata Record (Official Wand Identity)
+
+- Media type: `x-hunt-meta`
+- Payload: 2-byte creation year (big-endian) + 1-byte owner-name length + owner-name bytes (UTF-8)
+- The stored name is the **owner name** (child name), not a wand nickname
+- Written during initialization together with record 1 website URL
+- Required for spot writes: spots refuse tags without valid metadata
 
 ### Hunt Records (One Per Year)
 
@@ -253,7 +262,7 @@ This means a child's collected spots survive even transient RF failures during a
 
 ### Potential Future
 
-- Custom wand initialization (pick your wand's "name" or power)
+- Custom wand initialization (set owner name, theme, or power)
 - Multi-player challenges (find hidden spots together, share clues)
 - Wand leveling (unlock hints after collecting N spots)
 - Maker station: kids reprogramme their wand's Record 1 at an event
