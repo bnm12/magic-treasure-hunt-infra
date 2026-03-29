@@ -8,7 +8,7 @@ const INDEX_URL = new URL("management/index.html", APP_SCOPE).toString();
 const APP_SHELL_ASSETS = [
   MANAGEMENT_URL,
   INDEX_URL,
-  new URL("management/management-manifest.webmanifest", APP_SCOPE).toString(),
+  new URL("management-manifest.webmanifest", APP_SCOPE).toString(),
 ];
 
 self.addEventListener("install", (event) => {
