@@ -203,7 +203,7 @@ uint32_t lastSeenAt    = 0;
 
 void printHexByte(uint8_t value) {
   if (value < 0x10) CombiSerial.print("0");
-  CombiSerial.print(value, HEX);
+  CombiSerial.print((unsigned long)value, HEX);
 }
 
 void printUid(const uint8_t* uid, uint8_t uidLength) {

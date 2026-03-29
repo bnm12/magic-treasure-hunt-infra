@@ -3,7 +3,7 @@
   "configuration": "UploadSpeed=921600,CDCOnBoot=default,CPUFreq=160,FlashFreq=80,PartitionScheme=default,DebugLevel=none,EraseFlash=none",
   "output": "build",
   "board": "esp32:esp32:lolin_c3_mini",
-  "programmer": "",
+  "programmer": "esptool",
   "useProgrammer": false,
   "optimize_for_debug": false,
   "configurationRequired": true,
@@ -15,7 +15,8 @@
       "lineEnding": "\r\n",
       "dataBits": 8,
       "parity": "none",
-      "stopBits": "one"
+      "stopBits": "one",
+      "rts": false
     },
     "profile_name": ""
   }
