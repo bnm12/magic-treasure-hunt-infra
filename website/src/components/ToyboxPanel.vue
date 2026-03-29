@@ -133,7 +133,8 @@
         <div class="form-group">
           <label for="wand-creation-year">Creation year</label>
           <select
-            v-model.number="wandCreationYear"
+            :value="wandCreationYear"
+            @change="wandCreationYearOverride = +($event.target as HTMLSelectElement).value"
             id="wand-creation-year"
             class="nfc-input"
           >
@@ -177,7 +178,12 @@
 
         <div class="form-group">
           <label for="debug-year">Hunt year</label>
-          <select v-model.number="debugYear" id="debug-year" class="nfc-input">
+          <select
+            :value="debugYear"
+            @change="debugYearOverride = +($event.target as HTMLSelectElement).value"
+            id="debug-year"
+            class="nfc-input"
+          >
             <option v-for="year in availableYears" :key="year" :value="year">
               {{ year }}
             </option>
@@ -187,7 +193,8 @@
         <div class="form-group">
           <label for="debug-spot">Spot</label>
           <select
-            v-model.number="debugSpotId"
+            :value="debugSpotId"
+            @change="debugSpotIdOverride = +($event.target as HTMLSelectElement).value"
             id="debug-spot"
             class="nfc-input"
           >
@@ -257,78 +264,68 @@ const toyFields = ref<Record<string, string>>(
   createEmptyToyRecordFields("url"),
 );
 const validationError = ref("");
-const wandCreationYear = ref(0);
-const debugYear = ref(0);
-const debugSpotId = ref(0);
 const debugUnlockError = ref("");
 
 const selectedActionDefinition = computed(() =>
   toyboxActions.find((action) => action.id === toyAction.value),
 );
 
-const availableSpotIds = computed(
+// The year the user has explicitly selected for wand initialization (0 = no explicit choice)
+const wandCreationYearOverride = ref<number>(0);
+
+// Effective wand creation year: user's choice if valid, else prefer activeHuntYear, else first available
+const wandCreationYear = computed<number>(() => {
+  if (
+    wandCreationYearOverride.value > 0 &&
+    props.availableYears.includes(wandCreationYearOverride.value)
+  ) {
+    return wandCreationYearOverride.value;
+  }
+  if (
+    props.activeHuntYear > 0 &&
+    props.availableYears.includes(props.activeHuntYear)
+  ) {
+    return props.activeHuntYear;
+  }
+  return props.availableYears[0] ?? 0;
+});
+
+// The year the user has explicitly selected for debug unlock (0 = no explicit choice)
+const debugYearOverride = ref<number>(0);
+
+// Effective debug year: user's choice if valid, else first available
+const debugYear = computed<number>(() => {
+  if (
+    debugYearOverride.value > 0 &&
+    props.availableYears.includes(debugYearOverride.value)
+  ) {
+    return debugYearOverride.value;
+  }
+  return props.availableYears[0] ?? 0;
+});
+
+// All spot IDs available for the currently selected debug year
+const availableSpotIds = computed<number[]>(
   () => props.availableSpotIdsByYear[debugYear.value] ?? [],
 );
+
+// The spot ID the user has explicitly selected for debug unlock (0 = no explicit choice)
+const debugSpotIdOverride = ref<number>(0);
+
+// Effective debug spot ID: user's choice if valid, else first available
+const debugSpotId = computed<number>(() => {
+  if (
+    debugSpotIdOverride.value > 0 &&
+    availableSpotIds.value.includes(debugSpotIdOverride.value)
+  ) {
+    return debugSpotIdOverride.value;
+  }
+  return availableSpotIds.value[0] ?? 0;
+});
 
 watch(toyAction, (action) => {
   toyFields.value = createEmptyToyRecordFields(action);
   validationError.value = "";
-});
-
-watch(wandName, () => {
-  wandInitError.value = "";
-});
-
-watch(
-  toyFields,
-  () => {
-    validationError.value = "";
-  },
-  { deep: true },
-);
-
-watch(
-  [() => props.activeHuntYear, () => props.availableYears],
-  ([activeHuntYear, availableYears]) => {
-    const preferredYear =
-      activeHuntYear && availableYears.includes(activeHuntYear)
-        ? activeHuntYear
-        : (availableYears[0] ?? 0);
-
-    if (preferredYear > 0 && !availableYears.includes(wandCreationYear.value)) {
-      wandCreationYear.value = preferredYear;
-    }
-  },
-  { immediate: true },
-);
-
-watch(
-  () => props.availableYears,
-  (years) => {
-    if (years.length > 0 && !years.includes(debugYear.value)) {
-      debugYear.value = years[0];
-    }
-  },
-  { immediate: true },
-);
-
-watch(
-  availableSpotIds,
-  (spotIds) => {
-    if (spotIds.length === 0) {
-      debugSpotId.value = 0;
-      return;
-    }
-
-    if (!spotIds.includes(debugSpotId.value)) {
-      debugSpotId.value = spotIds[0];
-    }
-  },
-  { immediate: true },
-);
-
-watch([debugYear, debugSpotId], () => {
-  debugUnlockError.value = "";
 });
 
 async function handleInitWand() {

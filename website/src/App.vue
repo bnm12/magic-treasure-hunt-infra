@@ -69,7 +69,8 @@
           <template v-if="showScannedView && wandYears.length > 0">
             <YearSelector
               v-if="wandYears.length > 1"
-              v-model="selectedYear"
+              :model-value="selectedYear"
+              @update:model-value="selectedYearOverride = $event"
               :years="wandYears"
               :progress="yearProgress"
             />
@@ -185,7 +186,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useNfc } from "./composables/useNfc";
-import { loadHunts } from "./utils/spotLoader";
+import { useRouter } from "./composables/useRouter";
+import { useWandReveal } from "./composables/useWandReveal";
+import { useHuntData } from "./composables/useHuntData";
+import { useYearSelection } from "./composables/useYearSelection";
 import type { HuntYear } from "./utils/spotLoader";
 import MagicBackground from "./components/MagicBackground.vue";
 import MagicScanCircle from "./components/MagicScanCircle.vue";
@@ -223,22 +227,41 @@ const {
   unlockTestSpot,
 } = useNfc();
 
-const currentPage = ref("hunt");
-const initializeYear = ref(new Date().getFullYear());
 const showNfcConsent = ref(false);
-const scanRevealActive = ref(false);
-const scanRevealComplete = ref(false);
 const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null);
 const isStandalonePwa = ref(false);
-let scanRevealTimer: ReturnType<typeof setTimeout> | undefined;
+
+// Routing
+const { currentPage, initializeYear } = useRouter();
+
+// Hunt data
+const { hunts, allYears, availableSpotIdsByYear } = useHuntData();
+
+// Wand reveal animation
+const hasScannedWand = computed(
+  () =>
+    wandMetadata.value !== null || Object.keys(collectedSpots.value).length > 0,
+);
+const { scanRevealActive, showScannedView } = useWandReveal(hasScannedWand);
+
+// Year selection
+const {
+  wandYears,
+  selectedYear,
+  selectedYearOverride,
+  selectedHunt,
+  selectedCollectedIds,
+  archiveYear,
+  archiveHunt,
+  archiveCollectedIds,
+  yearProgress,
+} = useYearSelection(collectedSpots, hunts, allYears);
 
 const navTabs: NavTab[] = [
   { id: "hunt", label: "Hunt", icon: IconHuntMap },
   { id: "archive", label: "Archive", icon: IconArchive },
   { id: "toybox", label: "Toybox", icon: IconWandTweaker },
 ];
-
-const hunts = ref<Record<number, HuntYear>>({});
 
 // Show NFC status toast briefly when status changes
 const nfcToastVisible = ref(false);
@@ -254,7 +277,6 @@ watch(status, (val) => {
 });
 
 onBeforeUnmount(() => {
-  clearTimeout(scanRevealTimer);
   window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   window.removeEventListener("appinstalled", handleAppInstalled);
 });
@@ -316,29 +338,6 @@ onMounted(async () => {
   window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   window.addEventListener("appinstalled", handleAppInstalled);
 
-  // Check for /initialize or /configureSpot path or query param
-  const url = new URL(window.location.href);
-  if (
-    url.pathname.endsWith("/initialize") ||
-    url.pathname.endsWith("/initialize/") ||
-    url.searchParams.has("initialize")
-  ) {
-    currentPage.value = "initialize";
-    const yearParam = url.searchParams.get("year");
-    if (yearParam) {
-      const year = parseInt(yearParam, 10);
-      if (!isNaN(year)) {
-        initializeYear.value = year;
-      }
-    }
-  } else if (
-    url.pathname.endsWith("/configureSpot") ||
-    url.pathname.endsWith("/configureSpot/") ||
-    url.searchParams.has("configureSpot")
-  ) {
-    currentPage.value = "configureSpot";
-  }
-
   if (!nfcSupported()) {
     nfcCompatMessage.value =
       "Web NFC is not available. Open this page in Chrome on Android over HTTPS.";
@@ -349,115 +348,8 @@ onMounted(async () => {
       showNfcConsent.value = true;
     }
   }
-
-  hunts.value = await loadHunts();
-  // Default archive tab to most recent year
-  if (allYears.value.length > 0) {
-    archiveYear.value = allYears.value[0];
-  }
 });
 
-// Whether a wand has been scanned at least once
-const hasScannedWand = computed(
-  () =>
-    wandMetadata.value !== null || Object.keys(collectedSpots.value).length > 0,
-);
-
-watch(
-  () => hasScannedWand.value,
-  (scanned) => {
-    clearTimeout(scanRevealTimer);
-
-    if (!scanned) {
-      scanRevealActive.value = false;
-      scanRevealComplete.value = false;
-      return;
-    }
-
-    scanRevealActive.value = true;
-    scanRevealComplete.value = false;
-    scanRevealTimer = setTimeout(() => {
-      scanRevealActive.value = false;
-      scanRevealComplete.value = true;
-    }, 900);
-  },
-);
-
-const showScannedView = computed(
-  () => hasScannedWand.value && scanRevealComplete.value,
-);
-
-// All years from loaded hunt data (for archive)
-const allYears = computed(() =>
-  Object.keys(hunts.value)
-    .map(Number)
-    .sort((a, b) => b - a),
-);
-
-// Years to show on the hunt tab: wand years + latest available hunt (so
-// the active hunt is always visible even with zero collected spots).
-const wandYears = computed(() => {
-  const onWand = Object.keys(collectedSpots.value).map(Number);
-  const years = onWand.filter((y) => y in hunts.value);
-  // Always include the latest available hunt year
-  if (allYears.value.length > 0 && !years.includes(allYears.value[0])) {
-    years.push(allYears.value[0]);
-  }
-  return years.sort((a, b) => b - a);
-});
-
-// Auto-select default year when wand data arrives
-watch(wandYears, (years) => {
-  if (years.length > 0 && !years.includes(selectedYear.value)) {
-    selectedYear.value = years[0];
-  }
-});
-
-const selectedYear = ref(0);
-const archiveYear = ref(0);
-
-const selectedHunt = computed<HuntYear | null>(
-  () => hunts.value[selectedYear.value] ?? null,
-);
-
-const archiveHunt = computed<HuntYear | null>(
-  () => hunts.value[archiveYear.value] ?? null,
-);
-
-const selectedCollectedIds = computed<string[]>(() =>
-  (collectedSpots.value[selectedYear.value] ?? []).map(String),
-);
-
-const archiveCollectedIds = computed<string[]>(() =>
-  (collectedSpots.value[archiveYear.value] ?? []).map(String),
-);
-
-const yearProgress = computed(() => {
-  const result: Record<number, { collected: number; total: number }> = {};
-  for (const year of allYears.value) {
-    const hunt = hunts.value[year];
-    const total = hunt ? Object.keys(hunt.spots).length : 0;
-    const collectedIds = (collectedSpots.value[year] ?? []).filter(
-      (id) => hunt && String(id) in hunt.spots,
-    );
-    const collected = collectedIds.length;
-    result[year] = { collected, total };
-  }
-  return result;
-});
-
-const availableSpotIdsByYear = computed(() => {
-  const result: Record<number, number[]> = {};
-  for (const year of allYears.value) {
-    const hunt = hunts.value[year];
-    result[year] = hunt
-      ? Object.keys(hunt.spots)
-          .map(Number)
-          .sort((a, b) => a - b)
-      : [];
-  }
-  return result;
-});
 </script>
 
 <style scoped>
