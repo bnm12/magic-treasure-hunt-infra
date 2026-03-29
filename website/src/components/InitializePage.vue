@@ -2,9 +2,9 @@
   <div class="initialize-page page">
     <PageHero
       :icon="IconWandTweaker"
-      eyebrow="Mass Initialization"
-      title="Wand Workshop"
-      :copy="`Initializing wands for the ${creationYear} hunt.`"
+      :eyebrow="t('init_page.eyebrow')"
+      :title="t('init_page.title')"
+      :copy="t('init_page.copy', { year: creationYear })"
       :compact="true"
     />
 
@@ -16,27 +16,27 @@
 
     <div class="initialize-content glass-card">
       <div class="form-group">
-        <label for="wand-name">Owner name</label>
+        <label for="wand-name">{{ t('init_page.owner_label') }}</label>
         <input
           v-model="wandName"
           id="wand-name"
           ref="nameInput"
           class="nfc-input"
           type="text"
-          placeholder="e.g., Benjamin"
+          :placeholder="t('init_page.owner_placeholder')"
           maxlength="127"
           @keyup.enter="handleInitWand"
         />
         <div class="input-footer">
-          <small>{{ wandName.length }}/127 characters</small>
+          <small>{{ t('init_page.owner_counter', { count: wandName.length }) }}</small>
           <button @click="clearName" class="clear-btn" v-if="wandName">
-            Clear
+            {{ t('init_page.clear') }}
           </button>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="wand-creation-year">Creation year</label>
+        <label for="wand-creation-year">{{ t('init_page.year_label') }}</label>
         <select
           :value="creationYear"
           @change="
@@ -66,19 +66,18 @@
           type="button"
           class="counter primary-btn"
         >
-          {{ isWriting ? "✨ Initializing..." : "🪄 Initialize Wand" }}
+          {{ isWriting ? t('init_page.btn_busy') : t('init_page.btn') }}
         </button>
       </div>
 
       <div v-if="lastInitialized" class="success-message">
         <span class="sparkle">✨</span>
-        Successfully initialized wand for <strong>{{ lastInitialized }}</strong
-        >!
+        {{ t('init_page.success', { name: lastInitialized }) }}
       </div>
     </div>
 
     <div class="history-section" v-if="history.length > 0">
-      <h3>Recent Initializations</h3>
+      <h3>{{ t('init_page.history_title') }}</h3>
       <ul class="history-list">
         <li v-for="(name, index) in history" :key="index" class="history-item">
           <span class="history-name">{{ name }}</span>
@@ -91,12 +90,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import PageHero from "./PageHero.vue";
 import IconWandTweaker from "./icons/IconWandTweaker.vue";
 import NfcConsentOverlay from "./NfcConsentOverlay.vue";
 import { useNfc } from "../composables/useNfc";
 import { useHuntData } from "../composables/useHuntData";
 
+const { t } = useI18n();
 const wandName = ref("");
 const error = ref("");
 const lastInitialized = ref("");
@@ -130,19 +131,19 @@ async function handleInitWand() {
   const name = wandName.value.trim();
 
   if (!name) {
-    error.value = "Please enter the owner's name.";
+    error.value = t("init_page.error_name_required");
     return;
   }
   if (name.length > 127) {
-    error.value = "Owner name is too long (max 127 characters).";
+    error.value = t("init_page.error_name_too_long");
     return;
   }
   if (!nfcSupported()) {
-    error.value = "Web NFC is not supported on this device.";
+    error.value = t("init_page.error_no_nfc");
     return;
   }
   if (!creationYear.value) {
-    error.value = "Please select a creation year.";
+    error.value = t("init_page.error_no_year");
     return;
   }
 

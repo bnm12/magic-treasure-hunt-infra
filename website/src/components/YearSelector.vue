@@ -1,5 +1,5 @@
 <template>
-  <div class="year-selector" role="tablist" aria-label="Select hunt year">
+  <div class="year-selector" role="tablist" :aria-label="t('year_selector.aria_label')">
     <button
       v-for="year in years"
       :key="year"
@@ -27,6 +27,9 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 const props = defineProps<{
   years: number[];
   modelValue: number;

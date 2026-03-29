@@ -27,7 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import MagicBackground from "./components/MagicBackground.vue";
 import InitializePage from "./components/InitializePage.vue";
 import ConfigureSpotPage from "./components/ConfigureSpotPage.vue";
@@ -36,18 +37,18 @@ import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
 import IconWand from "./components/icons/IconWand.vue";
 import { useNfc } from "./composables/useNfc";
 
+const { t } = useI18n();
 const { isWriting, initializeWand, nfcCompatMessage, nfcSupported } = useNfc();
 const currentYear = new Date().getFullYear();
 const currentTab = ref("initialize");
-const tabs = [
-  { id: "initialize", label: "Initialize Wand", icon: IconWandTweaker },
-  { id: "configureSpot", label: "Configure Spot", icon: IconWand },
-];
+const tabs = computed(() => [
+  { id: "initialize", label: t("init_page.title"), icon: IconWandTweaker },
+  { id: "configureSpot", label: t("configure_page.title"), icon: IconWand },
+]);
 
 onMounted(async () => {
   if (!nfcSupported()) {
-    nfcCompatMessage.value =
-      "Web NFC is not available. Open this page in Chrome on Android over HTTPS.";
+    nfcCompatMessage.value = t("nfc.not_supported");
   }
 });
 </script>

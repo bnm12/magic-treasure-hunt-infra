@@ -2,21 +2,22 @@
   <div v-if="visible" class="nfc-consent-overlay">
     <div class="nfc-consent-card">
       <span class="consent-wand" aria-hidden="true">&#10024;</span>
-      <h2 class="consent-title">Enable Wand Scanner?</h2>
-      <p class="consent-desc">
-        Allow NFC scanning so your phone can read magic wands automatically.
-      </p>
+      <h2 class="consent-title">{{ t('consent.title') }}</h2>
+      <p class="consent-desc">{{ t('consent.desc') }}</p>
       <button class="consent-btn" @click="emit('consent')">
-        Enable NFC
+        {{ t('consent.enable') }}
       </button>
       <button class="consent-skip" @click="emit('skip')">
-        Skip for now
+        {{ t('consent.skip') }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 defineProps<{
   visible: boolean;
 }>();

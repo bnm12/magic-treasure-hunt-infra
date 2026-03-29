@@ -552,6 +552,27 @@ taskkill /PID <PID> /F
 3. Check console (F12) for errors
 4. When ready to test on phone: run `npm run build` and deploy
 
+### Adding or updating translations
+
+Locale strings live in `website/src/locales/`. Two files exist:
+
+- `en.json` — English (canonical, source of truth)
+- `da.json` — Danish
+
+**To add a new string:**
+1. Add the key and English value to `en.json`
+2. Add the same key and Danish value to `da.json`
+3. Use `t('your.key')` in the component
+
+**To add a new language:**
+1. Add a new JSON file e.g. `src/locales/de.json` with all the same keys as `en.json`
+2. Add `de` to the `SUPPORTED_LOCALES` array in `src/composables/useLocale.ts`
+3. Import the new file in `src/i18n.ts` and add it to the `messages` object
+4. Add `"de": "Deutsch"` to the `"language"` section in both existing locale files
+5. Add the language button to `ToyboxPanel.vue` — it will appear automatically because the template iterates `supportedLocales`
+
+**Key parity rule:** Every key in `en.json` must also exist in `da.json`. Missing keys fall back to English silently, but this should be treated as a bug to fix, not a feature to rely on.
+
 ### Making Changes to Firmware
 
 1. Edit `arduino/NFC_Basic/NFC_Basic.ino` or `arduino/RC522_Basic/RC522_Basic.ino`

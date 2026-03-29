@@ -1,0 +1,222 @@
+{
+  "nav": {
+    "hunt": "Hunt",
+    "archive": "Archive",
+    "toybox": "Toybox"
+  },
+  "hunt": {
+    "eyebrow": "Tryllestavsprojekt",
+    "title": "Magic Wand Companion",
+    "copy": "Tap your wand at a magic spot to collect it. Scan your wand here to see your progress and hints.",
+    "empty_no_data": "No hunt data found on your wand yet. Visit a magic spot!",
+    "empty_scanning": "Hold your wand close to begin your magical adventure!",
+    "empty_responding": "Your wand is responding...",
+    "empty_preparing": "Preparing NFC scanner...",
+    "progress_remaining": "0 spots remaining | 1 spot remaining | {n} spots remaining",
+    "progress_complete": "All spots collected!",
+    "progress_none": "No spots collected yet — tap your wand at a magic spot!"
+  },
+  "archive": {
+    "eyebrow": "Past & Present",
+    "title": "Hunt Archive",
+    "copy": "Browse all hunts — including ones you may have missed.",
+    "empty": "No hunts available yet."
+  },
+  "spot": {
+    "collected": "Collected",
+    "undiscovered": "Undiscovered"
+  },
+  "wand": {
+    "owner": "Owner",
+    "crafted": "Crafted"
+  },
+  "toybox": {
+    "eyebrow": "Wand Workshop",
+    "title": "Toybox",
+    "copy": "Initialize a wand and tune record 1 without disturbing your hunt progress.",
+    "install_title": "Install Companion",
+    "install_note": "Add the wand companion to your home screen as a standalone app when your browser supports installation.",
+    "install_btn": "Install App",
+    "action_title": "Default Tap Action",
+    "action_note": "Choose what the wand does on a normal NFC tap. Treasure progress is always preserved when writing.",
+    "action_label": "Action type",
+    "action_summary_fallback": "",
+    "write_btn": "Write to Wand",
+    "writing_btn": "Writing...",
+    "optional": "(optional)",
+    "actions": {
+      "url": {
+        "label": "Open Website",
+        "description": "Open a normal web page when the wand is tapped.",
+        "fields": {
+          "url": { "label": "Website URL", "placeholder": "https://example.org/magic" }
+        }
+      },
+      "text": {
+        "label": "Show Message",
+        "description": "Display a short magical note on compatible devices.",
+        "fields": {
+          "text": { "label": "Message", "placeholder": "The wand chooses you." }
+        }
+      },
+      "app": {
+        "label": "Open App Link",
+        "description": "Launch a custom deep link like spotify:, discord:, or app://.",
+        "fields": {
+          "uri": { "label": "App URI", "placeholder": "spotify:playlist:37i9dQZF1DX4WYpdgoIcn6" }
+        }
+      },
+      "email": {
+        "label": "Compose Email",
+        "description": "Prepare an email to a chosen address with subject and body.",
+        "fields": {
+          "to": { "label": "To", "placeholder": "owlpost@example.org" },
+          "subject": { "label": "Subject", "placeholder": "Message from my magic wand" },
+          "body": { "label": "Body", "placeholder": "Hello from the hunt!" }
+        }
+      },
+      "phone": {
+        "label": "Call Number",
+        "description": "Dial a phone number directly from the tap.",
+        "fields": {
+          "number": { "label": "Phone number", "placeholder": "+45 12 34 56 78" }
+        }
+      },
+      "sms": {
+        "label": "Text Message",
+        "description": "Open a text message draft to a chosen number.",
+        "fields": {
+          "number": { "label": "Phone number", "placeholder": "+45 12 34 56 78" },
+          "body": { "label": "Message", "placeholder": "Meet me at the next magic spot!" }
+        }
+      },
+      "geo": {
+        "label": "Open Map Pin",
+        "description": "Jump to coordinates in a mapping app.",
+        "fields": {
+          "latitude": { "label": "Latitude", "placeholder": "55.6761" },
+          "longitude": { "label": "Longitude", "placeholder": "12.5683" },
+          "label": { "label": "Place label", "placeholder": "Secret meetup point" }
+        }
+      },
+      "contact": {
+        "label": "Share Contact",
+        "description": "Write a vCard so the wand can share a person or project contact.",
+        "fields": {
+          "name": { "label": "Name", "placeholder": "Luna Spellcaster" },
+          "phone": { "label": "Phone", "placeholder": "+45 12 34 56 78" },
+          "email": { "label": "Email", "placeholder": "luna@example.org" },
+          "organization": { "label": "Organization", "placeholder": "Tryllestavsprojekt" },
+          "url": { "label": "Website", "placeholder": "https://example.org" },
+          "note": { "label": "Note", "placeholder": "Guardian contact for lost wand." }
+        }
+      },
+      "calendar": {
+        "label": "Calendar Event",
+        "description": "Create a calendar invitation from the wand.",
+        "fields": {
+          "title": { "label": "Event title", "placeholder": "Treasure hunt meetup" },
+          "start": { "label": "Starts", "placeholder": "" },
+          "end": { "label": "Ends", "placeholder": "" },
+          "location": { "label": "Location", "placeholder": "City fountain" },
+          "description": { "label": "Description", "placeholder": "Bring your wand and your sharpest clues." }
+        }
+      }
+    },
+    "admin_kicker": "Temporary",
+    "admin_title": "Admin Tools",
+    "admin_note": "These controls are for setup, testing, and debugging. We plan to remove them from the public Toybox flow later.",
+    "init_title": "Initialize Wand",
+    "init_note": "Initialize a blank NFC tag as an official wand. The wand can then collect treasures on your adventure.",
+    "init_owner_label": "Owner name",
+    "init_owner_placeholder": "e.g., Benjamin",
+    "init_owner_counter": "{count}/127 characters",
+    "init_year_label": "Creation year",
+    "init_btn": "Initialize Wand",
+    "init_btn_busy": "Initializing...",
+    "init_error_name_required": "Please enter the owner's name.",
+    "init_error_name_too_long": "Owner name is too long (max 127 characters).",
+    "init_error_year_required": "Please choose a creation year.",
+    "unlock_title": "Unlock Test Treasure",
+    "unlock_note": "Add any spot from any hunt year onto the wand for testing and debug flows.",
+    "unlock_year_label": "Hunt year",
+    "unlock_spot_label": "Spot",
+    "unlock_spot_option": "Spot {id}",
+    "unlock_btn": "Unlock Spot {id}",
+    "unlock_btn_busy": "Unlocking...",
+    "unlock_error_select": "Choose a hunt year and a spot first."
+  },
+  "nfc": {
+    "not_supported": "Web NFC is not available. Open this page in Chrome on Android over HTTPS.",
+    "unavailable": "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.",
+    "permission_denied": "NFC permission was denied. Please allow NFC access in your browser settings and refresh.",
+    "detected": "Wand detected!",
+    "read_failed": "Could not read the wand. Try again.",
+    "scan_failed": "Scan failed: {error}",
+    "write_verify": "Hold the wand near your device to verify and write...",
+    "write_verify_reading": "Hold the wand near your device to verify its current records...",
+    "write_record1_success": "Record 1 written! The tag was read first and treasure progress was preserved.",
+    "write_record1_failed": "Write failed: {error}",
+    "init_prompt": "Bring blank tag to initialize as wand...",
+    "init_success": "SUCCESS: Wand initialized for {name} (year {year})!",
+    "init_failed": "Initialization failed: {error}",
+    "init_name_invalid": "Owner name must be 1-127 characters.",
+    "unlock_prompt": "Hold the wand near your device to unlock spot {spot} for {year}...",
+    "unlock_success": "Unlocked spot {spot} for {year} on the wand.",
+    "unlock_failed": "Unlock failed: {error}",
+    "unlock_invalid": "Choose a valid hunt year and a spot ID between 1 and 64."
+  },
+  "consent": {
+    "title": "Enable Wand Scanner?",
+    "desc": "Allow NFC scanning so your phone can read magic wands automatically.",
+    "enable": "Enable NFC",
+    "skip": "Skip for now"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "da": "Dansk"
+  },
+  "year_selector": {
+    "aria_label": "Select hunt year"
+  },
+  "init_page": {
+    "eyebrow": "Mass Initialization",
+    "title": "Wand Workshop",
+    "copy": "Initializing wands for the {year} hunt.",
+    "owner_label": "Owner name",
+    "owner_placeholder": "e.g., Benjamin",
+    "owner_counter": "{count}/127 characters",
+    "year_label": "Creation year",
+    "btn": "Initialize Wand",
+    "btn_busy": "Initializing...",
+    "clear": "Clear",
+    "error_name_required": "Please enter the owner's name.",
+    "error_name_too_long": "Owner name is too long (max 127 characters).",
+    "error_no_nfc": "Web NFC is not supported on this device.",
+    "error_no_year": "Please select a creation year.",
+    "success": "Successfully initialized wand for {name}!",
+    "history_title": "Recent Initializations"
+  },
+  "configure_page": {
+    "eyebrow": "Device Configuration",
+    "title": "Spot Configurator",
+    "copy": "Connect to a Magic Spot over USB or Bluetooth to configure its ID and year.",
+    "connect_instruction": "Connect your device and click a button below to start configuration.",
+    "connect_usb": "Connect USB",
+    "connect_bluetooth": "Connect Bluetooth",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "year_label": "Hunt Year",
+    "year_placeholder": "Select Year",
+    "spot_label": "Spot ID",
+    "spot_placeholder": "Select Spot",
+    "spot_option": "Spot {id}",
+    "terminal_header": "Received Data",
+    "terminal_placeholder": "Waiting for data...",
+    "terminal_clear": "Clear",
+    "send_label": "Send Command",
+    "send_placeholder": "e.g., setSpot: 5",
+    "send_btn": "Send"
+  }
+}

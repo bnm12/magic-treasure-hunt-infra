@@ -1,18 +1,38 @@
 <template>
   <section class="toybox-panel">
+    <div class="toybox-section glass-card language-section">
+      <h3>
+        <span class="section-icon" aria-hidden="true">&#127760;</span>
+        {{ t('language.label') }}
+      </h3>
+      <div class="language-buttons">
+        <button
+          v-for="locale in supportedLocales"
+          :key="locale"
+          class="lang-btn"
+          :class="{ active: currentLocale() === locale }"
+          type="button"
+          @click="setLocale(locale as SupportedLocale)"
+        >
+          {{ t(`language.${locale}`) }}
+        </button>
+      </div>
+    </div>
+
+    <div class="toybox-divider" aria-hidden="true">
+      <span class="toybox-divider-core"></span>
+    </div>
+
     <div v-if="showInstallAction" class="toybox-section glass-card">
       <h3>
-        <span class="section-icon" aria-hidden="true">&#11015;</span> Install
-        Companion
+        <span class="section-icon" aria-hidden="true">&#11015;</span>
+        {{ t('toybox.install_title') }}
       </h3>
-      <p class="note">
-        Add the wand companion to your home screen as a standalone app when your
-        browser supports installation.
-      </p>
+      <p class="note">{{ t('toybox.install_note') }}</p>
 
       <div class="nfc-controls">
         <button @click="emit('install')" type="button" class="counter">
-          &#10022; Install App
+          &#10022; {{ t('toybox.install_btn') }}
         </button>
       </div>
     </div>
@@ -23,29 +43,26 @@
 
     <div class="toybox-section glass-card">
       <h3>
-        <span class="section-icon" aria-hidden="true">&#9998;</span> Default Tap
-        Action
+        <span class="section-icon" aria-hidden="true">&#9998;</span>
+        {{ t('toybox.action_title') }}
       </h3>
-      <p class="note">
-        Choose what the wand does on a normal NFC tap. Treasure progress is
-        always preserved when writing.
-      </p>
+      <p class="note">{{ t('toybox.action_note') }}</p>
 
       <div class="form-group">
-        <label for="toy-action">Action type</label>
+        <label for="toy-action">{{ t('toybox.action_label') }}</label>
         <select v-model="toyAction" id="toy-action" class="nfc-input">
           <option
             v-for="action in toyboxActions"
             :key="action.id"
             :value="action.id"
           >
-            {{ action.label }}
+            {{ t(`toybox.actions.${action.id}.label`) }}
           </option>
         </select>
       </div>
 
       <p class="action-summary">
-        {{ selectedActionDefinition?.description }}
+        {{ t(`toybox.actions.${toyAction}.description`) }}
       </p>
 
       <div
@@ -54,8 +71,8 @@
         class="form-group"
       >
         <label :for="`toy-${field.key}`">
-          {{ field.label }}
-          <span v-if="field.optional" class="optional-mark">(optional)</span>
+          {{ t(`toybox.actions.${toyAction}.fields.${field.key}.label`) }}
+          <span v-if="field.optional" class="optional-mark">{{ t('toybox.optional') }}</span>
         </label>
 
         <textarea
@@ -63,7 +80,7 @@
           :id="`toy-${field.key}`"
           v-model="toyFields[field.key]"
           class="nfc-input nfc-textarea"
-          :placeholder="field.placeholder"
+          :placeholder="t(`toybox.actions.${toyAction}.fields.${field.key}.placeholder`)"
           rows="3"
         ></textarea>
 
@@ -73,7 +90,7 @@
           v-model="toyFields[field.key]"
           class="nfc-input"
           :type="field.type ?? 'text'"
-          :placeholder="field.placeholder"
+          :placeholder="t(`toybox.actions.${toyAction}.fields.${field.key}.placeholder`)"
         />
       </div>
 
@@ -88,7 +105,7 @@
           type="button"
           class="counter"
         >
-          {{ isWriting ? "&#10024; Writing..." : "&#9733; Write to Wand" }}
+          {{ isWriting ? t('toybox.writing_btn') : t('toybox.write_btn') }}
         </button>
       </div>
     </div>
@@ -99,39 +116,33 @@
 
     <div class="admin-shell">
       <div class="admin-header">
-        <p class="admin-kicker">Temporary</p>
-        <h3>Admin Tools</h3>
-        <p class="note">
-          These controls are for setup, testing, and debugging. We plan to
-          remove them from the public Toybox flow later.
-        </p>
+        <p class="admin-kicker">{{ t('toybox.admin_kicker') }}</p>
+        <h3>{{ t('toybox.admin_title') }}</h3>
+        <p class="note">{{ t('toybox.admin_note') }}</p>
       </div>
 
       <div class="toybox-section glass-card">
         <h4>
           <span class="section-icon" aria-hidden="true">&#10022;</span>
-          Initialize Wand
+          {{ t('toybox.init_title') }}
         </h4>
-        <p class="note">
-          Initialize a blank NFC tag as an official wand. The wand can then
-          collect treasures on your adventure.
-        </p>
+        <p class="note">{{ t('toybox.init_note') }}</p>
 
         <div class="form-group">
-          <label for="wand-name">Owner name</label>
+          <label for="wand-name">{{ t('toybox.init_owner_label') }}</label>
           <input
             v-model="wandName"
             id="wand-name"
             class="nfc-input"
             type="text"
-            placeholder="e.g., Benjamin"
+            :placeholder="t('toybox.init_owner_placeholder')"
             maxlength="127"
           />
-          <small>{{ wandName.length }}/127 characters</small>
+          <small>{{ t('toybox.init_owner_counter', { count: wandName.length }) }}</small>
         </div>
 
         <div class="form-group">
-          <label for="wand-creation-year">Creation year</label>
+          <label for="wand-creation-year">{{ t('toybox.init_year_label') }}</label>
           <select
             :value="wandCreationYear"
             @change="wandCreationYearOverride = +($event.target as HTMLSelectElement).value"
@@ -159,8 +170,8 @@
           >
             {{
               isWriting
-                ? "&#10024; Initializing..."
-                : "&#10022; Initialize Wand"
+                ? t('toybox.init_btn_busy')
+                : t('toybox.init_btn')
             }}
           </button>
         </div>
@@ -168,16 +179,13 @@
 
       <div class="toybox-section glass-card">
         <h4>
-          <span class="section-icon" aria-hidden="true">&#10038;</span> Unlock
-          Test Treasure
+          <span class="section-icon" aria-hidden="true">&#10038;</span>
+          {{ t('toybox.unlock_title') }}
         </h4>
-        <p class="note">
-          Add any spot from any hunt year onto the wand for testing and debug
-          flows.
-        </p>
+        <p class="note">{{ t('toybox.unlock_note') }}</p>
 
         <div class="form-group">
-          <label for="debug-year">Hunt year</label>
+          <label for="debug-year">{{ t('toybox.unlock_year_label') }}</label>
           <select
             :value="debugYear"
             @change="debugYearOverride = +($event.target as HTMLSelectElement).value"
@@ -191,7 +199,7 @@
         </div>
 
         <div class="form-group">
-          <label for="debug-spot">Spot</label>
+          <label for="debug-spot">{{ t('toybox.unlock_spot_label') }}</label>
           <select
             :value="debugSpotId"
             @change="debugSpotIdOverride = +($event.target as HTMLSelectElement).value"
@@ -203,7 +211,7 @@
               :key="spotId"
               :value="spotId"
             >
-              Spot {{ spotId }}
+              {{ t('toybox.unlock_spot_option', { id: spotId }) }}
             </option>
           </select>
         </div>
@@ -221,8 +229,8 @@
           >
             {{
               isWriting
-                ? "&#10024; Unlocking..."
-                : `&#9733; Unlock Spot ${debugSpotId || ""}`
+                ? t('toybox.unlock_btn_busy')
+                : t('toybox.unlock_btn', { id: debugSpotId || '' })
             }}
           </button>
         </div>
@@ -233,6 +241,9 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useLocale } from "../composables/useLocale";
+import type { SupportedLocale } from "../composables/useLocale";
 import {
   buildToyRecord,
   createEmptyToyRecordFields,
@@ -240,6 +251,9 @@ import {
   type ToyRecordAction,
   type ToyRecordWriteRequest,
 } from "../utils/toyboxRecord1";
+
+const { t } = useI18n();
+const { setLocale, currentLocale, supportedLocales } = useLocale();
 
 const props = defineProps<{
   isWriting: boolean;
@@ -333,17 +347,17 @@ async function handleInitWand() {
   const name = wandName.value.trim();
 
   if (!name) {
-    wandInitError.value = "Please enter the owner's name.";
+    wandInitError.value = t("toybox.init_error_name_required");
     return;
   }
 
   if (name.length > 127) {
-    wandInitError.value = "Owner name is too long (max 127 characters).";
+    wandInitError.value = t("toybox.init_error_name_too_long");
     return;
   }
 
   if (wandCreationYear.value === 0) {
-    wandInitError.value = "Please choose a creation year.";
+    wandInitError.value = t("toybox.init_error_year_required");
     return;
   }
 
@@ -376,7 +390,7 @@ async function handleUnlockSpot() {
   debugUnlockError.value = "";
 
   if (debugYear.value === 0 || debugSpotId.value === 0) {
-    debugUnlockError.value = "Choose a hunt year and a spot first.";
+    debugUnlockError.value = t("toybox.unlock_error_select");
     return;
   }
 
@@ -609,5 +623,40 @@ async function handleUnlockSpot() {
   border-radius: 8px;
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
+}
+
+.language-section {
+  padding: 1.25rem;
+}
+
+.language-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.lang-btn {
+  padding: 0.4rem 1.25rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.lang-btn:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.lang-btn.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--glow-gold);
 }
 </style>

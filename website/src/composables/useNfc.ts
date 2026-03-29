@@ -1,10 +1,12 @@
 import { ref } from "vue";
+import { i18n } from "../i18n";
 import { resolveAppUrl } from "../utils/appUrl";
 import {
   buildToyRecord,
   type ToyRecordWriteRequest,
 } from "../utils/toyboxRecord1";
 
+const { t } = i18n.global;
 const HUNT_MIME_PREFIX = "x-hunt:";
 const HUNT_MASK_LENGTH = 8;
 
@@ -117,8 +119,7 @@ export function useNfc() {
    */
   function shouldAbortWrite(): boolean {
     if (!nfcSupported()) {
-      nfcCompatMessage.value =
-        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
+      nfcCompatMessage.value = t("nfc.unavailable");
       return true;
     }
     if (isWriting.value) return true;
@@ -322,8 +323,7 @@ export function useNfc() {
 
   async function beginScanning(): Promise<ScanResult> {
     if (!nfcSupported()) {
-      nfcCompatMessage.value =
-        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
+      nfcCompatMessage.value = t("nfc.unavailable");
       return "unsupported";
     }
     if (isScanning.value) return "ok";
@@ -346,11 +346,11 @@ export function useNfc() {
           ? decodeData(first.data) || `(${first.recordType})`
           : "";
 
-        status.value = "Wand detected!";
+        status.value = t("nfc.detected");
       };
 
       ndef.onreadingerror = () => {
-        status.value = "Could not read the wand. Try again.";
+        status.value = t("nfc.read_failed");
       };
 
       isScanning.value = true;
@@ -362,10 +362,10 @@ export function useNfc() {
       if (err.name === "AbortError") return "ok";
       if (err.name === "NotAllowedError") return "needs-gesture";
       if (err.name === "NotSupportedError") {
-        nfcCompatMessage.value = "Web NFC is not supported on this device.";
+        nfcCompatMessage.value = t("nfc.not_supported");
         return "unsupported";
       }
-      status.value = `Scan failed: ${err.message}`;
+      status.value = t("nfc.scan_failed", { error: err.message });
       return "unsupported";
     }
   }
@@ -374,11 +374,11 @@ export function useNfc() {
     if (shouldAbortWrite()) return;
 
     isWriting.value = true;
-    status.value = "Hold the wand near your device to verify and write...";
+    status.value = t("nfc.write_verify");
 
     try {
       const currentRecords = await readTagOnce(
-        "Hold the wand near your device to verify its current records...",
+        t("nfc.write_verify_reading"),
       );
       const ndef = new NDEFReader();
       const toyRecord = buildToyRecord(request);
@@ -392,12 +392,11 @@ export function useNfc() {
       lastReadRecords = currentRecords;
       collectedSpots.value = extractHuntYears(currentRecords);
       wandMetadata.value = extractWandMetadata(currentRecords);
-      status.value =
-        "Record 1 written! The tag was read first and treasure progress was preserved.";
+      status.value = t("nfc.write_record1_success");
       await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;
-      status.value = `Write failed: ${err.message}`;
+      status.value = t("nfc.write_record1_failed", { error: err.message });
     } finally {
       isWriting.value = false;
     }
@@ -409,12 +408,12 @@ export function useNfc() {
   ): Promise<void> {
     if (shouldAbortWrite()) return;
     if (!ownerName || ownerName.length === 0 || ownerName.length > 127) {
-      status.value = "Owner name must be 1-127 characters.";
+      status.value = t("nfc.init_name_invalid");
       return;
     }
 
     isWriting.value = true;
-    status.value = "Bring blank tag to initialize as wand...";
+    status.value = t("nfc.init_prompt");
 
     try {
       const ndef = new NDEFReader();
@@ -433,12 +432,12 @@ export function useNfc() {
       ];
 
       await ndef.write({ records });
-      status.value = `SUCCESS: Wand initialized for ${ownerName} (year ${creationYear})!`;
+      status.value = t("nfc.init_success", { name: ownerName, year: creationYear });
       wandMetadata.value = { creationYear, name: ownerName };
       await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;
-      status.value = `Initialization failed: ${err.message}`;
+      status.value = t("nfc.init_failed", { error: err.message });
     } finally {
       isWriting.value = false;
     }
@@ -447,16 +446,16 @@ export function useNfc() {
   async function unlockTestSpot(year: number, spotId: number): Promise<void> {
     if (shouldAbortWrite()) return;
     if (!isValidYear(year) || !Number.isInteger(spotId) || spotId < 1 || spotId > 64) {
-      status.value = "Choose a valid hunt year and a spot ID between 1 and 64.";
+      status.value = t("nfc.unlock_invalid");
       return;
     }
 
     isWriting.value = true;
-    status.value = `Hold the wand near your device to unlock spot ${spotId} for ${year}...`;
+    status.value = t("nfc.unlock_prompt", { spot: spotId, year });
 
     try {
       const currentRecords = await readTagOnce(
-        "Hold the wand near your device to verify its current records...",
+        t("nfc.write_verify_reading"),
       );
 
       const record1 = preserveRecord1(currentRecords[0]);
@@ -485,11 +484,11 @@ export function useNfc() {
       lastReadRecords = currentRecords;
       collectedSpots.value = updatedByYear;
       wandMetadata.value = extractWandMetadata(currentRecords);
-      status.value = `Unlocked spot ${spotId} for ${year} on the wand.`;
+      status.value = t("nfc.unlock_success", { spot: spotId, year });
       await keepReaderActive();
     } catch (error) {
       const err = error as DOMException;
-      status.value = `Unlock failed: ${err.message}`;
+      status.value = t("nfc.unlock_failed", { error: err.message });
     } finally {
       isWriting.value = false;
     }

@@ -2,9 +2,9 @@
   <div class="page">
     <PageHero
       :icon="IconArchive"
-      eyebrow="Past & Present"
-      title="Hunt Archive"
-      copy="Browse all hunts — including ones you may have missed."
+      :eyebrow="t('archive.eyebrow')"
+      :title="t('archive.title')"
+      :copy="t('archive.copy')"
       :no-spin="true"
       :compact="true"
     />
@@ -26,17 +26,20 @@
 
     <div v-else class="empty-state">
       <span class="empty-icon" aria-hidden="true">&#128218;</span>
-      <p>No hunts available yet.</p>
+      <p>{{ t('archive.empty') }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import PageHero from "./PageHero.vue";
 import YearSelector from "./YearSelector.vue";
 import HuntView from "./HuntView.vue";
 import IconArchive from "./icons/IconArchive.vue";
 import type { HuntYear } from "../utils/spotLoader";
+
+const { t } = useI18n();
 
 defineProps<{
   allYears: number[];
