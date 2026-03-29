@@ -69,7 +69,8 @@
           <template v-if="showScannedView && wandYears.length > 0">
             <YearSelector
               v-if="wandYears.length > 1"
-              v-model="selectedYear"
+              :model-value="selectedYear"
+              @update:model-value="selectedYearOverride = $event"
               :years="wandYears"
               :progress="yearProgress"
             />
@@ -406,14 +407,20 @@ const wandYears = computed(() => {
   return years.sort((a, b) => b - a);
 });
 
-// Auto-select default year when wand data arrives
-watch(wandYears, (years) => {
-  if (years.length > 0 && !years.includes(selectedYear.value)) {
-    selectedYear.value = years[0];
-  }
-});
+// Tracks the user's explicit year selection. 0 means "no explicit choice yet".
+const selectedYearOverride = ref<number>(0);
 
-const selectedYear = ref(0);
+// The effective selected year: use override if it's in the available list,
+// otherwise fall back to the first wand year, otherwise 0.
+const selectedYear = computed<number>(() => {
+  if (
+    selectedYearOverride.value > 0 &&
+    wandYears.value.includes(selectedYearOverride.value)
+  ) {
+    return selectedYearOverride.value;
+  }
+  return wandYears.value[0] ?? 0;
+});
 const archiveYear = ref(0);
 
 const selectedHunt = computed<HuntYear | null>(
