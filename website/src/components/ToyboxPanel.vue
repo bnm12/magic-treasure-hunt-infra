@@ -582,4 +582,32 @@ async function handleUnlockSpot() {
   color: var(--text);
   opacity: 0.92;
 }
+
+/* Rules moved from style.css — only used in this component */
+
+.nfc-note {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.nfc-compat {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--danger);
+  background: rgba(248, 113, 113, 0.08);
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.nfc-status {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--accent);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}
 </style>

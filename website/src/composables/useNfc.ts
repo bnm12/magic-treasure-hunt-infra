@@ -30,6 +30,10 @@ export function useNfc() {
   const wandMetadata = ref<WandMetadata | null>(null);
 
   let abortController: AbortController | null = null;
+  // NOTE: lastReadRecords is intentionally module-level (closure) state.
+  // useNfc() is designed to be called once in App.vue and treated as a singleton.
+  // Multiple calls to useNfc() share this state, which is the desired behaviour —
+  // all callers should see the same last-scanned wand records.
   let lastReadRecords: NDEFRecord[] = [];
 
   function spotIdsToMask(spotIds: number[]): bigint {
@@ -104,6 +108,21 @@ export function useNfc() {
 
   function nfcSupported(): boolean {
     return "NDEFReader" in window && window.isSecureContext;
+  }
+
+  /**
+   * Checks preconditions before a write operation.
+   * Returns true if the caller should abort, false if it may proceed.
+   * Sets nfcCompatMessage if NFC is not supported.
+   */
+  function shouldAbortWrite(): boolean {
+    if (!nfcSupported()) {
+      nfcCompatMessage.value =
+        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
+      return true;
+    }
+    if (isWriting.value) return true;
+    return false;
   }
 
   function decodeData(data: DataView | undefined): string {
@@ -258,15 +277,19 @@ export function useNfc() {
 
     return await new Promise<NDEFRecord[]>((resolve, reject) => {
       const scanController = new AbortController();
-      const timeout = setTimeout(() => {
-        scanController.abort();
-        reject(new DOMException("Timed out waiting for tag.", "TimeoutError"));
-      }, timeoutMs);
+      let finished = false;
 
       const finish = () => {
+        if (finished) return;
+        finished = true;
         clearTimeout(timeout);
         scanController.abort();
       };
+
+      const timeout = setTimeout(() => {
+        finish();
+        reject(new DOMException("Timed out waiting for tag.", "TimeoutError"));
+      }, timeoutMs);
 
       void (async () => {
         try {
@@ -285,7 +308,7 @@ export function useNfc() {
 
           await ndef.scan({ signal: scanController.signal });
         } catch (error) {
-          clearTimeout(timeout);
+          finish();
           reject(error);
         }
       })();
@@ -348,12 +371,7 @@ export function useNfc() {
   }
 
   async function writeRecord1(request: ToyRecordWriteRequest): Promise<void> {
-    if (!nfcSupported()) {
-      nfcCompatMessage.value =
-        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
-      return;
-    }
-    if (isWriting.value) return;
+    if (shouldAbortWrite()) return;
 
     isWriting.value = true;
     status.value = "Hold the wand near your device to verify and write...";
@@ -389,12 +407,7 @@ export function useNfc() {
     ownerName: string,
     creationYear: number,
   ): Promise<void> {
-    if (!nfcSupported()) {
-      nfcCompatMessage.value =
-        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
-      return;
-    }
-    if (isWriting.value) return;
+    if (shouldAbortWrite()) return;
     if (!ownerName || ownerName.length === 0 || ownerName.length > 127) {
       status.value = "Owner name must be 1-127 characters.";
       return;
@@ -432,16 +445,11 @@ export function useNfc() {
   }
 
   async function unlockTestSpot(year: number, spotId: number): Promise<void> {
-    if (!nfcSupported()) {
-      nfcCompatMessage.value =
-        "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.";
-      return;
-    }
+    if (shouldAbortWrite()) return;
     if (!isValidYear(year) || !Number.isInteger(spotId) || spotId < 1 || spotId > 64) {
       status.value = "Choose a valid hunt year and a spot ID between 1 and 64.";
       return;
     }
-    if (isWriting.value) return;
 
     isWriting.value = true;
     status.value = `Hold the wand near your device to unlock spot ${spotId} for ${year}...`;
