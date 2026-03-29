@@ -1,7 +1,7 @@
 const workerUrl = new URL(self.location.href);
 const buildId = workerUrl.searchParams.get("v") ?? "dev";
 const CACHE_NAME = `tryllestav-management-${buildId}`;
-const APP_SCOPE = new URL("management/", self.registration.scope);
+const APP_SCOPE = new URL("./", self.registration.scope);
 const MANAGEMENT_URL = new URL("management/", APP_SCOPE).toString();
 const INDEX_URL = new URL("management/index.html", APP_SCOPE).toString();
 
