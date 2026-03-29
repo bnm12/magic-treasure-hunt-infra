@@ -44,17 +44,11 @@ const tabs = [
   max-width: 100%;
   margin: 0 auto;
   min-height: 100svh;
-  <style scoped>
-  #management-app {
-    max-width: 100%;
-    margin: 0 auto;
-    min-height: 100svh;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    isolation: isolate;
-    overflow-x: hidden;
-  }
-  </style>
-<script setup lang="ts">
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+}
+</style>
