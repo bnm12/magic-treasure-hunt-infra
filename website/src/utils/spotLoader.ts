@@ -1,4 +1,8 @@
-import { resolveAppUrl, resolveVersionedAppUrl, withBuildVersion } from "./appUrl";
+import {
+  resolveAppUrl,
+  resolveVersionedAppUrl,
+  withBuildVersion,
+} from "./appUrl";
 
 export interface SpotDefinition {
   name: string;
@@ -29,10 +33,12 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
   const hunts: Record<number, HuntYear> = {};
 
   // Load available hunt years (try multiple years, load what's available)
-  for (const year of [2026, 2025, 2024, 2023]) {
+  for (const year of [2026, 2025]) {
     try {
       const huntBaseUrl = resolveAppUrl(`hunts/${year}/`);
-      const response = await fetch(resolveVersionedAppUrl(`hunts/${year}/hunt.json`));
+      const response = await fetch(
+        resolveVersionedAppUrl(`hunts/${year}/hunt.json`),
+      );
       if (response.ok) {
         const hunt = (await response.json()) as HuntYear;
         // Resolve image paths to absolute URLs relative to the hunt folder
