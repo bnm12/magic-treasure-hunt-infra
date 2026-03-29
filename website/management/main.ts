@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import ManagementApp from "./ManagementApp.vue";
+import ManagementApp from "../src/ManagementApp.vue";
 import "../src/style.css";
 import { resolveVersionedAppUrl } from "../src/utils/appUrl";
 

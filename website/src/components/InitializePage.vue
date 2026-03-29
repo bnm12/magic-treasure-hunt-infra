@@ -4,8 +4,14 @@
       :icon="IconWandTweaker"
       eyebrow="Mass Initialization"
       title="Wand Workshop"
-      :copy="`Initializing wands for the ${year} hunt.`"
+      :copy="`Initializing wands for the ${creationYear} hunt.`"
       :compact="true"
+    />
+
+    <NfcConsentOverlay
+      :visible="showNfcConsent"
+      @consent="handleNfcConsent"
+      @skip="showNfcConsent = false"
     />
 
     <div class="initialize-content glass-card">
@@ -23,32 +29,51 @@
         />
         <div class="input-footer">
           <small>{{ wandName.length }}/127 characters</small>
-          <button @click="clearName" class="clear-btn" v-if="wandName">Clear</button>
+          <button @click="clearName" class="clear-btn" v-if="wandName">
+            Clear
+          </button>
         </div>
       </div>
 
+      <div class="form-group">
+        <label for="wand-creation-year">Creation year</label>
+        <select
+          :value="creationYear"
+          @change="
+            creationYearOverride = +($event.target as HTMLSelectElement).value
+          "
+          id="wand-creation-year"
+          class="nfc-input"
+        >
+          <option v-for="year in availableYears" :key="year" :value="year">
+            {{ year }}
+          </option>
+        </select>
+      </div>
+
+      <p v-if="nfcCompatMessage" class="validation-error" role="alert">
+        {{ nfcCompatMessage }}
+      </p>
+      <p v-if="status && !nfcCompatMessage" class="nfc-status">{{ status }}</p>
       <p v-if="error" class="validation-error" role="alert">
         {{ error }}
       </p>
 
       <div class="nfc-controls">
         <button
-          :disabled="isWriting || !wandName.trim()"
+          :disabled="isWriting || !wandName.trim() || !nfcSupported()"
           @click="handleInitWand"
           type="button"
           class="counter primary-btn"
         >
-          {{
-            isWriting
-              ? "✨ Initializing..."
-              : "🪄 Initialize Wand"
-          }}
+          {{ isWriting ? "✨ Initializing..." : "🪄 Initialize Wand" }}
         </button>
       </div>
 
       <div v-if="lastInitialized" class="success-message">
         <span class="sparkle">✨</span>
-        Successfully initialized wand for <strong>{{ lastInitialized }}</strong>!
+        Successfully initialized wand for <strong>{{ lastInitialized }}</strong
+        >!
       </div>
     </div>
 
@@ -65,21 +90,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import PageHero from "./PageHero.vue";
 import IconWandTweaker from "./icons/IconWandTweaker.vue";
-
-const props = defineProps<{
-  year: number;
-  isWriting: boolean;
-  initializeWand: (name: string, year: number) => Promise<void>;
-}>();
+import NfcConsentOverlay from "./NfcConsentOverlay.vue";
+import { useNfc } from "../composables/useNfc";
+import { useHuntData } from "../composables/useHuntData";
 
 const wandName = ref("");
 const error = ref("");
 const lastInitialized = ref("");
 const history = ref<string[]>([]);
 const nameInput = ref<HTMLInputElement | null>(null);
+const showNfcConsent = ref(false);
+const creationYearOverride = ref<number>(0);
+
+const { isWriting, status, nfcCompatMessage, nfcSupported, initializeWand } =
+  useNfc();
+const { allYears: availableYears } = useHuntData();
+
+const creationYear = computed(() => {
+  if (
+    creationYearOverride.value > 0 &&
+    availableYears.value.includes(creationYearOverride.value)
+  ) {
+    return creationYearOverride.value;
+  }
+  return availableYears.value[0] ?? new Date().getFullYear();
+});
 
 function clearName() {
   wandName.value = "";
@@ -87,17 +125,37 @@ function clearName() {
 }
 
 async function handleInitWand() {
-  if (props.isWriting) return;
   error.value = "";
+  if (isWriting.value) return;
   const name = wandName.value.trim();
 
   if (!name) {
     error.value = "Please enter the owner's name.";
     return;
   }
+  if (name.length > 127) {
+    error.value = "Owner name is too long (max 127 characters).";
+    return;
+  }
+  if (!nfcSupported()) {
+    error.value = "Web NFC is not supported on this device.";
+    return;
+  }
+  if (!creationYear.value) {
+    error.value = "Please select a creation year.";
+    return;
+  }
+
+  // Try to start scanning silently; show consent popup only if a user gesture is needed
+  const { beginScanning } = useNfc();
+  const result = await beginScanning();
+  if (result === "needs-gesture") {
+    showNfcConsent.value = true;
+    return;
+  }
 
   try {
-    await props.initializeWand(name, props.year);
+    await initializeWand(name, creationYear.value);
     lastInitialized.value = name;
     history.value.unshift(name);
     if (history.value.length > 5) {
@@ -108,6 +166,14 @@ async function handleInitWand() {
   } catch (e) {
     error.value = `Error: ${(e as Error).message}`;
   }
+}
+
+async function handleNfcConsent() {
+  showNfcConsent.value = false;
+  const { beginScanning } = useNfc();
+  await beginScanning();
+  // After consent, try again
+  await handleInitWand();
 }
 
 onMounted(() => {
