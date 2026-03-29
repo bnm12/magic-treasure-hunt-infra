@@ -51,4 +51,15 @@ const tabs = [
   isolation: isolate;
   overflow-x: hidden;
 }
+
+.page-content {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 5rem;
+  -webkit-overflow-scrolling: touch;
+}
 </style>

@@ -1,10 +1,10 @@
 {
-  "id": "./management",
+  "id": "management",
   "name": "Tryllestav Management",
   "short_name": "Stav Admin",
   "description": "Initialize wands and configure magic spots for Tryllestavsprojekt.",
-  "start_url": "./management",
-  "scope": "./management",
+  "start_url": "management",
+  "scope": "management",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#0b0b1a",
