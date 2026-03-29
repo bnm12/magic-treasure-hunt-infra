@@ -1,8 +1,8 @@
 export function resolveAppUrl(path = ""): string {
-  const normalizedPath = path.replace(/(^\/+|management\/)/, "");
+  const normalizedPath = path.replace(/^\/+/, "");
   const baseUrl =
     typeof document !== "undefined"
-      ? document.baseURI
+      ? document.baseURI.replace(/management\//, "")
       : import.meta.env.BASE_URL;
 
   return new URL(normalizedPath, baseUrl).toString();
