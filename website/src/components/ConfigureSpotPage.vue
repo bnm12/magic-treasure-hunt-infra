@@ -150,7 +150,6 @@ const terminalContent = ref<HTMLElement | null>(null);
 
 const hunts = ref<Record<number, HuntYear>>({});
 const availableYears = ref<number[]>([]);
-const availableSpots = ref<number[]>([]);
 const deviceHuntYear = ref<number>(0);
 const deviceSpotId = ref<number>(0);
 let lastProcessedIndex = -1;
@@ -163,6 +162,14 @@ const currentSpotName = computed(() => {
   const hunt = hunts.value[deviceHuntYear.value];
   if (!hunt) return "";
   return hunt.spots[String(deviceSpotId.value)]?.name || "";
+});
+
+const availableSpots = computed<number[]>(() => {
+  const hunt = hunts.value[deviceHuntYear.value];
+  if (!hunt) return [];
+  return Object.keys(hunt.spots)
+    .map(Number)
+    .sort((a, b) => a - b);
 });
 
 onMounted(async () => {
@@ -211,16 +218,6 @@ function updateSpot() {
     void send(`setSpot: ${deviceSpotId.value}\n`);
   }
 }
-
-watch(deviceHuntYear, (year) => {
-  if (year && hunts.value[year]) {
-    availableSpots.value = Object.keys(hunts.value[year].spots)
-      .map(Number)
-      .sort((a, b) => a - b);
-  } else {
-    availableSpots.value = [];
-  }
-});
 
 // Auto-scroll terminal to bottom and parse for config
 watch(receivedText, (text) => {

@@ -49,8 +49,8 @@ Each guide document:
 ## Completion Checklist
 
 - [ x ] Phase 1 complete — `npm run build` passes
-- [ ] Phase 2 complete — `npm run build` passes
-- [ ] Phase 3 complete — `npm run build` passes
+- [ x ] Phase 2 complete — `npm run build` passes
+- [ x ] Phase 3 complete — `npm run build` passes
 - [ ] Phase 4 complete — `npm run build` passes
 - [ ] Phase 5 complete — `npm run build` passes
 - [ ] Phase 6 complete — `npm run build` passes

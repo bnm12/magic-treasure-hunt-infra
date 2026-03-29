@@ -4,6 +4,8 @@ interface SerialPort extends EventTarget {
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<Uint8Array>;
   open(options: SerialOptions): Promise<void>;
+  setSignals(signals: SerialOutputSignals): Promise<void>;
+  getSignals(): Promise<SerialInputSignals>;
   close(): Promise<void>;
   forget(): Promise<void>;
   getInfo(): SerialPortInfo;
@@ -21,6 +23,19 @@ interface SerialOptions {
 interface SerialPortInfo {
   usbVendorId?: number;
   usbProductId?: number;
+}
+
+interface SerialOutputSignals {
+  dataTerminalReady?: boolean;
+  requestToSend?: boolean;
+  break?: boolean;
+}
+
+interface SerialInputSignals {
+  dataCarrierDetect: boolean;
+  clearToSend: boolean;
+  deviceReady: boolean;
+  ringIndicator: boolean;
 }
 
 interface SerialPortRequestOptions {
