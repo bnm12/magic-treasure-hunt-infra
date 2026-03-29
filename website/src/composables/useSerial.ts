@@ -20,17 +20,21 @@ export function useSerial() {
 
       await port.value.open({ baudRate: 115200 });
 
-      // Give the device a brief moment to stabilize after opening
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Deassert both signals first to avoid bootloader entry
+      await port.value.setSignals({
+        dataTerminalReady: false,
+        requestToSend: false,
+      });
+      await new Promise((r) => setTimeout(r, 50));
 
-      // ESP32-C3/S3 built-in USB Serial/JTAG often requires DTR/RTS to be HIGH
-      // for the serial output to flow and to prevent the chip from being
-      // stuck in a reset state or bootloader mode.
-      try {
-        await port.value.setSignals({ dataTerminalReady: true, requestToSend: true });
-      } catch (signalError) {
-        console.warn("Failed to set DTR/RTS signals:", signalError);
-      }
+      // RTS pulse to reset device if stuck in ROM bootloader
+      await port.value.setSignals({ requestToSend: true });
+      await new Promise((r) => setTimeout(r, 100));
+      await port.value.setSignals({ requestToSend: false });
+
+      // Wait for sketch to boot (covers PN532 boot delay)
+      await new Promise((r) => setTimeout(r, 2500));
+      receivedText.value = "";
 
       isConnected.value = true;
       readLoop();
