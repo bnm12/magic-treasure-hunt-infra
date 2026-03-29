@@ -9,6 +9,11 @@
         "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7\\qio_qspi\\include/**",
         "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32/**",
         "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\variants\\lolin_c3_mini/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\Wire\\src/**",
+        "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532_I2C/**",
+        "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532/**",
+        "C:\\Users\\Benja\\Documents\\Arduino\\libraries\\NDEF/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\EEPROM\\src/**",
         "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\BLE\\src/**"
       ],
       "forcedInclude": [
@@ -44,6 +49,11 @@
         "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7/qio_qspi/include",
         "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32",
         "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\variants\\lolin_c3_mini",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\Wire\\src",
+        "-IC:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532_I2C",
+        "-IC:\\Users\\Benja\\Documents\\Arduino\\libraries\\PN532",
+        "-IC:\\Users\\Benja\\Documents\\Arduino\\libraries\\NDEF",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\EEPROM\\src",
         "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\BLE\\src",
         "@D:\\Git\\Tryllestavsprojekt\\arduino\\esp32\\build/build_opt.h",
         "@D:\\Git\\Tryllestavsprojekt\\arduino\\esp32\\build/file_opts",

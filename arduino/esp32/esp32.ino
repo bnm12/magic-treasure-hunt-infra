@@ -332,12 +332,12 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
 
-void setup() {
+void setup() {  
   CombiSerial.begin(115200);
   delay(200);
 
   pinMode(kLedPin, OUTPUT);
-  digitalWrite(kLedPin, HIGH);  // Off (active low on C3 Mini)
+  digitalWrite(kLedPin, LOW);  // Off (active low on C3 Mini)
   pinMode(kButtonPin, INPUT_PULLUP);
 
   initBLE();
@@ -363,7 +363,7 @@ void setup() {
 
   if (!tryInitPn532()) {
     CombiSerial.println("PN532 not detected. Will retry every 2 s.");
-    digitalWrite(kLedPin, LOW);  // On
+    digitalWrite(kLedPin, HIGH);  // On
   }
 }
 
@@ -381,7 +381,7 @@ void loop() {
         CombiSerial.println("PN532 still not detected, retrying...");
         digitalWrite(kLedPin, !digitalRead(kLedPin));  // Toggle
       } else {
-        digitalWrite(kLedPin, HIGH);  // Off
+        digitalWrite(kLedPin, LOW);  // Off
       }
     }
     delay(50);
