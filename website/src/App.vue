@@ -65,10 +65,7 @@
       </Transition>
     </div>
 
-    <BottomNav
-      v-model="currentPage"
-      :tabs="navTabs"
-    />
+    <BottomNav v-model="currentPage" :tabs="navTabs" />
 
     <NfcConsentOverlay
       :visible="showNfcConsent"
@@ -190,7 +187,6 @@ onMounted(async () => {
     }
   }
 });
-
 </script>
 
 <style scoped>

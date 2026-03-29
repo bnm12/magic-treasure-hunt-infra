@@ -190,7 +190,9 @@ const mainAppUrl = resolveAppUrl("../");
 }
 .mgmt-tab-icon {
   font-size: 1.3rem;
-  transition: transform 0.25s ease, filter 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
 }
 .mgmt-tab.active .mgmt-tab-icon {
   transform: scale(1.1);
@@ -203,7 +205,9 @@ const mainAppUrl = resolveAppUrl("../");
 }
 .mgmt-fade-enter-active,
 .mgmt-fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .mgmt-fade-enter-from {
   opacity: 0;
@@ -214,8 +218,17 @@ const mainAppUrl = resolveAppUrl("../");
   transform: translateY(-6px);
 }
 @keyframes indicator-appear {
-  from { width: 0; opacity: 0; left: 50%; right: 50%; }
-  to   { left: 10%; right: 10%; opacity: 1; }
+  from {
+    width: 0;
+    opacity: 0;
+    left: 50%;
+    right: 50%;
+  }
+  to {
+    left: 10%;
+    right: 10%;
+    opacity: 1;
+  }
 }
 @media (max-width: 600px) {
   .mgmt-header {
