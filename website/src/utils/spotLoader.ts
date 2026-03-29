@@ -32,8 +32,7 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
 
   const hunts: Record<number, HuntYear> = {};
 
-  // Load available hunt years (try multiple years, load what's available)
-  for (const year of [2026, 2025]) {
+  for (const year of __HUNT_YEARS__) {
     try {
       const huntBaseUrl = resolveAppUrl(`hunts/${year}/`);
       const response = await fetch(
@@ -41,7 +40,6 @@ export async function loadHunts(): Promise<Record<number, HuntYear>> {
       );
       if (response.ok) {
         const hunt = (await response.json()) as HuntYear;
-        // Resolve image paths to absolute URLs relative to the hunt folder
         if (
           hunt.image &&
           !hunt.image.startsWith("/") &&
