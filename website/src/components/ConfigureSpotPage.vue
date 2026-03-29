@@ -4,19 +4,23 @@
       :icon="IconWandTweaker"
       eyebrow="Device Configuration"
       title="Spot Configurator"
-      copy="Connect to a Magic Spot over USB to configure its ID and year."
+      copy="Connect to a Magic Spot over USB or Bluetooth to configure its ID and year."
       :compact="true"
     />
 
     <div class="configure-content glass-card">
       <div v-if="!isConnected" class="connect-section">
         <p class="instruction-text">
-          Connect your device via USB and click the button below to start
-          configuration.
+          Connect your device and click a button below to start configuration.
         </p>
-        <button @click="connect" class="primary-btn">
-          🔌 Connect to Device
-        </button>
+        <div class="connect-buttons">
+          <button @click="connectSerial" class="primary-btn">
+            🔌 Connect USB
+          </button>
+          <button @click="connectBluetooth" class="primary-btn bluetooth-btn">
+            📡 Connect Bluetooth
+          </button>
+        </div>
       </div>
 
       <div v-else class="config-section">
@@ -128,11 +132,18 @@
 import { ref, watch, nextTick, onMounted, computed } from "vue";
 import PageHero from "./PageHero.vue";
 import IconWandTweaker from "./icons/IconWandTweaker.vue";
-import { useSerial } from "../composables/useSerial";
+import { useCommunication } from "../composables/useCommunication";
 import { loadHunts, type HuntYear } from "../utils/spotLoader";
 
-const { isConnected, receivedText, error, connect, disconnect, send } =
-  useSerial();
+const {
+  isConnected,
+  receivedText,
+  error,
+  connectSerial,
+  connectBluetooth,
+  disconnect,
+  send,
+} = useCommunication();
 
 const inputText = ref("");
 const terminalContent = ref<HTMLElement | null>(null);
@@ -256,6 +267,12 @@ watch(receivedText, (text) => {
   line-height: 1.6;
 }
 
+.connect-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .primary-btn {
   width: 100%;
   justify-content: center;
@@ -264,6 +281,11 @@ watch(receivedText, (text) => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.bluetooth-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
 }
 
 .status-bar {
