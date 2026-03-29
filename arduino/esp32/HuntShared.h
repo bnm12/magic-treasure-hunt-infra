@@ -40,6 +40,10 @@ class CombiSerialClass {
 public:
   void begin(unsigned long baud) {
     Serial.begin(baud);
+#if defined(USB_SERIAL_JTAG) && !ARDUINO_USB_CDC_ON_BOOT
+    // ESP32-C3/S3 built-in USB-Serial/JTAG, only if not already Serial
+    USBSerial.begin(baud);
+#endif
   }
 
   // ── Output ────────────────────────────────────────────────────────────────
@@ -90,10 +94,18 @@ private:
     while (Serial.available()) {
       rxBuffer += (char)Serial.read();
     }
+#if defined(USB_SERIAL_JTAG) && !ARDUINO_USB_CDC_ON_BOOT
+    while (USBSerial.available()) {
+      rxBuffer += (char)USBSerial.read();
+    }
+#endif
   }
 
   void toAll(const String& s) {
     Serial.print(s);
+#if defined(USB_SERIAL_JTAG) && !ARDUINO_USB_CDC_ON_BOOT
+    USBSerial.print(s);
+#endif
     if (!deviceConnected || !pTxCharacteristic) return;
     const uint8_t* data = (const uint8_t*)s.c_str();
     size_t len = s.length();
