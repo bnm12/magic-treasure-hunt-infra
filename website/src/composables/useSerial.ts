@@ -15,9 +15,24 @@ export function useSerial() {
       }
 
       port.value = await navigator.serial.requestPort();
-      await port.value.open({ baudRate: 115200 });
-      isConnected.value = true;
+      const info = port.value.getInfo();
+      console.log("Serial port info:", info);
 
+      await port.value.open({ baudRate: 115200 });
+
+      // Give the device a brief moment to stabilize after opening
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // ESP32-C3/S3 built-in USB Serial/JTAG often requires DTR/RTS to be HIGH
+      // for the serial output to flow and to prevent the chip from being
+      // stuck in a reset state or bootloader mode.
+      try {
+        await port.value.setSignals({ dataTerminalReady: true, requestToSend: true });
+      } catch (signalError) {
+        console.warn("Failed to set DTR/RTS signals:", signalError);
+      }
+
+      isConnected.value = true;
       readLoop();
     } catch (e) {
       error.value = (e as Error).message;
