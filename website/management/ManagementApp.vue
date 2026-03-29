@@ -39,27 +39,4 @@ const tabs = [
 ];
 </script>
 
-<style scoped>
-#management-app {
-  max-width: 100%;
-  margin: 0 auto;
-  min-height: 100svh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  isolation: isolate;
-  overflow-x: hidden;
-}
-
-.page-content {
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-bottom: 5rem;
-  -webkit-overflow-scrolling: touch;
-}
-</style>
+<style scoped></style>
