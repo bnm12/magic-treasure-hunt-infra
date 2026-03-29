@@ -2,44 +2,44 @@
   <div class="configure-spot-page page">
     <PageHero
       :icon="IconWandTweaker"
-      eyebrow="Device Configuration"
-      title="Spot Configurator"
-      copy="Connect to a Magic Spot over USB or Bluetooth to configure its ID and year."
+      :eyebrow="t('configure_page.eyebrow')"
+      :title="t('configure_page.title')"
+      :copy="t('configure_page.copy')"
       :compact="true"
     />
 
     <div class="configure-content glass-card">
       <div v-if="!isConnected" class="connect-section">
         <p class="instruction-text">
-          Connect your device and click a button below to start configuration.
+          {{ t('configure_page.connect_instruction') }}
         </p>
         <div class="connect-buttons">
           <button @click="connectSerial" class="primary-btn">
-            🔌 Connect USB
+            🔌 {{ t('configure_page.connect_usb') }}
           </button>
           <button @click="connectBluetooth" class="primary-btn bluetooth-btn">
-            📡 Connect Bluetooth
+            📡 {{ t('configure_page.connect_bluetooth') }}
           </button>
         </div>
       </div>
 
       <div v-else class="config-section">
         <div class="status-bar">
-          <span class="status-indicator connected">Connected</span>
-          <button @click="disconnect" class="text-btn">Disconnect</button>
+          <span class="status-indicator connected">{{ t('configure_page.connected') }}</span>
+          <button @click="disconnect" class="text-btn">{{ t('configure_page.disconnect') }}</button>
         </div>
 
         <div class="current-config">
           <div class="config-grid">
             <div class="form-group">
-              <label for="year-select">Hunt Year</label>
+              <label for="year-select">{{ t('configure_page.year_label') }}</label>
               <select
                 id="year-select"
                 v-model="deviceHuntYear"
                 @change="updateYear"
                 class="nfc-input"
               >
-                <option disabled :value="0">Select Year</option>
+                <option disabled :value="0">{{ t('configure_page.year_placeholder') }}</option>
                 <option
                   v-for="year in availableYears"
                   :key="year"
@@ -53,16 +53,16 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="spot-select">Spot ID</label>
+              <label for="spot-select">{{ t('configure_page.spot_label') }}</label>
               <select
                 id="spot-select"
                 v-model="deviceSpotId"
                 @change="updateSpot"
                 class="nfc-input"
               >
-                <option disabled :value="0">Select Spot</option>
+                <option disabled :value="0">{{ t('configure_page.spot_placeholder') }}</option>
                 <option v-for="id in availableSpots" :key="id" :value="id">
-                  Spot {{ id }}
+                  {{ t('configure_page.spot_option', { id }) }}
                 </option>
               </select>
               <div v-if="currentSpotName" class="selection-info">
@@ -75,28 +75,28 @@
         <div class="divider-magic"></div>
 
         <div class="terminal glass-card">
-          <div class="terminal-header">Received Data</div>
+          <div class="terminal-header">{{ t('configure_page.terminal_header') }}</div>
           <pre ref="terminalContent" class="terminal-content">{{
-            receivedText || "Waiting for data..."
+            receivedText || t('configure_page.terminal_placeholder')
           }}</pre>
           <button
             @click="clearTerminal"
             class="clear-terminal-btn"
             v-if="receivedText"
           >
-            Clear
+            {{ t('configure_page.terminal_clear') }}
           </button>
         </div>
 
         <div class="form-group">
-          <label for="serial-input">Send Command</label>
+          <label for="serial-input">{{ t('configure_page.send_label') }}</label>
           <div class="input-with-button">
             <input
               v-model="inputText"
               id="serial-input"
               class="nfc-input"
               type="text"
-              placeholder="e.g., setSpot: 5"
+              :placeholder="t('configure_page.send_placeholder')"
               @keyup.enter="handleSend"
             />
             <button
@@ -104,7 +104,7 @@
               :disabled="!inputText.trim()"
               class="send-btn"
             >
-              Send
+              {{ t('configure_page.send_btn') }}
             </button>
           </div>
           <div class="quick-commands">
@@ -130,11 +130,13 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import PageHero from "./PageHero.vue";
 import IconWandTweaker from "./icons/IconWandTweaker.vue";
 import { useCommunication } from "../composables/useCommunication";
 import { loadHunts, type HuntYear } from "../utils/spotLoader";
 
+const { t } = useI18n();
 const {
   isConnected,
   receivedText,

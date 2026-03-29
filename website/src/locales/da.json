@@ -1,0 +1,222 @@
+{
+  "nav": {
+    "hunt": "Jagt",
+    "archive": "Arkiv",
+    "toybox": "Legetøjskasse"
+  },
+  "hunt": {
+    "eyebrow": "Tryllestavsprojekt",
+    "title": "Tryllestav-følgesvend",
+    "copy": "Tryk din tryllestav mod et magisk sted for at samle det. Scan din tryllestav her for at se din fremgang og tips.",
+    "empty_no_data": "Ingen jagdata fundet på din tryllestav endnu. Besøg et magisk sted!",
+    "empty_scanning": "Hold din tryllestav tæt på for at begynde dit magiske eventyr!",
+    "empty_responding": "Din tryllestav svarer...",
+    "empty_preparing": "Forbereder NFC-scanner...",
+    "progress_remaining": "0 steder tilbage | 1 sted tilbage | {n} steder tilbage",
+    "progress_complete": "Alle steder er samlet!",
+    "progress_none": "Ingen steder samlet endnu — tryk din tryllestav mod et magisk sted!"
+  },
+  "archive": {
+    "eyebrow": "Fortid og Nutid",
+    "title": "Jagtarkiv",
+    "copy": "Gennemse alle jagter — inklusiv dem du måske er gået glip af.",
+    "empty": "Ingen jagter tilgængelige endnu."
+  },
+  "spot": {
+    "collected": "Samlet",
+    "undiscovered": "Uopdaget"
+  },
+  "wand": {
+    "owner": "Ejer",
+    "crafted": "Skabt"
+  },
+  "toybox": {
+    "eyebrow": "Tryllestavs-værksted",
+    "title": "Legetøjskasse",
+    "copy": "Initialiser en tryllestav og juster post 1 uden at forstyrre din jagtfremgang.",
+    "install_title": "Installer følgesvend",
+    "install_note": "Tilføj tryllestav-følgesvenden til din startskærm som en selvstændig app, når din browser understøtter installation.",
+    "install_btn": "Installer app",
+    "action_title": "Standard trykhandling",
+    "action_note": "Vælg hvad tryllestaven gør ved et normalt NFC-tryk. Skattefremgang bevares altid ved skrivning.",
+    "action_label": "Handlingstype",
+    "action_summary_fallback": "",
+    "write_btn": "Skriv til tryllestav",
+    "writing_btn": "Skriver...",
+    "optional": "(valgfrit)",
+    "actions": {
+      "url": {
+        "label": "Åbn hjemmeside",
+        "description": "Åbn en normal webside, når tryllestaven trykkes.",
+        "fields": {
+          "url": { "label": "Hjemmeside-URL", "placeholder": "https://eksempel.dk/magi" }
+        }
+      },
+      "text": {
+        "label": "Vis besked",
+        "description": "Vis en kort magisk note på kompatible enheder.",
+        "fields": {
+          "text": { "label": "Besked", "placeholder": "Tryllestaven vælger dig." }
+        }
+      },
+      "app": {
+        "label": "Åbn App-link",
+        "description": "Start et brugerdefineret dybt link som spotify:, discord: eller app://.",
+        "fields": {
+          "uri": { "label": "App-URI", "placeholder": "spotify:playlist:37i9dQZF1DX4WYpdgoIcn6" }
+        }
+      },
+      "email": {
+        "label": "Skriv e-mail",
+        "description": "Forbered en e-mail til en valgt adresse med emne og tekst.",
+        "fields": {
+          "to": { "label": "Til", "placeholder": "uglepost@eksempel.dk" },
+          "subject": { "label": "Emne", "placeholder": "Besked fra min tryllestav" },
+          "body": { "label": "Tekst", "placeholder": "Hej fra jagten!" }
+        }
+      },
+      "phone": {
+        "label": "Ring til nummer",
+        "description": "Ring til et telefonnummer direkte ved tryk.",
+        "fields": {
+          "number": { "label": "Telefonnummer", "placeholder": "+45 12 34 56 78" }
+        }
+      },
+      "sms": {
+        "label": "SMS-besked",
+        "description": "Åbn en SMS-kladde til et valgt nummer.",
+        "fields": {
+          "number": { "label": "Telefonnummer", "placeholder": "+45 12 34 56 78" },
+          "body": { "label": "Besked", "placeholder": "Mød mig ved det næste magiske sted!" }
+        }
+      },
+      "geo": {
+        "label": "Åbn kortnål",
+        "description": "Hop til koordinater i en kort-app.",
+        "fields": {
+          "latitude": { "label": "Breddegrad", "placeholder": "55.6761" },
+          "longitude": { "label": "Længdegrad", "placeholder": "12.5683" },
+          "label": { "label": "Stednavn", "placeholder": "Hemmeligt mødested" }
+        }
+      },
+      "contact": {
+        "label": "Del kontakt",
+        "description": "Skriv et vCard, så tryllestaven kan dele en person eller et projekt.",
+        "fields": {
+          "name": { "label": "Navn", "placeholder": "Luna Støv" },
+          "phone": { "label": "Telefon", "placeholder": "+45 12 34 56 78" },
+          "email": { "label": "E-mail", "placeholder": "luna@eksempel.dk" },
+          "organization": { "label": "Organisation", "placeholder": "Tryllestavsprojekt" },
+          "url": { "label": "Hjemmeside", "placeholder": "https://eksempel.dk" },
+          "note": { "label": "Note", "placeholder": "Kontaktperson hvis tryllestaven findes." }
+        }
+      },
+      "calendar": {
+        "label": "Kalenderbegivenhed",
+        "description": "Opret en kalenderinvitation fra tryllestaven.",
+        "fields": {
+          "title": { "label": "Titel", "placeholder": "Skattejagt-møde" },
+          "start": { "label": "Starter", "placeholder": "" },
+          "end": { "label": "Slutter", "placeholder": "" },
+          "location": { "label": "Lokation", "placeholder": "Byens springvand" },
+          "description": { "label": "Beskrivelse", "placeholder": "Tag din tryllestav og dine skarpeste ledetråde med." }
+        }
+      }
+    },
+    "admin_kicker": "Midlertidig",
+    "admin_title": "Administratorværktøjer",
+    "admin_note": "Disse kontroller er til opsætning, test og fejlfinding. Vi planlægger at fjerne dem fra det offentlige Legetøjskasse-flow senere.",
+    "init_title": "Initialiser tryllestav",
+    "init_note": "Initialiser et tomt NFC-tag som en officiel tryllestav. Tryllestaven kan derefter samle skatte på dit eventyr.",
+    "init_owner_label": "Ejernavn",
+    "init_owner_placeholder": "f.eks. Benjamin",
+    "init_owner_counter": "{count}/127 tegn",
+    "init_year_label": "Oprettelsesår",
+    "init_btn": "Initialiser tryllestav",
+    "init_btn_busy": "Initialiserer...",
+    "init_error_name_required": "Indtast venligst ejerens navn.",
+    "init_error_name_too_long": "Ejernavn er for langt (maks. 127 tegn).",
+    "init_error_year_required": "Vælg venligst et oprettelsesår.",
+    "unlock_title": "Lås testskatte op",
+    "unlock_note": "Tilføj et vilkårligt sted fra et vilkårligt jagtår på tryllestaven til test og fejlfindingsflows.",
+    "unlock_year_label": "Jagtår",
+    "unlock_spot_label": "Sted",
+    "unlock_spot_option": "Sted {id}",
+    "unlock_btn": "Lås sted {id} op",
+    "unlock_btn_busy": "Låser op...",
+    "unlock_error_select": "Vælg et jagtår og et sted først."
+  },
+  "nfc": {
+    "not_supported": "Web NFC er ikke tilgængeligt. Åbn denne side i Chrome på Android over HTTPS.",
+    "unavailable": "Web NFC er ikke tilgængeligt. Brug HTTPS on Android Chrome eller Samsung Internet.",
+    "permission_denied": "NFC-tilladelse blev afvist. Tillad venligst NFC-adgang i dine browserindstillinger og opdater siden.",
+    "detected": "Tryllestav registreret!",
+    "read_failed": "Kunne ikke læse tryllestaven. Prøv igen.",
+    "scan_failed": "Scanning mislykkedes: {error}",
+    "write_verify": "Hold tryllestaven tæt på din enhed for at verificere og skrive...",
+    "write_verify_reading": "Hold tryllestaven tæt på din enhed for at verificere dens aktuelle poster...",
+    "write_record1_success": "Post 1 skrevet! Tagget blev læst først og skattfremgang blev bevaret.",
+    "write_record1_failed": "Skrivning mislykkedes: {error}",
+    "init_prompt": "Bring tomt tag for at initialisere som tryllestav...",
+    "init_success": "SUCCES: Tryllestav initialiseret for {name} (år {year})!",
+    "init_failed": "Initialisering mislykkedes: {error}",
+    "init_name_invalid": "Ejernavn skal være 1-127 tegn.",
+    "unlock_prompt": "Hold tryllestaven tæt på din enhed for at låse sted {spot} op for {year}...",
+    "unlock_success": "Låste sted {spot} op for {year} på tryllestaven.",
+    "unlock_failed": "Oplåsning mislykkedes: {error}",
+    "unlock_invalid": "Vælg et gyldigt jagtår og et sted-ID mellem 1 og 64."
+  },
+  "consent": {
+    "title": "Aktiver tryllestav-scanner?",
+    "desc": "Tillad NFC-scanning, så din telefon automatisk kan læse magiske tryllestave.",
+    "enable": "Aktiver NFC",
+    "skip": "Spring over for nu"
+  },
+  "language": {
+    "label": "Sprog",
+    "en": "English",
+    "da": "Dansk"
+  },
+  "year_selector": {
+    "aria_label": "Vælg jagtår"
+  },
+  "init_page": {
+    "eyebrow": "Masseinitialisering",
+    "title": "Tryllestavs-værksted",
+    "copy": "Initialiserer tryllestave til {year}-jagten.",
+    "owner_label": "Ejernavn",
+    "owner_placeholder": "f.eks. Benjamin",
+    "owner_counter": "{count}/127 tegn",
+    "year_label": "Oprettelsesår",
+    "btn": "Initialiser tryllestav",
+    "btn_busy": "Initialiserer...",
+    "clear": "Ryd",
+    "error_name_required": "Indtast venligst ejerens navn.",
+    "error_name_too_long": "Ejernavn er for langt (maks. 127 tegn).",
+    "error_no_nfc": "Web NFC understøttes ikke på denne enhed.",
+    "error_no_year": "Vælg venligst et oprettelsesår.",
+    "success": "Tryllestav initialiseret for {name}!",
+    "history_title": "Seneste initialiseringer"
+  },
+  "configure_page": {
+    "eyebrow": "Enhedskonfiguration",
+    "title": "Sted-konfigurator",
+    "copy": "Opret forbindelse til et magisk sted via USB eller Bluetooth for at konfigurere dets ID og år.",
+    "connect_instruction": "Tilslut din enhed og klik på en knap nedenfor for at starte konfigurationen.",
+    "connect_usb": "Tilslut USB",
+    "connect_bluetooth": "Tilslut Bluetooth",
+    "connected": "Tilsluttet",
+    "disconnect": "Afbryd",
+    "year_label": "Jagtår",
+    "year_placeholder": "Vælg år",
+    "spot_label": "Sted-ID",
+    "spot_placeholder": "Vælg sted",
+    "spot_option": "Sted {id}",
+    "terminal_header": "Modtagne data",
+    "terminal_placeholder": "Venter på data...",
+    "terminal_clear": "Ryd",
+    "send_label": "Send kommando",
+    "send_placeholder": "f.eks. setSpot: 5",
+    "send_btn": "Send"
+  }
+}

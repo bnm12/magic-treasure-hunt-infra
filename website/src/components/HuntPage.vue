@@ -2,9 +2,9 @@
   <div class="page">
     <PageHero
       :icon="IconSeeking"
-      eyebrow="Tryllestavsprojekt"
-      title="Magic Wand Companion"
-      copy="Tap your wand at a magic spot to collect it. Scan your wand here to see your progress and hints."
+      :eyebrow="t('hunt.eyebrow')"
+      :title="t('hunt.title')"
+      :copy="t('hunt.copy')"
       :show-indicator="true"
       :indicator-active="isScanning"
       :indicator-label="isScanning ? 'NFC Active' : 'NFC Off'"
@@ -38,12 +38,12 @@
       <p>
         {{
           showScannedView
-            ? "No hunt data found on your wand yet. Visit a magic spot!"
+            ? t('hunt.empty_no_data')
             : scanRevealActive
-              ? "Your wand is responding..."
+              ? t('hunt.empty_responding')
               : isScanning
-                ? "Hold your wand close to begin your magical adventure!"
-                : "Preparing NFC scanner..."
+                ? t('hunt.empty_scanning')
+                : t('hunt.empty_preparing')
         }}
       </p>
     </div>
@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import PageHero from "./PageHero.vue";
 import WandInfo from "./WandInfo.vue";
 import YearSelector from "./YearSelector.vue";
@@ -58,6 +59,8 @@ import HuntView from "./HuntView.vue";
 import MagicScanCircle from "./MagicScanCircle.vue";
 import IconSeeking from "./icons/IconSeeking.vue";
 import type { HuntYear } from "../utils/spotLoader";
+
+const { t } = useI18n();
 
 defineProps<{
   isScanning: boolean;

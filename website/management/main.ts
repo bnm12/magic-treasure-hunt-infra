@@ -1,12 +1,13 @@
 import { createApp } from "vue";
 import ManagementApp from "../src/ManagementApp.vue";
 import "../src/style.css";
+import { i18n } from "../src/i18n";
 import { resolveVersionedAppUrl } from "../src/utils/appUrl";
 
 const app = createApp(ManagementApp);
+app.use(i18n);
 app.mount("#app");
 
-// Register service worker for PWA support
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker

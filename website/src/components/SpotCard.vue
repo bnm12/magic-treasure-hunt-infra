@@ -15,7 +15,7 @@
       <span class="spot-number">#{{ spotId }}</span>
       <span v-if="collected" class="collected-badge">
         <span class="badge-rune" aria-hidden="true">&#10022;</span>
-        <span class="badge-label">Collected</span>
+        <span class="badge-label">{{ t('spot.collected') }}</span>
         <!-- Sparkle particles -->
         <span class="badge-sparkles" aria-hidden="true">
           <span class="bs" style="--bx: -8px; --by: -10px; --bd: 0s"
@@ -29,7 +29,7 @@
           >
         </span>
       </span>
-      <span v-else class="undiscovered-badge">Undiscovered</span>
+      <span v-else class="undiscovered-badge">{{ t('spot.undiscovered') }}</span>
       <span v-if="!collected" class="locked-badge" aria-hidden="true">
         <svg
           class="lock-chain chain-a"
@@ -168,7 +168,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import type { SpotDefinition } from "../utils/spotLoader";
+
+const { t } = useI18n();
 
 defineProps<{
   spotId: string;

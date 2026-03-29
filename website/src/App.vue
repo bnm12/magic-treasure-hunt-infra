@@ -45,9 +45,9 @@
         <div v-else-if="currentPage === 'toybox'" key="toybox" class="page">
           <PageHero
             :icon="IconWandTweaker"
-            eyebrow="Wand Workshop"
-            title="Toybox"
-            copy="Initialize a wand and tune record 1 without disturbing your hunt progress."
+            :eyebrow="t('toybox.eyebrow')"
+            :title="t('toybox.title')"
+            :copy="t('toybox.copy')"
             :compact="true"
           />
           <ToyboxPanel
@@ -77,6 +77,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useNfc } from "./composables/useNfc";
 import { useRouter } from "./composables/useRouter";
 import { useWandReveal } from "./composables/useWandReveal";
@@ -97,6 +98,8 @@ import NfcToast from "./components/NfcToast.vue";
 import NfcConsentOverlay from "./components/NfcConsentOverlay.vue";
 import HuntPage from "./components/HuntPage.vue";
 import ArchivePage from "./components/ArchivePage.vue";
+
+const { t } = useI18n();
 
 const {
   isScanning,
@@ -142,11 +145,11 @@ const {
   yearProgress,
 } = useYearSelection(collectedSpots, hunts, allYears);
 
-const navTabs: NavTab[] = [
-  { id: "hunt", label: "Hunt", icon: IconHuntMap },
-  { id: "archive", label: "Archive", icon: IconArchive },
-  { id: "toybox", label: "Toybox", icon: IconWandTweaker },
-];
+const navTabs = computed<NavTab[]>(() => [
+  { id: "hunt", label: t("nav.hunt"), icon: IconHuntMap },
+  { id: "archive", label: t("nav.archive"), icon: IconArchive },
+  { id: "toybox", label: t("nav.toybox"), icon: IconWandTweaker },
+]);
 
 // Show NFC status toast briefly when status changes
 const nfcToastVisible = ref(false);
@@ -170,15 +173,13 @@ async function handleNfcConsent() {
   const result = await beginScanning();
   if (result === "needs-gesture") {
     // Browser denied again — user probably dismissed the system prompt
-    nfcCompatMessage.value =
-      "NFC permission was denied. Please allow NFC access in your browser settings and refresh.";
+    nfcCompatMessage.value = t("nfc.permission_denied");
   }
 }
 
 onMounted(async () => {
   if (!nfcSupported()) {
-    nfcCompatMessage.value =
-      "Web NFC is not available. Open this page in Chrome on Android over HTTPS.";
+    nfcCompatMessage.value = t("nfc.not_supported");
   } else {
     // Try to start scanning silently; show consent popup only if a user gesture is needed
     const result = await beginScanning();

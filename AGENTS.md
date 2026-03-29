@@ -35,6 +35,7 @@ This repository currently contains two primary folders:
 **Website (`website/`):**
 
 - Vue 3 + Vite PWA with Web NFC scanning
+- Localization support (English and Danish) via vue-i18n, with browser language auto-detection and manual override in Toybox
 - Hunt visualization with progress tracking
 - Web Serial configuration for Magic Spots (`/configureSpot`)
 - Record 1 Toybox with multi-action NFC presets (web links, messages, contact cards, maps, and more)

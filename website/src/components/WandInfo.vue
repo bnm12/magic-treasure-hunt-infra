@@ -27,7 +27,7 @@
       </div>
       <div class="wand-details">
         <div ref="ownerSectionRef" class="owner-section">
-          <p class="detail-label">Owner</p>
+          <p class="detail-label">{{ t('wand.owner') }}</p>
           <p
             ref="ownerNameRef"
             class="owner-name"
@@ -40,7 +40,7 @@
         </div>
         <div class="divider"></div>
         <div class="year-section">
-          <p class="detail-label">Crafted</p>
+          <p class="detail-label">{{ t('wand.crafted') }}</p>
           <p class="year-value">{{ metadata.creationYear }}</p>
         </div>
       </div>
@@ -58,6 +58,9 @@ import {
   watch,
   computed,
 } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 interface Props {
   metadata: {

@@ -46,6 +46,7 @@ Key files:
 
 Tech stack:
 - **Framework:** Vue 3 with TypeScript
+- **Localization:** vue-i18n@9
 - **Build tool:** Vite
 - **PWA:** Manual manifest + service worker (no vite-plugin-pwa due to Vite version compatibility)
 - **NFC:** Browser Web NFC API (Chrome 108+, Edge, Samsung Internet)
@@ -101,7 +102,7 @@ Core documents:
 | Component | Owner | Status | Notes |
 |-----------|-------|--------|-------|
 | Hunt branding & spots (JSON) | Non-technical organizers | ✅ Ready | Edit hunt.json + add images, no coding |
-| Website PWA | Frontend team | ✅ Functional | Vue 3 + Vite; Web NFC compatible browsers |
+| Website PWA | Frontend team | ✅ Functional | Vue 3 + Vite; Web NFC compatible browsers; localized (EN/DA) |
 | PN532 spot writer (I2C) | Firmware team | ✅ Functional | NTAG21x verified; awaiting field reliability |
 | RC522 spot writer (SPI) | Firmware team | ✅ Implemented | Works with MIFARE sticker tags; not for wands |
 | Wand hardware (glass ampule NTAG216) | Design team | 🚧 In testing | Tip cavity design + ferrite rod tuning pending |

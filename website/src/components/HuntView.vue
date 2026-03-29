@@ -72,16 +72,13 @@
         </div>
         <p class="progress-text">
           <template v-if="collectedCount === totalCount && totalCount > 0">
-            <span class="complete-text">&#10024; All spots collected!</span>
+            <span class="complete-text">&#10024; {{ t('hunt.progress_complete') }}</span>
           </template>
           <template v-else-if="collectedCount === 0">
-            No spots collected yet — tap your wand at a magic spot!
+            {{ t('hunt.progress_none') }}
           </template>
           <template v-else>
-            {{ totalCount - collectedCount }} spot{{
-              totalCount - collectedCount === 1 ? "" : "s"
-            }}
-            remaining
+            {{ t('hunt.progress_remaining', { n: totalCount - collectedCount }, totalCount - collectedCount) }}
           </template>
         </p>
       </div>
@@ -103,8 +100,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import type { HuntYear } from "../utils/spotLoader";
 import SpotCard from "./SpotCard.vue";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   hunt: HuntYear;
