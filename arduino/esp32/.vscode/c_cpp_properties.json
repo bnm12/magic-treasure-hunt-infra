@@ -1,0 +1,80 @@
+{
+  "configurations": [
+    {
+      "name": "Arduino",
+      "includePath": [
+        "C:\\Users\\Benja\\Documents\\Arduino\\libraries/**",
+        "D:\\Git\\Tryllestavsprojekt\\arduino\\esp32/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7\\include/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7\\qio_qspi\\include/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\variants\\lolin_c3_mini/**",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\BLE\\src/**"
+      ],
+      "forcedInclude": [
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32\\Arduino.h"
+      ],
+      "compilerPath": "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp-rv32\\2511/bin/riscv32-esp-elf-g++",
+      "compilerArgs": [
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp-rv32\\2511/bin/riscv32-esp-elf-g++",
+        "-MMD",
+        "-c",
+        "@C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7/flags/cpp_flags",
+        "-w",
+        "-Os",
+        "-Werror=return-type",
+        "-DF_CPU=160000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_LOLIN_C3_MINI",
+        "-DARDUINO_ARCH_ESP32",
+        "-DARDUINO_BOARD=\"LOLIN_C3_MINI\"",
+        "-DARDUINO_VARIANT=\"lolin_c3_mini\"",
+        "-DARDUINO_PARTITION_default",
+        "-DARDUINO_HOST_OS=\"windows\"",
+        "-DARDUINO_FQBN=\"esp32:esp32:lolin_c3_mini:UploadSpeed=921600,CDCOnBoot=default,CPUFreq=160,FlashFreq=80,PartitionScheme=default,DebugLevel=none,EraseFlash=none\"",
+        "-DESP32=ESP32",
+        "-DCORE_DEBUG_LEVEL=0",
+        "-DARDUINO_USB_MODE=1",
+        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        "@C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7/flags/defines",
+        "-ID:\\Git\\Tryllestavsprojekt\\arduino\\esp32",
+        "-iprefix",
+        "C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7/include/",
+        "@C:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7/flags/includes",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32c3-libs\\3.3.7/qio_qspi/include",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\variants\\lolin_c3_mini",
+        "-IC:\\Users\\Benja\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\BLE\\src",
+        "@D:\\Git\\Tryllestavsprojekt\\arduino\\esp32\\build/build_opt.h",
+        "@D:\\Git\\Tryllestavsprojekt\\arduino\\esp32\\build/file_opts",
+        "D:\\Git\\Tryllestavsprojekt\\arduino\\esp32\\build\\sketch\\esp32.ino.cpp",
+        "-o",
+        "D:\\Git\\Tryllestavsprojekt\\arduino\\esp32\\build\\sketch\\esp32.ino.cpp.o"
+      ],
+      "defines": [
+        "F_CPU=160000000L",
+        "ARDUINO=10607",
+        "ARDUINO_LOLIN_C3_MINI",
+        "ARDUINO_ARCH_ESP32",
+        "ARDUINO_BOARD=\"LOLIN_C3_MINI\"",
+        "ARDUINO_VARIANT=\"lolin_c3_mini\"",
+        "ARDUINO_PARTITION_default",
+        "ARDUINO_HOST_OS=\"windows\"",
+        "ARDUINO_FQBN=\"esp32:esp32:lolin_c3_mini:UploadSpeed=921600,CDCOnBoot=default,CPUFreq=160,FlashFreq=80,PartitionScheme=default,DebugLevel=none,EraseFlash=none\"",
+        "ESP32=ESP32",
+        "CORE_DEBUG_LEVEL=0",
+        "ARDUINO_USB_MODE=1",
+        "ARDUINO_USB_CDC_ON_BOOT=1",
+        "ARDUINO_BOARD=\\\"LOLIN_C3_MINI\\\"\"",
+        "ARDUINO_VARIANT=\\\"lolin_c3_mini\\\"\"",
+        "ARDUINO_HOST_OS=\\\"windows\\\"\"",
+        "ARDUINO_FQBN=\\\"esp32:esp32:lolin_c3_mini:UploadSpeed=921600,CDCOnBoot=default,CPUFreq=160,FlashFreq=80,PartitionScheme=default,DebugLevel=none,EraseFlash=none\\\"\"",
+        "ARDUINO_CORE_BUILD",
+        "USBCON"
+      ],
+      "cStandard": "c17",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
