@@ -18,7 +18,7 @@ export default defineConfig({
     port: 5173,
     watch: {
       // Watch src/ and public/ (hunt JSONs, images, sw.js, etc.)
-      paths: ["src", "public"],
+      paths: ["src", "public", "management"],
     },
   },
   build: {

@@ -26,6 +26,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"],
+  "include": ["src", "management/main.ts"],
   "exclude": ["node_modules"]
 }

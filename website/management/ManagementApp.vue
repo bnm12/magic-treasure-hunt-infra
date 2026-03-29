@@ -22,13 +22,13 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import MagicBackground from "../components/MagicBackground.vue";
-import InitializePage from "../components/InitializePage.vue";
-import ConfigureSpotPage from "../components/ConfigureSpotPage.vue";
-import BottomNav from "../components/BottomNav.vue";
-import IconWandTweaker from "../components/icons/IconWandTweaker.vue";
-import IconWand from "../components/icons/IconWand.vue";
-import { useNfc } from "../composables/useNfc";
+import MagicBackground from "../src/components/MagicBackground.vue";
+import InitializePage from "../src/components/InitializePage.vue";
+import ConfigureSpotPage from "../src/components/ConfigureSpotPage.vue";
+import BottomNav from "../src/components/BottomNav.vue";
+import IconWandTweaker from "../src/components/icons/IconWandTweaker.vue";
+import IconWand from "../src/components/icons/IconWand.vue";
+import { useNfc } from "../src/composables/useNfc";
 
 const { isWriting, initializeWand } = useNfc();
 const currentYear = new Date().getFullYear();
