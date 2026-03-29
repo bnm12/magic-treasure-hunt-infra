@@ -1,0 +1,38 @@
+{
+  "id": "management",
+  "name": "Tryllestav Management",
+  "short_name": "Stav Admin",
+  "description": "Initialize wands and configure magic spots for Tryllestavsprojekt.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0b0b1a",
+  "background_color": "#0b0b1a",
+  "icons": [
+    {
+      "src": "../icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "../icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "../icon-maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "../icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ]
+}

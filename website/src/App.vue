@@ -16,21 +16,8 @@
 
     <div class="page-content">
       <Transition name="page-fade" mode="out-in">
-        <InitializePage
-          v-if="currentPage === 'initialize'"
-          key="initialize"
-          :year="initializeYear"
-          :is-writing="isWriting"
-          :initialize-wand="initializeWand"
-        />
-
-        <ConfigureSpotPage
-          v-else-if="currentPage === 'configureSpot'"
-          key="configureSpot"
-        />
-
         <HuntPage
-          v-else-if="currentPage === 'hunt'"
+          v-if="currentPage === 'hunt'"
           key="hunt"
           :is-scanning="isScanning"
           :show-scanned-view="showScannedView"
@@ -79,7 +66,6 @@
     </div>
 
     <BottomNav
-      v-if="currentPage !== 'initialize'"
       v-model="currentPage"
       :tabs="navTabs"
     />
@@ -104,8 +90,6 @@ import MagicBackground from "./components/MagicBackground.vue";
 import PageHero from "./components/PageHero.vue";
 import BottomNav from "./components/BottomNav.vue";
 import ToyboxPanel from "./components/ToyboxPanel.vue";
-import InitializePage from "./components/InitializePage.vue";
-import ConfigureSpotPage from "./components/ConfigureSpotPage.vue";
 import IconHuntMap from "./components/icons/IconHuntMap.vue";
 import IconArchive from "./components/icons/IconArchive.vue";
 import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
@@ -136,7 +120,7 @@ const { canInstall: canInstallPwa, promptInstall } = usePwa();
 const showNfcConsent = ref(false);
 
 // Routing
-const { currentPage, initializeYear } = useRouter();
+const { currentPage } = useRouter();
 
 // Hunt data
 const { hunts, allYears, availableSpotIdsByYear } = useHuntData();

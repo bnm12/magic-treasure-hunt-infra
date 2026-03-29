@@ -1,4 +1,6 @@
 import { defineConfig } from "vite";
+
+import { resolve } from "node:path";
 import vue from "@vitejs/plugin-vue";
 import mkcert from "vite-plugin-mkcert";
 
@@ -21,5 +23,11 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        management: resolve(__dirname, "management/index.html"),
+      },
+    },
   },
 });
