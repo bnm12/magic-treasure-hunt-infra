@@ -31,7 +31,7 @@
           <p
             ref="ownerNameRef"
             class="owner-name"
-            :style="ownerNameStyle(metadata.name)"
+            :style="ownerNameStyle"
           >
             <span ref="ownerNameTextRef" class="owner-name-text">
               {{ metadata.name }}
@@ -56,6 +56,7 @@ import {
   onMounted,
   ref,
   watch,
+  computed,
 } from "vue";
 
 interface Props {
@@ -125,12 +126,10 @@ function fitOwnerName() {
   ownerName.style.setProperty("--owner-font-size", fittedOwnerFontSize.value);
 }
 
-function ownerNameStyle(name: string) {
-  return {
-    "--owner-font-size": fittedOwnerFontSize.value,
-    "--owner-letter-spacing": fittedOwnerLetterSpacing.value,
-  };
-}
+const ownerNameStyle = computed(() => ({
+  "--owner-font-size": fittedOwnerFontSize.value,
+  "--owner-letter-spacing": fittedOwnerLetterSpacing.value,
+}));
 
 watch(
   () => props.metadata?.name,
