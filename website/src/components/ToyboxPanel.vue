@@ -485,6 +485,33 @@ async function handleUnlockSpot() {
   gap: 0.3rem;
 }
 
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.preset-chip {
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-h);
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.preset-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(244, 217, 122, 0.55);
+  background: rgba(244, 217, 122, 0.08);
+}
+
 .nfc-textarea {
   min-height: 5.25rem;
   resize: vertical;

@@ -24,6 +24,13 @@ export interface ToyRecordActionDefinition {
   fields: ToyRecordFieldDefinition[];
 }
 
+export interface ToyRecordPreset {
+  id: string;
+  label: string;
+  action: ToyRecordAction;
+  fields: Record<string, string>;
+}
+
 export interface ToyRecordWriteRequest {
   action: ToyRecordAction;
   fields: Record<string, string>;
@@ -236,6 +243,58 @@ const ACTIONS: ToyRecordActionDefinition[] = [
 ];
 
 export const TOYBOX_ACTIONS = ACTIONS;
+
+export const TOYBOX_PRESETS: ToyRecordPreset[] = [
+  {
+    id: "companion-home",
+    label: "Companion Home",
+    action: "url",
+    fields: { url: "https://tryllestav.example.org" },
+  },
+  {
+    id: "secret-spell",
+    label: "Secret Spell",
+    action: "text",
+    fields: { text: "By moonlight and maplight, reveal the next clue." },
+  },
+  {
+    id: "playlist-portal",
+    label: "Playlist Portal",
+    action: "app",
+    fields: { uri: "spotify:playlist:37i9dQZF1DX4WYpdgoIcn6" },
+  },
+  {
+    id: "guardian-contact",
+    label: "Guardian Contact",
+    action: "contact",
+    fields: {
+      name: "Guardian of the Wand",
+      phone: "+45 12 34 56 78",
+      email: "guardian@example.org",
+      note: "Please contact us if this wand is found.",
+    },
+  },
+  {
+    id: "meet-at-fountain",
+    label: "Meet at Fountain",
+    action: "geo",
+    fields: {
+      latitude: "55.6761",
+      longitude: "12.5683",
+      label: "Magic fountain meetup",
+    },
+  },
+  {
+    id: "owl-post",
+    label: "Owl Post",
+    action: "email",
+    fields: {
+      to: "owlpost@example.org",
+      subject: "A message from my wand",
+      body: "I found another treasure spot today.",
+    },
+  },
+];
 
 function getTrimmedField(
   fields: Record<string, string>,

@@ -495,6 +495,7 @@ export function useNfc() {
     record1Preview,
     collectedSpots,
     wandMetadata,
+    hasScannedWand: () => lastReadRecords.length > 0,
     nfcSupported,
     beginScanning,
     writeRecord1,
