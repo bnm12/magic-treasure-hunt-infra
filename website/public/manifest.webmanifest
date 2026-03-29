@@ -1,7 +1,7 @@
 {
   "name": "Tryllestavsprojekt",
   "short_name": "Tryllestav",
-  "id": "./",
+  "id": "main",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
