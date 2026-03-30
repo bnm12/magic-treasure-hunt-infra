@@ -2,54 +2,76 @@
   <div id="app">
     <MagicBackground />
 
-    <!-- NFC compatibility error banner -->
-    <div v-if="nfcCompatMessage" class="nfc-banner">
-      {{ nfcCompatMessage }}
-    </div>
-
-    <!-- NFC status toast -->
-    <NfcToast
-      :visible="nfcToastVisible"
-      :is-writing="isWriting"
-      :status="status"
-    />
-
     <div class="page-content">
       <Transition name="page-fade" mode="out-in">
-        <HuntPage
+        <PageLayout
           v-if="currentPage === 'hunt'"
           key="hunt"
-          :is-scanning="isScanning"
-          :show-scanned-view="showScannedView"
-          :scan-reveal-active="scanRevealActive"
-          :wand-metadata="wandMetadata"
-          :wand-years="wandYears"
-          :selected-year="selectedYear"
-          :selected-hunt="selectedHunt"
-          :selected-collected-ids="selectedCollectedIds"
-          :year-progress="yearProgress"
-          @update:selected-year="selectedYearOverride = $event"
-        />
+          :nfc-compat-message="nfcCompatMessage"
+          :nfc-toast-visible="nfcToastVisible"
+          :is-writing="isWriting"
+          :nfc-status="status"
+          :hero-icon="IconSeeking"
+          :hero-eyebrow="t('hunt.eyebrow')"
+          :hero-title="t('hunt.title')"
+          :hero-copy="t('hunt.copy')"
+          :hero-show-indicator="true"
+          :hero-indicator-active="isScanning"
+          :hero-indicator-label="
+            isScanning ? t('nfc.indicator_active') : t('nfc.indicator_inactive')
+          "
+        >
+          <HuntPage
+            :is-scanning="isScanning"
+            :show-scanned-view="showScannedView"
+            :scan-reveal-active="scanRevealActive"
+            :wand-metadata="wandMetadata"
+            :wand-years="wandYears"
+            :selected-year="selectedYear"
+            :selected-hunt="selectedHunt"
+            :selected-collected-ids="selectedCollectedIds"
+            :year-progress="yearProgress"
+            @update:selected-year="selectedYearOverride = $event"
+          />
+        </PageLayout>
 
-        <ArchivePage
+        <PageLayout
           v-else-if="currentPage === 'archive'"
           key="archive"
-          :all-years="allYears"
-          :archive-year="archiveYear"
-          :archive-hunt="archiveHunt"
-          :archive-collected-ids="archiveCollectedIds"
-          :year-progress="yearProgress"
-          @update:archive-year="archiveYear = $event"
-        />
-
-        <div v-else-if="currentPage === 'toybox'" key="toybox" class="page">
-          <PageHero
-            :icon="IconWandTweaker"
-            :eyebrow="t('toybox.eyebrow')"
-            :title="t('toybox.title')"
-            :copy="t('toybox.copy')"
-            :compact="true"
+          :nfc-compat-message="nfcCompatMessage"
+          :nfc-toast-visible="nfcToastVisible"
+          :is-writing="isWriting"
+          :nfc-status="status"
+          :hero-icon="IconArchive"
+          :hero-eyebrow="t('archive.eyebrow')"
+          :hero-title="t('archive.title')"
+          :hero-copy="t('archive.copy')"
+          :hero-no-spin="true"
+          :hero-compact="true"
+        >
+          <ArchivePage
+            :all-years="allYears"
+            :archive-year="archiveYear"
+            :archive-hunt="archiveHunt"
+            :archive-collected-ids="archiveCollectedIds"
+            :year-progress="yearProgress"
+            @update:archive-year="archiveYear = $event"
           />
+        </PageLayout>
+
+        <PageLayout
+          v-else-if="currentPage === 'toybox'"
+          key="toybox"
+          :nfc-compat-message="nfcCompatMessage"
+          :nfc-toast-visible="nfcToastVisible"
+          :is-writing="isWriting"
+          :nfc-status="status"
+          :hero-icon="IconWandTweaker"
+          :hero-eyebrow="t('toybox.eyebrow')"
+          :hero-title="t('toybox.title')"
+          :hero-copy="t('toybox.copy')"
+          :hero-compact="true"
+        >
           <ToyboxPanel
             :is-writing="isWriting"
             :initialize-wand="initializeWand"
@@ -61,7 +83,7 @@
             @write="handleToyboxWrite"
             @install="promptInstall"
           />
-        </div>
+        </PageLayout>
       </Transition>
     </div>
 
@@ -85,16 +107,16 @@ import { useHuntData } from "./composables/useHuntData";
 import { useYearSelection } from "./composables/useYearSelection";
 import { usePwa } from "./composables/usePwa";
 import MagicBackground from "./components/MagicBackground.vue";
-import PageHero from "./components/PageHero.vue";
+import PageLayout from "./components/PageLayout.vue";
 import BottomNav from "./components/BottomNav.vue";
 import ToyboxPanel from "./components/ToyboxPanel.vue";
 import IconHuntMap from "./components/icons/IconHuntMap.vue";
 import IconArchive from "./components/icons/IconArchive.vue";
+import IconSeeking from "./components/icons/IconSeeking.vue";
 import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
 import type { NavTab } from "./components/BottomNav.vue";
 import type { ToyRecordWriteRequest } from "./utils/toyboxRecord1";
 
-import NfcToast from "./components/NfcToast.vue";
 import NfcConsentOverlay from "./components/NfcConsentOverlay.vue";
 import HuntPage from "./components/HuntPage.vue";
 import ArchivePage from "./components/ArchivePage.vue";
@@ -181,7 +203,7 @@ onMounted(async () => {
   if (!nfcSupported()) {
     nfcCompatMessage.value = t("nfc.not_supported");
   } else {
-    // Try to start scanning silently; show consent popup only if a user gesture is needed
+    // Try to start scanning silently only in main app
     const result = await beginScanning();
     if (result === "needs-gesture") {
       showNfcConsent.value = true;
@@ -189,19 +211,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style scoped>
-/* --- NFC Banner (errors) --- */
-.nfc-banner {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  padding: 0.6rem 1rem;
-  background: rgba(248, 113, 113, 0.12);
-  border-bottom: 1px solid rgba(248, 113, 113, 0.3);
-  color: var(--danger);
-  font-size: 0.8rem;
-  text-align: center;
-  backdrop-filter: blur(12px);
-}
-</style>

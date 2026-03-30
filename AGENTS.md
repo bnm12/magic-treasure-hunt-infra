@@ -39,7 +39,8 @@ This repository currently contains two primary folders:
 - Hunt visualization with progress tracking
 - Web Serial configuration for Magic Spots (`/configureSpot`)
 - Record 1 Toybox with multi-action NFC presets (web links, messages, contact cards, maps, and more)
-- Reusable page hero and isolated magic scan-circle components
+- Unified page layout via PageLayout component (NFC banner, NfcToast, PageHero, content width constraint)
+- Isolated magic scan-circle components
 - Local custom font asset support for decorative display moments
 - Static hunt asset delivery (JSON + images per year)
 - Auto-discovery of multi-year hunts on wand
@@ -55,6 +56,12 @@ This repository currently contains two primary folders:
 - Wand metadata authentication (`x-hunt-meta` record)
 - Record 1 preservation guarantee
 - Serial configuration interface (dynamic spotId, huntYear)
+
+**Architecture:**
+
+- **Unified Page Shell:** All pages in both the main app and management app utilize `PageLayout.vue` to ensure consistent 680px max-width, padding, and entry animations.
+- **Multi-Entry Frontend:** The application is split into two entry points: `index.html` (Main App) and `management.html` (Management App), allowing for optimized bundles and cleaner separation of user vs. admin logic.
+- **Centralized NFC Feedback:** `PageLayout.vue` manages the sticky NFC compatibility banner and the floating `NfcToast`, providing a unified feedback mechanism for communication status.
 
 **Data Model:**
 

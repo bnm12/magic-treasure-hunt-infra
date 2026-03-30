@@ -161,6 +161,8 @@
     "init_success": "SUCCESS: Wand initialized for {name} (year {year})!",
     "init_failed": "Initialization failed: {error}",
     "init_name_invalid": "Owner name must be 1-127 characters.",
+    "indicator_active": "NFC Active",
+    "indicator_inactive": "NFC Off",
     "unlock_prompt": "Hold the wand near your device to unlock spot {spot} for {year}...",
     "unlock_success": "Unlocked spot {spot} for {year} on the wand.",
     "unlock_failed": "Unlock failed: {error}",

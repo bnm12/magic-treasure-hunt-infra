@@ -1,15 +1,5 @@
 <template>
-  <div class="page">
-    <PageHero
-      :icon="IconSeeking"
-      :eyebrow="t('hunt.eyebrow')"
-      :title="t('hunt.title')"
-      :copy="t('hunt.copy')"
-      :show-indicator="true"
-      :indicator-active="isScanning"
-      :indicator-label="isScanning ? 'NFC Active' : 'NFC Off'"
-    />
-
+  <div>
     <WandInfo v-if="showScannedView" :metadata="wandMetadata" />
 
     <template v-if="showScannedView && wandYears.length > 0">
@@ -52,7 +42,6 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import PageHero from "./PageHero.vue";
 import WandInfo from "./WandInfo.vue";
 import YearSelector from "./YearSelector.vue";
 import HuntView from "./HuntView.vue";
@@ -80,10 +69,6 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-.page {
-  animation: reveal-up 0.35s ease;
-}
-
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;

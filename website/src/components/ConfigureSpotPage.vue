@@ -1,14 +1,5 @@
 <template>
-  <div class="configure-spot-page page">
-    <PageHero
-      :icon="IconWandTweaker"
-      :eyebrow="t('configure_page.eyebrow')"
-      :title="t('configure_page.title')"
-      :copy="t('configure_page.copy')"
-      :compact="true"
-    />
-
-    <div class="configure-content glass-card">
+  <div class="configure-content glass-card">
       <div v-if="!isConnected" class="connect-section">
         <p class="instruction-text">
           {{ t('configure_page.connect_instruction') }}
@@ -125,14 +116,11 @@
         {{ error }}
       </p>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import PageHero from "./PageHero.vue";
-import IconWandTweaker from "./icons/IconWandTweaker.vue";
 import { useCommunication } from "../composables/useCommunication";
 import { loadHunts, type HuntYear } from "../utils/spotLoader";
 
@@ -248,12 +236,6 @@ watch(receivedText, (text) => {
 </script>
 
 <style scoped>
-.configure-spot-page {
-  padding: 0 1.5rem 2rem;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
 .configure-content {
   padding: 2rem;
   margin-top: 1rem;

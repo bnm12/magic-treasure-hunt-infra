@@ -6,7 +6,7 @@
     <script>
       (function() {
         const url = new URL(window.location.href);
-        const redirectUrl = new URL("../", window.location.href);
+        const redirectUrl = new URL("../management.html", window.location.href);
         redirectUrl.searchParams.set("configureSpot", "");
         // Forward any other query params if needed
         for (const [key, value] of url.searchParams) {

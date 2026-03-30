@@ -7,7 +7,7 @@
       (function() {
         const url = new URL(window.location.href);
         const year = url.searchParams.get("year");
-        const redirectUrl = new URL("../", window.location.href);
+        const redirectUrl = new URL("../management.html", window.location.href);
         redirectUrl.searchParams.set("initialize", "");
         if (year) {
           redirectUrl.searchParams.set("year", year);

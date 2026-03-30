@@ -1,14 +1,5 @@
 <template>
-  <div class="page">
-    <PageHero
-      :icon="IconArchive"
-      :eyebrow="t('archive.eyebrow')"
-      :title="t('archive.title')"
-      :copy="t('archive.copy')"
-      :no-spin="true"
-      :compact="true"
-    />
-
+  <div>
     <template v-if="allYears.length > 0">
       <YearSelector
         v-if="allYears.length > 1"
@@ -33,10 +24,8 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import PageHero from "./PageHero.vue";
 import YearSelector from "./YearSelector.vue";
 import HuntView from "./HuntView.vue";
-import IconArchive from "./icons/IconArchive.vue";
 import type { HuntYear } from "../utils/spotLoader";
 
 const { t } = useI18n();
@@ -55,10 +44,6 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-.page {
-  animation: reveal-up 0.35s ease;
-}
-
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;

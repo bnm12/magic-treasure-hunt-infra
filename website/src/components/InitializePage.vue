@@ -1,13 +1,5 @@
 <template>
-  <div class="initialize-page page">
-    <PageHero
-      :icon="IconWandTweaker"
-      :eyebrow="t('init_page.eyebrow')"
-      :title="t('init_page.title')"
-      :copy="t('init_page.copy', { year: creationYear })"
-      :compact="true"
-    />
-
+  <div>
     <NfcConsentOverlay
       :visible="showNfcConsent"
       @consent="handleNfcConsent"
@@ -91,8 +83,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import PageHero from "./PageHero.vue";
-import IconWandTweaker from "./icons/IconWandTweaker.vue";
 import NfcConsentOverlay from "./NfcConsentOverlay.vue";
 import { useNfc } from "../composables/useNfc";
 import { useHuntData } from "../composables/useHuntData";
@@ -183,12 +173,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.initialize-page {
-  padding: 0 1.5rem 2rem;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
 .initialize-content {
   padding: 2rem;
   margin-top: 1rem;
@@ -265,17 +249,6 @@ onMounted(() => {
   text-align: center;
   font-size: 0.9rem;
   animation: reveal-up 0.3s ease;
-}
-
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .sparkle {
