@@ -7,7 +7,7 @@ import { i18n } from "./i18n";
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("/management-sw.js")
+      .register("../management-sw.js")
       .then((registration) => {
         console.log("Management SW registered:", registration);
       })

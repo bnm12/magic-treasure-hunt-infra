@@ -10,7 +10,7 @@
           :nfc-compat-message="nfcCompatMessage"
           :nfc-toast-visible="nfcToastVisible"
           :is-writing="isWriting"
-          :nfc-status="nfcStatus"
+          :nfc-status="status"
           :hero-icon="IconWandTweaker"
           :hero-eyebrow="t('init_page.eyebrow')"
           :hero-title="t('init_page.title')"
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useNfc } from "./composables/useNfc";
 import { useRouter } from "./composables/useRouter";
@@ -59,13 +59,7 @@ import IconWand from "./components/icons/IconWand.vue";
 import type { NavTab } from "./components/BottomNav.vue";
 
 const { t } = useI18n();
-const {
-  nfcCompatMessage,
-  nfcToastVisible,
-  isWriting,
-  nfcStatus,
-  checkNfcSupport,
-} = useNfc();
+const { nfcCompatMessage, isWriting, status, nfcSupported } = useNfc();
 const { currentPage } = useRouter();
 const { allYears } = useHuntData();
 
@@ -78,7 +72,22 @@ const navTabs = computed<NavTab[]>(() => [
   { id: "configureSpot", label: t("configure_page.title"), icon: IconWand },
 ]);
 
+// Show NFC status toast briefly when status changes
+const nfcToastVisible = ref(false);
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+watch(status, (val) => {
+  if (!val) return;
+  nfcToastVisible.value = true;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    nfcToastVisible.value = false;
+  }, 3000);
+});
+
 onMounted(async () => {
-  await checkNfcSupport();
+  if (!nfcSupported()) {
+    nfcCompatMessage.value = t("nfc.not_supported");
+  }
 });
 </script>
