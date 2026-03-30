@@ -238,7 +238,6 @@ code {
 /* ─── App Shell ─── */
 #app {
   max-width: 100%;
-  margin: 0 auto;
   min-height: 100svh;
   min-height: 100dvh;
   display: flex;
