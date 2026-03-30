@@ -40,7 +40,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        management: resolve(__dirname, "management.html"),
+        management: resolve(__dirname, "management/index.html"),
       },
     },
   },
