@@ -37,6 +37,7 @@
 
 Key files:
 - `src/App.vue` — Root component; wand scan entry point
+- `src/components/PageLayout.vue` — Unified page shell (NFC banner, toast, hero, content container)
 - `src/composables/useNfc.ts` — All Web NFC logic (scan, MIME hunt parsing, bitmask decode/encode)
 - `src/components/HuntView.vue` — Single year hunt rendering
 - `src/components/SpotCard.vue` — Individual spot visualization
@@ -85,6 +86,8 @@ Core documents:
 
 ### Completed
 - ✅ **Hunt asset system:** JSON + images per year; website auto-discovers; organizers don't code
+- ✅ **Unified layout:** All pages share a canonical 680px max-width shell with consistent entry animations
+- ✅ **Multi-entry architecture:** Main app and Management app have dedicated entry points for better bundle isolation
 - ✅ **Web NFC and wand scanning:** Vue app scans wands, displays collected/missing spots, shows hints
 - ✅ **Spot writers:** PN532 and RC522 firmware skethces that verify metadata and write yearly hunt records
 - ✅ **Record 1 reserved:** User NFC action stays separate from hunt data; Toybox configures links, text, contact cards, and other common actions

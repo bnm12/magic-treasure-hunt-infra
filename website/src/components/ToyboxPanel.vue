@@ -404,7 +404,7 @@ async function handleUnlockSpot() {
 
 <style scoped>
 .toybox-panel {
-  padding: 0 1.5rem 1.5rem;
+  padding: 0;
 }
 
 .toybox-section {

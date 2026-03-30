@@ -2,55 +2,83 @@
   <div id="management-app">
     <MagicBackground />
 
-    <!-- NFC compatibility error banner -->
-    <div v-if="nfcCompatMessage" class="nfc-banner">
-      {{ nfcCompatMessage }}
-    </div>
-
     <div class="page-content">
       <Transition name="page-fade" mode="out-in">
-        <InitializePage
-          v-if="currentTab === 'initialize'"
+        <PageLayout
+          v-if="currentPage === 'initialize'"
           key="initialize"
-          :year="currentYear"
+          :nfc-compat-message="nfcCompatMessage"
+          :nfc-toast-visible="nfcToastVisible"
           :is-writing="isWriting"
-          :initialize-wand="initializeWand"
-        />
-        <ConfigureSpotPage
-          v-else-if="currentTab === 'configureSpot'"
+          :nfc-status="nfcStatus"
+          :hero-icon="IconWandTweaker"
+          :hero-eyebrow="t('init_page.eyebrow')"
+          :hero-title="t('init_page.title')"
+          :hero-copy="t('init_page.copy', { year: currentYear })"
+          :hero-compact="true"
+        >
+          <InitializePage />
+        </PageLayout>
+
+        <PageLayout
+          v-else-if="currentPage === 'configureSpot'"
           key="configureSpot"
-        />
+          :nfc-compat-message="nfcCompatMessage"
+          :show-nfc-banner="false"
+          :nfc-toast-visible="false"
+          :is-writing="false"
+          :nfc-status="''"
+          :hero-icon="IconWand"
+          :hero-eyebrow="t('configure_page.eyebrow')"
+          :hero-title="t('configure_page.title')"
+          :hero-copy="t('configure_page.copy')"
+          :hero-compact="true"
+        >
+          <ConfigureSpotPage />
+        </PageLayout>
       </Transition>
     </div>
-    <BottomNav v-model="currentTab" :tabs="tabs" />
+
+    <BottomNav v-model="currentPage" :tabs="navTabs" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { useNfc } from "./composables/useNfc";
+import { useRouter } from "./composables/useRouter";
+import { useHuntData } from "./composables/useHuntData";
 import MagicBackground from "./components/MagicBackground.vue";
+import PageLayout from "./components/PageLayout.vue";
+import BottomNav from "./components/BottomNav.vue";
 import InitializePage from "./components/InitializePage.vue";
 import ConfigureSpotPage from "./components/ConfigureSpotPage.vue";
-import BottomNav from "./components/BottomNav.vue";
 import IconWandTweaker from "./components/icons/IconWandTweaker.vue";
 import IconWand from "./components/icons/IconWand.vue";
-import { useNfc } from "./composables/useNfc";
+import type { NavTab } from "./components/BottomNav.vue";
 
 const { t } = useI18n();
-const { isWriting, initializeWand, nfcCompatMessage, nfcSupported } = useNfc();
-const currentYear = new Date().getFullYear();
-const currentTab = ref("initialize");
-const tabs = computed(() => [
+const {
+  nfcCompatMessage,
+  nfcToastVisible,
+  isWriting,
+  nfcStatus,
+  checkNfcSupport,
+} = useNfc();
+const { currentPage } = useRouter();
+const { allYears } = useHuntData();
+
+const currentYear = computed(() => {
+  return allYears.value[0] ?? new Date().getFullYear();
+});
+
+const navTabs = computed<NavTab[]>(() => [
   { id: "initialize", label: t("init_page.title"), icon: IconWandTweaker },
   { id: "configureSpot", label: t("configure_page.title"), icon: IconWand },
 ]);
 
 onMounted(async () => {
-  if (!nfcSupported()) {
-    nfcCompatMessage.value = t("nfc.not_supported");
-  }
+  await checkNfcSupport();
 });
 </script>
-
-<style scoped></style>

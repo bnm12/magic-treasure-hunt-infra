@@ -161,6 +161,8 @@
     "init_success": "SUCCES: Tryllestav initialiseret for {name} (år {year})!",
     "init_failed": "Initialisering mislykkedes: {error}",
     "init_name_invalid": "Ejernavn skal være 1-127 tegn.",
+    "indicator_active": "NFC Aktiv",
+    "indicator_inactive": "NFC Fra",
     "unlock_prompt": "Hold tryllestaven tæt på din enhed for at låse sted {spot} op for {year}...",
     "unlock_success": "Låste sted {spot} op for {year} på tryllestaven.",
     "unlock_failed": "Oplåsning mislykkedes: {error}",

@@ -32,7 +32,7 @@ export default defineConfig({
     https: true,
     port: 5173,
     watch: {
-      paths: ["src", "public", "management"],
+      paths: ["src", "public"],
     },
   },
   build: {
