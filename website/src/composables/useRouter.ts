@@ -4,24 +4,24 @@ export type PageName = "hunt" | "archive" | "toybox" | "initialize" | "configure
 
 export function useRouter() {
   const params = new URLSearchParams(window.location.search);
+  const path = window.location.pathname;
 
-  // Detection for which app we are in can be done by looking at the path or query params.
-  // Since we have two entry points, they both use this same composable.
+  let initialPageName: PageName = "hunt";
 
-  const isManagementApp = window.location.pathname.includes("management.html") || params.has("initialize") || params.has("configureSpot");
+  // Check management.html entry point
+  const isManagementFile = path.includes("management.html") || path.endsWith("/management/");
 
-  const initialPage = ref<PageName>("hunt");
-
-  if (params.has("initialize")) {
-    initialPage.value = "initialize";
+  if (params.has("initialize") || (isManagementFile && !params.has("configureSpot"))) {
+    initialPageName = "initialize";
   } else if (params.has("configureSpot")) {
-    initialPage.value = "configureSpot";
-  } else if (isManagementApp) {
-    // Default for management app
-    initialPage.value = "initialize";
+    initialPageName = "configureSpot";
+  } else if (params.has("toybox")) {
+    initialPageName = "toybox";
+  } else if (params.has("archive")) {
+    initialPageName = "archive";
   }
 
-  const currentPage = ref<PageName>(initialPage.value);
+  const currentPage = ref<PageName>(initialPageName);
 
   const isManagement = computed(() => {
     return currentPage.value === "initialize" || currentPage.value === "configureSpot";

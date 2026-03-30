@@ -8,9 +8,9 @@
           v-if="currentPage === 'initialize'"
           key="initialize"
           :nfc-compat-message="nfcCompatMessage"
-          :nfc-toast-visible="false"
+          :nfc-toast-visible="nfcToastVisible"
           :is-writing="isWriting"
-          :nfc-status="''"
+          :nfc-status="nfcStatus"
           :hero-icon="IconWandTweaker"
           :hero-eyebrow="t('init_page.eyebrow')"
           :hero-title="t('init_page.title')"
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useNfc } from "./composables/useNfc";
 import { useRouter } from "./composables/useRouter";
@@ -59,7 +59,13 @@ import IconWand from "./components/icons/IconWand.vue";
 import type { NavTab } from "./components/BottomNav.vue";
 
 const { t } = useI18n();
-const { nfcCompatMessage, isWriting } = useNfc();
+const {
+  nfcCompatMessage,
+  nfcToastVisible,
+  isWriting,
+  nfcStatus,
+  checkNfcSupport,
+} = useNfc();
 const { currentPage } = useRouter();
 const { allYears } = useHuntData();
 
@@ -71,4 +77,8 @@ const navTabs = computed<NavTab[]>(() => [
   { id: "initialize", label: t("init_page.title"), icon: IconWandTweaker },
   { id: "configureSpot", label: t("configure_page.title"), icon: IconWand },
 ]);
+
+onMounted(async () => {
+  await checkNfcSupport();
+});
 </script>
