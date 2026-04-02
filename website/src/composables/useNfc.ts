@@ -175,10 +175,7 @@ export function useNfc() {
     if (3 + nameLength !== bytes.length) return null;
     if (!isValidYear(creationYear)) return null;
 
-    let name = "";
-    for (let i = 0; i < nameLength; i += 1) {
-      name += String.fromCharCode(bytes[3 + i]);
-    }
+    const name = new TextDecoder("utf-8").decode(bytes.slice(3, 3 + nameLength));
 
     return { creationYear, name };
   }
@@ -220,18 +217,16 @@ export function useNfc() {
   }
 
   function buildMetaRecordInits(records: NDEFRecord[]): NDEFRecordInit[] {
-    const meta = extractWandMetadata(records);
-    if (!meta) return [];
-
-    const nameBytes = new TextEncoder().encode(meta.name);
-    const payload = new ArrayBuffer(2 + 1 + nameBytes.length);
-    const view = new Uint8Array(payload);
-    view[0] = (meta.creationYear >> 8) & 0xff;
-    view[1] = meta.creationYear & 0xff;
-    view[2] = nameBytes.length;
-    view.set(nameBytes, 3);
-
-    return [{ recordType: "mime", mediaType: "x-hunt-meta", data: payload }];
+    for (const record of records) {
+      if (record.recordType === "mime" && record.mediaType === "x-hunt-meta") {
+        return [{
+          recordType: "mime",
+          mediaType: "x-hunt-meta",
+          data: cloneRecordData(record.data),
+        }];
+      }
+    }
+    return [];
   }
 
   function preserveRecord1(record: NDEFRecord | undefined): NDEFRecordInit | null {
