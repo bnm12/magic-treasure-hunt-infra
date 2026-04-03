@@ -124,19 +124,19 @@ For each hunt year, there is a folder of files that defines what the hunt looks 
 
 ### Glossary
 
-| Term | Meaning |
-|---|---|
-| **NFC** | Near-Field Communication — the wireless technology that lets the wand and reader talk to each other at close range |
-| **Tag** | The tiny NFC chip inside the wand tip |
-| **Initialise** | The process of writing the owner name and website link onto a blank tag for the first time, making it an official wand |
-| **Spot box** | The 3D-printed enclosure at each spot location containing all the electronics |
-| **Spot ID** | A number (1–64) that identifies a specific spot within a hunt year |
-| **Hunt year** | Each year's hunt is separate. A wand collects spots for each year independently |
-| **Management app** | The organiser tools at `/management/` |
-| **PWA** | Progressive Web App — the installable version of the companion website |
-| **Power cycle** | Turning a spot off and on again — the fix for most hardware problems |
+| Term               | Meaning                                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **NFC**            | Near-Field Communication — the wireless technology that lets the wand and reader talk to each other at close range     |
+| **Tag**            | The tiny NFC chip inside the wand tip                                                                                  |
+| **Initialise**     | The process of writing the owner name and website link onto a blank tag for the first time, making it an official wand |
+| **Spot box**       | The 3D-printed enclosure at each spot location containing all the electronics                                          |
+| **Spot ID**        | A number (1–64) that identifies a specific spot within a hunt year                                                     |
+| **Hunt year**      | Each year's hunt is separate. A wand collects spots for each year independently                                        |
+| **Management app** | The organiser tools at `/management/`                                                                                  |
+| **PWA**            | Progressive Web App — the installable version of the companion website                                                 |
+| **Power cycle**    | Turning a spot off and on again — the fix for most hardware problems                                                   |
 
----
+## ![Diagram of the setup](./images/complete_setup_diagram.png)
 
 ## 2. Before the Hunt
 
@@ -145,6 +145,7 @@ For each hunt year, there is a folder of files that defines what the hunt looks 
 Full details are in the **Hunt Folder README** (`website/public/hunts/README.md`). The short version:
 
 1. **Create a new folder** named after the year inside `website/public/hunts/`
+
    ```
    website/public/hunts/
    ├── 2026/          ← existing
@@ -237,6 +238,7 @@ If power cycling does not fix it, connect to the spot via the management app and
 ### 2.3 Configuring Spots with the Management App
 
 Each spot needs to know two things:
+
 - **Which spot ID it is** (e.g. spot 3 = "The Dragon's Garden")
 - **Which hunt year** it is writing for (e.g. 2026)
 
@@ -303,7 +305,7 @@ Use this method when a spot is already mounted and a USB cable is not practical.
 4. Once connected, release the toothpick
 5. The terminal will confirm the connection and show the current config
 
-> 📍 You must press the button *before* tapping Connect Bluetooth. The button tells the spot to start advertising — without it, the device will not appear in the list.
+> 📍 You must press the button _before_ tapping Connect Bluetooth. The button tells the spot to start advertising — without it, the device will not appear in the list.
 
 ---
 
@@ -448,6 +450,7 @@ If a child returns with a wand from last year, do not re-initialise it unless th
 The website can be installed to the home screen so it works like a real app — faster to open and no need to type the URL each time.
 
 In Chrome on Android:
+
 1. Open the website
 2. Tap the **three-dot menu** (top right)
 3. Tap **Add to home screen** or **Install app**
@@ -617,4 +620,4 @@ If you discover that a spot has been writing the wrong spot ID to wands, the aff
 
 ---
 
-*For hardware or software problems not covered here, contact the developer responsible for the system.*
+_For hardware or software problems not covered here, contact the developer responsible for the system._
