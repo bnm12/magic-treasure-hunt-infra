@@ -7,20 +7,20 @@ applyTo: "website/**"
 
 ## Dev Server
 
-- Run `npm run dev` from `website/` to start the Vite dev server with HTTPS (mkcert).
-- Check whether the dev server is already running before starting a new one.
-- The dev server supports HMR — no restart needed after code changes.
+- Run `npm run dev` from the `website/` directory to start the Vite dev server with HTTPS (mkcert) to ensure local NFC development functions securely under SSL.
+- Always check whether the dev server is already running on port `5173` before starting a new one to avoid port conflict errors.
+- Note that the dev server supports HMR (Hot Module Replacement) so that no manual restart is needed after code changes.
 
 ## Chrome DevTools (MCP)
 
 Use the Chrome DevTools MCP tools to inspect the running app:
 
-- Navigate to pages, evaluate JS, inspect the DOM snapshot, check console errors, list network requests.
-- Prefer DOM snapshots (`take_snapshot`) and console checks (`list_console_messages`) over screenshots for visual verification.
+- Use `take_snapshot`, `list_console_messages`, and `list_network_requests` to inspect the application, because doing so allows direct verification without relying on external UI captures.
+- Prefer DOM snapshots via the `take_snapshot` tool and console checks via the `list_console_messages` tool over screenshots to ensure highly precise visual and state verification.
 
 ### Enterprise restriction: screenshots are disabled
 
-**`take_screenshot` is blocked by enterprise policy and will always fail.** Do not attempt it.
+**`take_screenshot` is blocked by enterprise policy and will always fail.** Do not attempt it to prevent execution errors.
 
 Use these alternatives instead:
 
@@ -34,5 +34,5 @@ Use these alternatives instead:
 
 ## Build Verification
 
-- Run `npm run build` from `website/` to verify TypeScript + Vite production build.
-- Always build after code changes before considering a task complete.
+- Run `npm run build` from the `website/` directory to verify TypeScript + Vite production build to prevent deploying broken builds.
+- Always build after code changes before considering a task complete to ensure the code compiles without any TypeScript or bundler errors.
