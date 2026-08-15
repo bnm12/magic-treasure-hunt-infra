@@ -1,4 +1,4 @@
-# Tryllestavsprojekt — Event Organiser Manual
+# Tryllestavsprojekt — Event Organiser Runbook
 
 > **Who this is for:** The people setting up and running the treasure hunt. No coding knowledge required.
 
@@ -6,7 +6,7 @@
 
 ## Table of Contents
 
-1. [What Is Everything? — Glossary & Overview](#1-what-is-everything)
+1. [Orientation](#1-orientation)
 2. [Before the Hunt — Preparation](#2-before-the-hunt)
    - [2.1 Adding a New Hunt Year](#21-adding-a-new-hunt-year)
    - [2.2 Setting Up Spots Physically](#22-setting-up-spots-physically)
@@ -18,125 +18,20 @@
 
 ---
 
-## 1. What Is Everything?
+## 1. Orientation
 
-Here is a quick map of every piece of the system — what it is, what it does, and how it relates to everything else.
+Use this runbook for hunt content preparation, physical spot setup, wand initialisation, event operation, and field troubleshooting.
 
----
+Read the canonical references for concepts and contracts:
 
-### The Wand 🪄
+- [Project glossary](../../CONTEXT.md)
+- [Vision and wand hardware](../reference/vision-and-wand-hardware.md)
+- [Wand NFC data contract](../reference/wand-nfc-data-contract.md)
+- [Hunt asset authoring guide](../../website/public/hunts/README.md)
 
-```
-  ╔══════════════════════════════════════╗
-  ║  Wooden wand (hand-turned hardwood)  ║
-  ║                                      ║
-  ║   Tip ──► tiny glass capsule         ║
-  ║            (NFC chip inside)         ║
-  ╚══════════════════════════════════════╝
-```
+The current spot box target is a LOLIN C3 Mini (ESP32-C3) with a PN532 reader. The management app handles wand initialisation and spot configuration; use the procedures below for the physical and event workflow.
 
-A hand-crafted wooden wand with a tiny passive NFC chip sealed inside the tip. "Passive" means it has no battery — it gets its power wirelessly from a reader when tapped. The wand stores everything: the child's name, the year it was created, and every spot they have ever collected. **The wand IS the save file.** Nothing is stored on a server or in the cloud.
-
-Each wand is personal to one child and can be used year after year. Collected spots from previous hunts stay on the wand alongside new ones.
-
----
-
-### A Magic Spot 🏛️
-
-```
-  ┌──────────────────────────────────┐
-  │  Physical plaque or sign         │
-  │  at a location in the city       │
-  │                                  │
-  │  ┌──────────────────────────┐    │
-  │  │  Spot box (3D printed)   │    │
-  │  │                          │    │
-  │  │  ┌──────────────────┐    │    │
-  │  │  │  tap surface  ◎  │    │    │  ← wands tap here
-  │  │  └──────────────────┘    │    │
-  │  │                          │    │
-  │  │  [on/off switch]         │    │
-  │  │  [USB-C port]  ←─ power  │    │
-  │  │  [· Bluetooth hole]      │    │
-  │  └──────────────────────────┘    │
-  └──────────────────────────────────┘
-```
-
-A magic spot is a physical location — a mural, statue, fountain, landmark — that has been fitted with a spot box. When a child taps their wand against the tap surface on the box, the spot recognises the wand and writes proof of the visit onto it. The whole process takes about one second and works with no internet connection.
-
----
-
-### The Spot Box
-
-A compact 3D-printed enclosure housing all the electronics for one spot. From the outside, you will see:
-
-```
-  ┌───────────────────────────────────────┐
-  │                                       │
-  │          ◎  tap surface               │
-  │                                       │
-  │    ──────────────────────────────     │
-  │                                       │
-  │   [  ○  ]    [USB-C]    [  ·  ]       │
-  │  on/off       power     Bluetooth     │
-  │  switch       input     pinhole       │
-  └───────────────────────────────────────┘
-```
-
-- **Tap surface** — where wands are held to collect a spot
-- **On/off switch** — turns the spot on and off
-- **USB-C port** — where power comes in (mains cable or powerbank)
-- **Bluetooth pinhole** — a small hole for pressing the Bluetooth button with a toothpick or paperclip
-
-That is everything an organiser needs to interact with. The electronics inside are fully enclosed and do not need to be touched.
-
----
-
-### The Website / PWA 🌐
-
-The companion website that children use to see their progress. It works in Chrome on Android. When a child scans their wand on the website, it shows:
-
-- Their name and when the wand was created
-- Which spots they have collected (with images and story text)
-- Which spots they are still missing (with hints)
-- Progress across previous years if they have an older wand
-
-"PWA" stands for Progressive Web App — it means the website can be installed to a phone's home screen and used like a normal app, without going through an app store.
-
-> **Important:** Web NFC (the technology that lets a website read NFC tags) currently only works on Android devices using Chrome. iPhones cannot scan wands through the website. This is a browser limitation, not something we can change.
-
----
-
-### The Management App 🛠️
-
-A separate section of the website, found at `/management/`, used by organisers (not children). It has two tools:
-
-- **Initialize Wand** — prepares a blank NFC tag to become an official wand
-- **Configure Spot** — connects to a spot box and sets its spot ID and hunt year
-
----
-
-### Hunt Assets (the content files) 📄
-
-For each hunt year, there is a folder of files that defines what the hunt looks like on the website: the hunt title, the banner image, and for each spot — its name, hint, collected message, photo, and location. Organisers edit these files to create or update a hunt. No coding is required. Once the files are saved to the repository, the website updates itself automatically.
-
----
-
-### Glossary
-
-| Term               | Meaning                                                                                                                |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **NFC**            | Near-Field Communication — the wireless technology that lets the wand and reader talk to each other at close range     |
-| **Tag**            | The tiny NFC chip inside the wand tip                                                                                  |
-| **Initialise**     | The process of writing the owner name and website link onto a blank tag for the first time, making it an official wand |
-| **Spot box**       | The 3D-printed enclosure at each spot location containing all the electronics                                          |
-| **Spot ID**        | A number (1–64) that identifies a specific spot within a hunt year                                                     |
-| **Hunt year**      | Each year's hunt is separate. A wand collects spots for each year independently                                        |
-| **Management app** | The organiser tools at `/management/`                                                                                  |
-| **PWA**            | Progressive Web App — the installable version of the companion website                                                 |
-| **Power cycle**    | Turning a spot off and on again — the fix for most hardware problems                                                   |
-
-## ![Diagram of the setup](./images/complete_setup_diagram.png)
+![Diagram of the setup](../images/complete_setup_diagram.png)
 
 ## 2. Before the Hunt
 
@@ -161,8 +56,6 @@ Full details are in the **Hunt Folder README** (`website/public/hunts/README.md`
 3. **Add images** to the `images/` subfolder — one banner image and one image per spot.
 
 4. **Save the files to the repository.** The website will update itself automatically within a few minutes — no developer intervention needed.
-
-> 📖 For the full content format and all available fields, see `website/public/hunts/README.md`.
 
 ---
 
@@ -219,19 +112,7 @@ Flip the on/off switch. The spot takes about 10 seconds to fully start up. After
 
 #### If a spot is not working
 
-**Power cycle it.** This is the fix for all hardware problems:
-
-```
-  1. Flip the switch to OFF  (or unplug USB-C if no switch is accessible)
-         │
-         ▼  wait 10 seconds
-  2. Flip the switch to ON
-         │
-         ▼  wait 10 seconds
-  3. Test with a wand
-```
-
-If power cycling does not fix it, connect to the spot via the management app and read the terminal log to find out what is happening (see section 3.3).
+Use the [power-cycle procedure in the field troubleshooting section](#power-cycling-a-spot). If it does not fix the spot, connect through the management app and read the terminal log.
 
 ---
 
@@ -345,7 +226,7 @@ After configuring, test the full loop before deploying the spot:
 
 ```
   Tag UID(7): 04:A1:B2:C3:D4:E5:F6
-  Owner verified: 'Alice' (created 2026)
+  Metadata valid: 'Alice' (created 2026)
   SUCCESS: spot 3 written to year 2026
 ```
 
@@ -413,7 +294,7 @@ An uninitialised wand is invisible to the spot boxes — they will refuse to wri
 
 #### What if a wand from a previous year needs re-initialising?
 
-If a child returns with a wand from last year, do not re-initialise it unless the wand has a problem. Re-initialising updates the owner name and creation year, but **all previous hunt data is preserved**. The child's old collected spots are safe.
+Do not initialise a wand that already contains hunt progress. The current initialisation flow writes a new Record 1 URL and metadata message and can replace prior hunt records. Use a blank wand for initialisation; preserve an existing wand rather than trying to repair its owner details through this flow.
 
 ---
 
@@ -424,6 +305,8 @@ If a child returns with a wand from last year, do not re-initialise it unless th
 - An Android phone (theirs, a parent's, or a shared device at the event)
 - Chrome browser (pre-installed on Android)
 - The companion website URL
+
+> **Scanner support:** Use Chrome on Android for Web NFC wand scans. An iPhone can open the wand's Record 1 website link but cannot scan hunt progress; provide a shared Android device when needed.
 
 #### The scanning flow
 
@@ -460,10 +343,6 @@ The website icon appears on the home screen and opens in full-screen mode.
 
 > 📱 The website also shows its own **Install** button inside the Toybox section.
 
-#### If a child taps their wand against any phone
-
-Wands are initialised with the website URL. If anyone taps the wand against an NFC-enabled phone, the website will open automatically in the browser. This works on both Android and iPhone — though checking hunt progress still requires Android Chrome.
-
 #### What children see on the website
 
 ```
@@ -487,9 +366,6 @@ Wands are initialised with the website URL. If anyone taps the wand against an N
 ```
 
 #### Common questions from children and parents
-
-**"Why doesn't it work on my iPhone?"**
-The technology that lets a website read NFC tags is not supported on iPhones. The wand will still open the website if tapped against the phone, but hunt progress requires Android Chrome. Use a shared Android device at the event for families without one.
 
 **"It says 'Preparing NFC scanner...' and nothing happens"**
 Make sure NFC is enabled on the phone: Settings → Connected devices → NFC. Then hold the wand tip to the back of the phone and keep it completely still for 2–3 seconds.
@@ -546,7 +422,7 @@ The terminal log shows exactly what the spot is doing. Connect to the spot box v
 
 ```
   Tag UID(7): 04:A1:B2:C3:D4:E5:F6
-  Owner verified: 'Alice' (created 2026)
+  Metadata valid: 'Alice' (created 2026)
   SUCCESS: spot 3 written to year 2026
 ```
 

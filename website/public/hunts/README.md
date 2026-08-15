@@ -1,6 +1,7 @@
 # Hunt Asset Configuration Guide
 
 This folder contains spot definitions for each year's treasure hunt. No coding required!
+This file is the canonical guide for hunt JSON and image authoring.
 
 ## Folder Structure
 
@@ -92,7 +93,7 @@ Each spot in the collection:
 
 - **Banner image**: Use a landscape image (~800x600px or wider). This is the main visual for the hunt!
 - **Spot images**: Use ~400x300px (square or landscape). Keep them consistent sizes.
-- Use `.jpg` or `.png` files
+- Use browser-supported image files such as `.jpg`, `.png`, or `.svg`; the current hunt uses SVG assets
 - Compress images to keep file sizes small
 
 ❌ **Don't do this**:
