@@ -47,7 +47,7 @@ import YearSelector from "./YearSelector.vue";
 import HuntView from "./HuntView.vue";
 import MagicScanCircle from "./MagicScanCircle.vue";
 import IconSeeking from "./icons/IconSeeking.vue";
-import type { HuntYear } from "../utils/spotLoader";
+import type { HuntYear } from "../utils/huntCatalog";
 
 const { t } = useI18n();
 

@@ -1,6 +1,6 @@
 import { ref, computed, watch } from "vue";
 import type { Ref, ComputedRef } from "vue";
-import type { HuntYear } from "../utils/spotLoader";
+import type { HuntYear } from "../utils/huntCatalog";
 
 export interface YearSelectionState {
   // Hunt tab
@@ -22,7 +22,7 @@ export interface YearSelectionState {
 export function useYearSelection(
   collectedSpots: Ref<Record<number, number[]>>,
   hunts: Ref<Record<number, HuntYear>>,
-  allYears: ComputedRef<number[]>,
+  uiYears: ComputedRef<number[]>,
 ): YearSelectionState {
   // ── Hunt tab ─────────────────────────────────────────────────────────────
 
@@ -31,8 +31,8 @@ export function useYearSelection(
   const wandYears = computed<number[]>(() => {
     const onWand = Object.keys(collectedSpots.value).map(Number);
     const years = onWand.filter((y) => y in hunts.value);
-    if (allYears.value.length > 0 && !years.includes(allYears.value[0])) {
-      years.push(allYears.value[0]);
+    if (uiYears.value.length > 0 && !years.includes(uiYears.value[0])) {
+      years.push(uiYears.value[0]);
     }
     return years.sort((a, b) => b - a);
   });
@@ -65,7 +65,7 @@ export function useYearSelection(
   // when hunt data first loads.
   const archiveYear = ref<number>(0);
 
-  watch(allYears, (years) => {
+  watch(uiYears, (years) => {
     if (years.length > 0 && archiveYear.value === 0) {
       archiveYear.value = years[0];
     }
@@ -83,7 +83,7 @@ export function useYearSelection(
 
   const yearProgress = computed<Record<number, { collected: number; total: number }>>(() => {
     const result: Record<number, { collected: number; total: number }> = {};
-    for (const year of allYears.value) {
+    for (const year of uiYears.value) {
       const hunt = hunts.value[year];
       const total = hunt ? Object.keys(hunt.spots).length : 0;
       const collectedIds = (collectedSpots.value[year] ?? []).filter(

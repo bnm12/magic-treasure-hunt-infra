@@ -3,6 +3,31 @@
     <MagicBackground />
 
     <div class="page-content">
+      <section
+        v-if="isLoading || catalogError || diagnostics.length > 0"
+        class="catalog-diagnostics glass-card"
+        aria-live="polite"
+      >
+        <p v-if="isLoading" class="catalog-loading">
+          {{ t("catalog.loading") }}
+        </p>
+        <template v-else>
+          <p v-if="catalogError" class="validation-error" role="alert">
+            {{ t("catalog.management_error", { error: catalogError.message }) }}
+          </p>
+          <div v-if="diagnostics.length > 0">
+            <h2>{{ t("catalog.management_heading") }}</h2>
+            <ul class="diagnostic-list">
+              <li v-for="diagnostic in diagnostics" :key="`${diagnostic.year}-${diagnostic.code}-${diagnostic.path ?? ''}`">
+                <strong>{{ diagnostic.year }} · {{ diagnostic.code }}</strong>
+                <span>{{ diagnostic.message }}</span>
+                <code v-if="diagnostic.path">{{ diagnostic.path }}</code>
+              </li>
+            </ul>
+          </div>
+        </template>
+      </section>
+
       <Transition name="page-fade" mode="out-in">
         <PageLayout
           v-if="currentPage === 'initialize'"
@@ -61,10 +86,15 @@ import type { NavTab } from "./components/BottomNav.vue";
 const { t } = useI18n();
 const { nfcCompatMessage, isWriting, status, nfcSupported } = useNfc();
 const { currentPage } = useRouter();
-const { allYears } = useHuntData();
+const {
+  uiYears,
+  isLoading,
+  diagnostics,
+  error: catalogError,
+} = useHuntData();
 
 const currentYear = computed(() => {
-  return allYears.value[0] ?? new Date().getFullYear();
+  return uiYears.value[0] ?? new Date().getFullYear();
 });
 
 const navTabs = computed<NavTab[]>(() => [
@@ -91,3 +121,50 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.catalog-diagnostics {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+}
+
+.catalog-diagnostics h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.catalog-loading {
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.validation-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.diagnostic-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+}
+
+.diagnostic-list li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.diagnostic-list strong {
+  color: var(--text-h);
+}
+
+.diagnostic-list code {
+  width: fit-content;
+}
+</style>

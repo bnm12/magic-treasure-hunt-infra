@@ -8,3 +8,4 @@ These records capture accepted decisions that are hard to reverse, surprising wi
 - [0004 — Current spot writer platform](0004-current-spot-writer-platform.md)
 - [0005 — Normalized wand ledger codec seam](0005-normalized-wand-ledger-codec.md)
 - [0006 — Retire legacy ESP8266 spot writers](0006-retire-legacy-esp8266-spot-writers.md)
+- [0007 — Authoritative hunt catalog boundary](0007-authoritative-hunt-catalog-boundary.md)

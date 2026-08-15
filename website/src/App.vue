@@ -3,6 +3,14 @@
     <MagicBackground />
 
     <div class="page-content">
+      <div
+        v-if="catalogWarningVisible"
+        class="catalog-warning"
+        role="status"
+      >
+        {{ t("catalog.warning") }}
+      </div>
+
       <Transition name="page-fade" mode="out-in">
         <PageLayout
           v-if="currentPage === 'hunt'"
@@ -50,7 +58,8 @@
           :hero-compact="true"
         >
           <ArchivePage
-            :all-years="allYears"
+            :ui-years="uiYears"
+            :is-loading="isLoading"
             :archive-year="archiveYear"
             :archive-hunt="archiveHunt"
             :archive-collected-ids="archiveCollectedIds"
@@ -77,8 +86,8 @@
             :initialize-wand="initializeWand"
             :unlock-test-spot="unlockTestSpot"
             :show-install-action="canInstallPwa"
-            :active-hunt-year="allYears[0] ?? 0"
-            :available-years="allYears"
+            :active-hunt-year="uiYears[0] ?? 0"
+            :available-years="uiYears"
             :available-spot-ids-by-year="availableSpotIdsByYear"
             @write="handleToyboxWrite"
             @install="promptInstall"
@@ -145,7 +154,20 @@ const showNfcConsent = ref(false);
 const { currentPage } = useRouter();
 
 // Hunt data
-const { hunts, allYears, availableSpotIdsByYear } = useHuntData();
+const {
+  hunts,
+  uiYears,
+  availableSpotIdsByYear,
+  isLoading,
+  diagnostics,
+  error: catalogError,
+} = useHuntData();
+
+const catalogWarningVisible = computed(
+  () =>
+    !isLoading.value &&
+    (diagnostics.value.length > 0 || catalogError.value !== null),
+);
 
 // Wand reveal animation
 const hasScannedWand = computed(
@@ -165,7 +187,7 @@ const {
   archiveHunt,
   archiveCollectedIds,
   yearProgress,
-} = useYearSelection(collectedSpots, hunts, allYears);
+} = useYearSelection(collectedSpots, hunts, uiYears);
 
 const navTabs = computed<NavTab[]>(() => [
   { id: "hunt", label: t("nav.hunt"), icon: IconHuntMap },
@@ -211,3 +233,16 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.catalog-warning {
+  margin: 0 auto 0.75rem;
+  max-width: 680px;
+  padding: 0.6rem 1rem;
+  color: var(--warning);
+  background: rgba(251, 191, 36, 0.1);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+  text-align: center;
+  font-size: 0.8rem;
+}
+</style>
