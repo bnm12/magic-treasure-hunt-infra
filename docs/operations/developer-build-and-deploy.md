@@ -25,6 +25,27 @@ npm run build
 
 The dev server is for local browser testing. Production output is the static `dist/` directory. The main website and management app are separate entry points in the same build.
 
+The website fixture at
+`website/src/utils/test-fixtures/wand-ledger-codec.json` is also the source for
+the portable ESP32 conformance vectors. Regenerate the native header from the
+repository root after changing the fixture:
+
+```powershell
+node tools/generate-wand-fixtures.mjs
+```
+
+Run the native codec tests with a host C++17 compiler:
+
+```powershell
+g++ -std=c++17 -Wall -Wextra -pedantic `
+  arduino/esp32/WandNdefCodec.cpp arduino/esp32/native/wand_codec_test.cpp `
+  -o arduino/esp32/native/wand_codec_test
+arduino/esp32/native/wand_codec_test
+```
+
+The native seam has no Arduino, NDEF-library, BLE, EEPROM, or JSON dependency.
+It is compiled into the current ESP32 sketch as `WandNdefCodec.cpp`.
+
 The supported hunt scanner is Chrome on Android. Use [dev-debugging.instructions.md](../../.github/instructions/dev-debugging.instructions.md) for browser inspection rules.
 
 Locale strings live in `website/src/locales/`. Keep the English and Danish key sets in parity when editing translations. Hunt titles, spot names, hints, and images belong in the year folder described by [`website/public/hunts/README.md`](../../website/public/hunts/README.md), not in Vue components.

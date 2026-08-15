@@ -1,55 +1,472 @@
 {
   "duplicateMerge": {
     "records": [
-      { "recordType": "url", "data": [104, 116, 116, 112, 115, 58, 47, 47, 119, 97, 110, 100] },
-      { "recordType": "mime", "mediaType": "text/plain", "data": [111, 112, 97, 113, 117, 101] },
-      { "recordType": "x-hunt:2026", "data": [0, 0, 0, 0, 0, 0, 0, 5] },
-      { "recordType": "x-hunt:2026", "data": [0, 0, 0, 0, 0, 0, 0, 2] },
-      { "recordType": "x-hunt:2025", "data": [0, 0, 0, 0, 0, 0, 0, 8] },
-      { "recordType": "x-hunt-meta", "data": [7, 234, 3, 65, 100, 97] }
+      {
+        "recordType": "url",
+        "data": [
+          104,
+          116,
+          116,
+          112,
+          115,
+          58,
+          47,
+          47,
+          119,
+          97,
+          110,
+          100
+        ]
+      },
+      {
+        "recordType": "mime",
+        "mediaType": "text/plain",
+        "data": [
+          111,
+          112,
+          97,
+          113,
+          117,
+          101
+        ]
+      },
+      {
+        "recordType": "x-hunt:2026",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ]
+      },
+      {
+        "recordType": "x-hunt:2026",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2
+        ]
+      },
+      {
+        "recordType": "x-hunt:2025",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8
+        ]
+      },
+      {
+        "recordType": "x-hunt-meta",
+        "data": [
+          7,
+          234,
+          3,
+          65,
+          100,
+          97
+        ]
+      }
     ],
-    "expectedHunts": { "2025": [4], "2026": [1, 2, 3] },
-    "expectedMetadata": { "creationYear": 2026, "ownerName": "Ada" }
+    "expectedHunts": {
+      "2025": [
+        4
+      ],
+      "2026": [
+        1,
+        2,
+        3
+      ]
+    },
+    "expectedMetadata": {
+      "creationYear": 2026,
+      "ownerName": "Ada"
+    }
   },
   "opaqueAliasesAndMalformedMetadata": {
     "records": [
-      { "recordType": "url", "data": [104, 105] },
-      { "recordType": "mime", "mediaType": "application/x-hunt:2026", "data": [0, 0, 0, 0, 0, 0, 0, 255] },
-      { "recordType": "x-hunt-invalid:2026", "data": [1, 2] },
-      { "recordType": "x-hunt-meta", "data": [7, 234, 5, 65] }
+      {
+        "recordType": "url",
+        "data": [
+          104,
+          105
+        ]
+      },
+      {
+        "recordType": "mime",
+        "mediaType": "application/x-hunt:2026",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          255
+        ]
+      },
+      {
+        "recordType": "x-hunt-invalid:2026",
+        "data": [
+          1,
+          2
+        ]
+      },
+      {
+        "recordType": "x-hunt-meta",
+        "data": [
+          7,
+          234,
+          5,
+          65
+        ]
+      }
     ],
     "expectedHunts": {},
-    "expectedDiagnosticCodes": ["metadata-malformed"]
+    "expectedDiagnosticCodes": [
+      "metadata-malformed"
+    ]
   },
   "websiteMime": {
     "records": [
-      { "recordType": "url", "data": [104, 105] },
-      { "recordType": "mime", "mediaType": "x-hunt:2026", "data": [0, 0, 0, 0, 0, 0, 0, 1] },
-      { "recordType": "mime", "mediaType": "x-hunt:2026", "data": [0, 0, 0, 0, 0, 0, 0, 2] },
-      { "recordType": "mime", "mediaType": "x-hunt-meta", "data": [7, 234, 3, 65, 100, 97] }
+      {
+        "recordType": "url",
+        "data": [
+          104,
+          105
+        ]
+      },
+      {
+        "recordType": "mime",
+        "mediaType": "x-hunt:2026",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "recordType": "mime",
+        "mediaType": "x-hunt:2026",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2
+        ]
+      },
+      {
+        "recordType": "mime",
+        "mediaType": "x-hunt-meta",
+        "data": [
+          7,
+          234,
+          3,
+          65,
+          100,
+          97
+        ]
+      }
     ],
-    "expectedHunts": { "2026": [1, 2] }
+    "expectedHunts": {
+      "2026": [
+        1,
+        2
+      ]
+    }
   },
   "repairKeepsValidSameYear": {
     "records": [
-      { "recordType": "url", "data": [104, 105] },
-      { "recordType": "x-hunt:2026", "data": [1, 2] },
-      { "recordType": "x-hunt:2026", "data": [0, 0, 0, 0, 0, 0, 0, 1] },
-      { "recordType": "x-hunt-meta", "data": [7, 234, 3, 65, 100, 97] }
+      {
+        "recordType": "url",
+        "data": [
+          104,
+          105
+        ]
+      },
+      {
+        "recordType": "x-hunt:2026",
+        "data": [
+          1,
+          2
+        ]
+      },
+      {
+        "recordType": "x-hunt:2026",
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "recordType": "x-hunt-meta",
+        "data": [
+          7,
+          234,
+          3,
+          65,
+          100,
+          97
+        ]
+      }
     ],
     "expectedRepair": {
       "recordIndex": 1,
       "year": 2026,
       "toRecordType": "x-hunt-invalid:2026"
     },
-    "expectedHuntRecordTypes": ["url", "x-hunt-invalid:2026", "x-hunt:2026", "x-hunt-meta"]
+    "expectedHuntRecordTypes": [
+      "url",
+      "x-hunt-invalid:2026",
+      "x-hunt:2026",
+      "x-hunt-meta"
+    ],
+    "expectedSpotPayload": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3
+    ]
   },
   "repairCreatesMissingYear": {
     "records": [
-      { "recordType": "url", "data": [104, 105] },
-      { "recordType": "x-hunt:2026", "data": [1, 2] },
-      { "recordType": "x-hunt-meta", "data": [7, 234, 3, 65, 100, 97] }
+      {
+        "recordType": "url",
+        "data": [
+          104,
+          105
+        ]
+      },
+      {
+        "recordType": "x-hunt:2026",
+        "data": [
+          1,
+          2
+        ]
+      },
+      {
+        "recordType": "x-hunt-meta",
+        "data": [
+          7,
+          234,
+          3,
+          65,
+          100,
+          97
+        ]
+      }
     ],
-    "expectedHuntRecordTypes": ["url", "x-hunt-invalid:2026", "x-hunt-meta", "x-hunt:2026"]
+    "expectedHuntRecordTypes": [
+      "url",
+      "x-hunt-invalid:2026",
+      "x-hunt-meta",
+      "x-hunt:2026"
+    ],
+    "expectedSpotPayload": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "metadataValidation": {
+    "overlongName": {
+      "records": [
+        {
+          "recordType": "url",
+          "data": []
+        },
+        {
+          "recordType": "x-hunt-meta",
+          "data": [
+            7,
+            234,
+            128,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65
+          ]
+        }
+      ]
+    },
+    "invalidUtf8": {
+      "records": [
+        {
+          "recordType": "url",
+          "data": []
+        },
+        {
+          "recordType": "x-hunt-meta",
+          "data": [
+            7,
+            234,
+            1,
+            192
+          ]
+        }
+      ]
+    }
   }
 }

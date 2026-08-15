@@ -4,21 +4,44 @@ status: accepted
 
 # Normalized wand ledger codec seam
 
-The website introduces an adapter-neutral normalized codec before the staged
-ESP32 migration. It preserves Record 1 opaquely, carries every
-representable NDEF field and raw payload bytes, and canonicalizes output
-because Web NFC cannot guarantee the original serialized bytes.
+## Context
 
-The codec owns exact type recognition, typed diagnostics, golden fixtures,
-duplicate hunt merge, invalid-record repair during intentional writes, metadata
-write gating, spot-ID validation, and capacity preflight. Reads remain
-non-mutating and expose safe valid progress plus diagnostics. Valid duplicate
-hunt records merge by bitwise OR; an exact hunt type with a bad payload is
-renamed to `x-hunt-invalid:<YYYY>` only during a write.
+The website and firmware had independent implementations of NDEF discovery,
+metadata validation, UTF-8 handling, and 64-bit hunt masks. Web NFC exposes
+normalized records while the spot writer works with native NDEF records, so
+sharing browser or Arduino serialization code directly would couple unrelated
+adapters.
 
-The language-neutral JSON fixtures are authoritative for the website now and
-will later support generated ESP32 test vectors. NFC session lifecycle remains
-in the shared website session adapter, while ledger interpretation stays behind
-the codec seam. This keeps the first migration slice testable without changing
-firmware and prevents browser-specific serialization behavior from becoming
-the protocol.
+## Decision
+
+Use an adapter-neutral normalized wand-ledger model as the seam between
+transport adapters and hunt behavior. Keep the normative wire behavior in the
+[wand NFC data contract](../reference/wand-nfc-data-contract.md). Keep the
+website NFC lifecycle in `nfcSession.ts` and the website integration in
+`useNfc.ts`; ledger normalization, validation, diagnostics, and write planning
+belong in `wandLedgerCodec.ts`.
+
+Use one language-neutral fixture set for the website and current ESP32 target.
+The ESP32 side consumes generated native test vectors rather than adding a
+runtime JSON parser.
+
+This is an implementation seam, not a promise that the current TypeScript
+exports are the final cross-language API. The ESP32 adapter validation is the
+next compatibility checkpoint; any incompatible interface change must update
+this ADR and the contract together.
+
+## Trade-offs
+
+- Semantic normalized records allow Web NFC and firmware to preserve the same
+  ledger meaning, but cannot promise byte-for-byte browser serialization.
+- A shared fixture source adds a generation step, but avoids maintaining
+  language-specific protocol examples or a JSON dependency in firmware.
+- Keeping transport adapters separate makes the first implementation testable
+  without hardware, while requiring a later ESP32 conformance checkpoint.
+
+## Consequences
+
+The contract remains the single source of truth for record ownership, exact
+wire values, validation gates, preservation, repair, and write outcomes.
+Website and firmware tests must consume the shared fixtures before the codec
+work is considered complete.

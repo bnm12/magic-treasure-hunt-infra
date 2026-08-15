@@ -80,32 +80,29 @@ export function createNfcStore(session: NfcSession = createNfcSession()): NfcSto
 
   function updateReadState(records: NfcRecord[]) {
     const normalized = normalizeNfcRecords(records);
-    const decoded = decodeWandRecords(normalized);
-    collectedSpots.value = decoded.hunts;
-    wandMetadata.value = decoded.metadata
-      ? toUiMetadata(decoded.metadata)
-      : null;
-    wandDiagnostics.value = decoded.diagnostics;
-
-    const first = normalized[0];
-    record1Preview.value = first
-      ? decodeBytes(first.data) || `(${first.recordType})`
-      : "";
+    applyDecodedState(normalized, decodeWandRecords(normalized));
     nfcCompatMessage.value = "";
     status.value = t("nfc.detected");
   }
 
-  function updateWriteState(records: ReturnType<typeof normalizeNfcRecords>) {
-    const decoded = decodeWandRecords(records);
+  function applyDecodedState(
+    records: ReturnType<typeof normalizeNfcRecords>,
+    decoded: ReturnType<typeof decodeWandRecords>,
+  ) {
     collectedSpots.value = decoded.hunts;
     wandMetadata.value = decoded.metadata
       ? toUiMetadata(decoded.metadata)
       : null;
     wandDiagnostics.value = decoded.diagnostics;
+
     const first = records[0];
     record1Preview.value = first
       ? decodeBytes(first.data) || `(${first.recordType})`
       : "";
+  }
+
+  function updateWriteState(records: ReturnType<typeof normalizeNfcRecords>) {
+    applyDecodedState(records, decodeWandRecords(records));
   }
 
   function toUiMetadata(metadata: CodecWandMetadata): WandMetadata {

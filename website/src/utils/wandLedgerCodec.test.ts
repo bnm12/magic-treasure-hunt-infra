@@ -117,7 +117,7 @@ describe("wand ledger codec", () => {
       fixtures.repairKeepsValidSameYear.expectedHuntRecordTypes,
     );
     expect(plan.records[2]?.data).toEqual(
-      new Uint8Array([0, 0, 0, 0, 0, 0, 0, 3]),
+      new Uint8Array(fixtures.repairKeepsValidSameYear.expectedSpotPayload),
     );
   });
 
@@ -133,7 +133,7 @@ describe("wand ledger codec", () => {
       fixtures.repairCreatesMissingYear.expectedHuntRecordTypes,
     );
     expect(plan.records[3]?.data).toEqual(
-      new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]),
+      new Uint8Array(fixtures.repairCreatesMissingYear.expectedSpotPayload),
     );
   });
 
@@ -204,17 +204,8 @@ describe("wand ledger codec", () => {
   });
 
   it("enforces fatal UTF-8 and the 127-byte metadata name limit", () => {
-    const overlongName = fixtureRecords([
-      { recordType: "url", data: [] },
-      {
-        recordType: "x-hunt-meta",
-        data: [7, 234, 128, ...new Array<number>(128).fill(65)],
-      },
-    ]);
-    const invalidUtf8 = fixtureRecords([
-      { recordType: "url", data: [] },
-      { recordType: "x-hunt-meta", data: [7, 234, 1, 192] },
-    ]);
+    const overlongName = fixtureRecords(fixtures.metadataValidation.overlongName.records);
+    const invalidUtf8 = fixtureRecords(fixtures.metadataValidation.invalidUtf8.records);
 
     expect(decodeWandRecords(normalizeNfcRecords(overlongName)).metadataStatus)
       .toBe("malformed");

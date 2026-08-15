@@ -102,12 +102,12 @@ same codec gate.
 
 ## Staged implementation
 
-The first staged slice is website-side: the adapter-neutral TypeScript codec,
-golden JSON fixtures, focused website tests, and integration in the shared
-`useNfc` read/write/initialize/unlock paths. NFC session lifecycle coordination
-remains in `nfcSession`. The ESP32 migration will later consume the same
-language-neutral fixtures and contract; no firmware source changes are part of
-this slice.
+The website and current ESP32 target now share the language-neutral fixture
+source. The website uses the adapter-neutral TypeScript codec, while the
+ESP32-C3 spot writer uses the portable pure C++ codec and generated native
+conformance vectors. NFC session lifecycle coordination remains in
+`nfcSession`; the raw Type-2 transport is an adapter around the codec's
+bounded parse, write-plan, encode, and semantic-readback seams.
 
 Authoritative fixtures live in
 [`website/src/utils/test-fixtures/wand-ledger-codec.json`](../../website/src/utils/test-fixtures/wand-ledger-codec.json).

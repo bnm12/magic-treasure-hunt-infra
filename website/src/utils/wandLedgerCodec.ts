@@ -1,7 +1,6 @@
 import type { NfcRecord } from "../composables/nfcSession";
 
 const HUNT_RECORD_PATTERN = /^x-hunt:([0-9]{4})$/;
-const INVALID_HUNT_RECORD_PATTERN = /^x-hunt-invalid:([0-9]{4})$/;
 const METADATA_RECORD_TYPE = "x-hunt-meta";
 const HUNT_PAYLOAD_LENGTH = 8;
 
@@ -744,8 +743,4 @@ export function buildInitializationWritePlan(
     repairs: [],
     estimatedBytes: ensureCapacity(records, options),
   };
-}
-
-export function isOpaqueInvalidHuntRecord(recordType: string): boolean {
-  return INVALID_HUNT_RECORD_PATTERN.test(recordType);
 }
