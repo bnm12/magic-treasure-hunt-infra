@@ -132,7 +132,9 @@ const {
   connectSerial,
   connectBluetooth,
   disconnect,
-  send,
+  sendLine,
+  onLine,
+  clearOutput,
 } = useCommunication();
 
 const inputText = ref("");
@@ -142,7 +144,6 @@ const hunts = ref<Record<number, HuntYear>>({});
 const availableYears = ref<number[]>([]);
 const deviceHuntYear = ref<number>(0);
 const deviceSpotId = ref<number>(0);
-let lastProcessedIndex = -1;
 
 const currentHuntTitle = computed(() => {
   return hunts.value[deviceHuntYear.value]?.title || "";
@@ -173,7 +174,7 @@ watch(isConnected, (connected) => {
   if (connected) {
     // Small delay to let the device boot/be ready
     setTimeout(() => {
-      void send("getConfig\n");
+      void sendLine("getConfig");
     }, 500);
   }
 });
@@ -181,7 +182,7 @@ watch(isConnected, (connected) => {
 function handleSend() {
   const text = inputText.value.trim();
   if (text) {
-    void send(text + "\n");
+    void sendLine(text);
     inputText.value = "";
   }
 }
@@ -193,40 +194,31 @@ function quickSend(cmd: string) {
 }
 
 function clearTerminal() {
-  receivedText.value = "";
-  lastProcessedIndex = -1;
+  clearOutput();
 }
 
 function updateYear() {
   if (deviceHuntYear.value) {
-    void send(`setYear: ${deviceHuntYear.value}\n`);
+    void sendLine(`setYear: ${deviceHuntYear.value}`);
   }
 }
 
 function updateSpot() {
   if (deviceSpotId.value) {
-    void send(`setSpot: ${deviceSpotId.value}\n`);
+    void sendLine(`setSpot: ${deviceSpotId.value}`);
   }
 }
 
-// Auto-scroll terminal to bottom and parse for config
-watch(receivedText, (text) => {
-  // Parse for CONFIG:ID,YEAR
-  const matches = [...text.matchAll(/CONFIG:(\d+),(\d+)/g)];
-  if (matches.length > 0) {
-    const lastMatch = matches[matches.length - 1];
-    const matchIndex = lastMatch.index ?? -1;
-
-    // Only update if we found a new CONFIG message we haven't processed
-    if (matchIndex > lastProcessedIndex) {
-      const id = parseInt(lastMatch[1], 10);
-      const year = parseInt(lastMatch[2], 10);
-      deviceSpotId.value = id;
-      deviceHuntYear.value = year;
-      lastProcessedIndex = matchIndex;
-    }
+onLine((line) => {
+  const match = /^CONFIG:(\d+),(\d+)$/.exec(line);
+  if (match) {
+    deviceSpotId.value = Number.parseInt(match[1], 10);
+    deviceHuntYear.value = Number.parseInt(match[2], 10);
   }
+});
 
+// Auto-scroll terminal to bottom
+watch(receivedText, () => {
   nextTick(() => {
     if (terminalContent.value) {
       terminalContent.value.scrollTop = terminalContent.value.scrollHeight;
