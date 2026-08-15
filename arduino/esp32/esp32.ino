@@ -3,8 +3,8 @@
 #include <Wire.h>
 #include <PN532_I2C.h>
 #include <PN532.h>
-#include <MifareUltralight.h>
 #include "HuntShared.h"
+#include "WandNdefCodec.h"
 
 // ─── C3 Mini Pinout ─────────────────────────────────────────────────────────
 // GPIO8  -> SDA
@@ -202,21 +202,62 @@ bool probeBlankUserArea(bool* isBlank) {
   return true;
 }
 
+bool writeRawNdefToTag(const uint8_t* message, size_t messageLength) {
+  uint8_t ccCheck[4] = {0};
+  if (!readCcPageStable(ccCheck)) {
+    CombiSerial.println("Tag coupling unstable; refusing raw NDEF write.");
+    return false;
+  }
+  const size_t capacity = static_cast<size_t>(ccCheck[2]) * 8;
+  if (capacity == 0 || capacity > kMaxUserAreaBytes) {
+    CombiSerial.println("Unsupported tag capacity for raw NDEF write.");
+    return false;
+  }
+  const size_t headerLength = messageLength < 0xFF ? 2 : 4;
+  const size_t usedLength = headerLength + messageLength + 1;
+  const size_t writeLength = (usedLength + 3) & ~static_cast<size_t>(3);
+  if (writeLength > capacity || writeLength > kMaxUserAreaBytes) {
+    CombiSerial.println("NDEF output exceeds deterministic tag capacity.");
+    return false;
+  }
+  static uint8_t encoded[kMaxUserAreaBytes] = {0};
+  memset(encoded, 0, sizeof(encoded));
+  encoded[0] = 0x03;
+  if (messageLength < 0xFF) {
+    encoded[1] = static_cast<uint8_t>(messageLength);
+  } else {
+    encoded[1] = 0xFF;
+    encoded[2] = static_cast<uint8_t>((messageLength >> 8) & 0xFF);
+    encoded[3] = static_cast<uint8_t>(messageLength & 0xFF);
+  }
+  memcpy(encoded + headerLength, message, messageLength);
+  encoded[headerLength + messageLength] = 0xFE;
+
+  for (size_t offset = 0; offset < writeLength; offset += 4) {
+    if (!pn532.mifareultralight_WritePage(
+            static_cast<uint8_t>(kUserStartPage + offset / 4), encoded + offset)) {
+      CombiSerial.print("Raw NDEF write failed at page ");
+      CombiSerial.println(static_cast<int>(kUserStartPage + offset / 4));
+      return false;
+    }
+  }
+  return true;
+}
+
+void printCodecType(const WandNdefCodec::Message& message,
+                    const WandNdefCodec::Record& record) {
+  CombiSerial.print("Type=");
+  const uint8_t* type = WandNdefCodec::typeBytes(&message, &record);
+  for (size_t index = 0; index < record.typeLength; ++index) {
+    CombiSerial.print(static_cast<char>(type[index]));
+  }
+}
+
 bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
   if (spotId < 1 || spotId > 64) {
     CombiSerial.println("spotId must be in range 1..64.");
     return false;
   }
-
-  char mimeType[64] = {0};
-  buildHuntMimeType(mimeType, sizeof(mimeType));
-
-  uint8_t ccCheck[4] = {0};
-  if (!readCcPageStable(ccCheck)) {
-    CombiSerial.println("Tag coupling unstable (CC read mismatch/fail); skipping write.");
-    return false;
-  }
-
   static uint8_t existingNdef[kMaxUserAreaBytes];
   size_t existingNdefLen = 0;
   const bool hasExistingNdef = readRawNdefFromTag(existingNdef, sizeof(existingNdef), &existingNdefLen);
@@ -234,65 +275,28 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
     CombiSerial.println("ERROR: Blank tag detected; missing wand metadata (x-hunt-meta). Refusing write.");
     return false;
   }
+  (void)uid;
+  (void)uidLength;
 
-  NdefRecord uriRecord;
-  bool hasUri = false;
-  NdefRecord metaRecord;
-  bool hasMeta = false;
-  String otherYearMimeTypes[MAX_NDEF_RECORDS];
-  uint8_t otherYearPayloads[MAX_NDEF_RECORDS][8] = {{0}};
-  int otherYearCount = 0;
-  uint8_t huntPayload[8] = {0};
-
-  if (hasExistingNdef && existingNdefLen > 0) {
-    NdefMessage existingMsg(existingNdef, (int)existingNdefLen);
-
-    uint16_t metaYear = 0;
-    String metaName = "";
-    if (!hasValidWandMetadata(existingMsg, &metaYear, &metaName)) {
-      CombiSerial.println("ERROR: Tag does not have valid wand metadata. Not an official wand.");
-      CombiSerial.println("Initialize wands in website Toybox (writes x-hunt-meta), then retry.");
-      return false;
-    }
-    CombiSerial.print("Owner verified: '");
-    CombiSerial.print(metaName);
-    CombiSerial.print("' (created ");
-    CombiSerial.print(metaYear);
-    CombiSerial.println(")");
-
-    for (int i = 0; i < (int)existingMsg.getRecordCount(); i++) {
-      NdefRecord r = existingMsg.getRecord(i);
-      if (r.getTnf() == TNF_WELL_KNOWN && r.getType() == "U") {
-        hasUri = true;
-        uriRecord = r;
-      } else if (r.getTnf() == TNF_MIME_MEDIA) {
-        String recType = r.getType();
-        if (recType == String(kWandMetaMimeType)) {
-          hasMeta = true;
-          metaRecord = r;
-        } else if (r.getPayloadLength() == 8 && recType == String(mimeType)) {
-          r.getPayload(huntPayload);
-        } else if (r.getPayloadLength() == 8 && recType.startsWith(String(kHuntMimePrefix)) && otherYearCount < MAX_NDEF_RECORDS) {
-          otherYearMimeTypes[otherYearCount] = recType;
-          r.getPayload(otherYearPayloads[otherYearCount]);
-          otherYearCount++;
-        }
-      }
-    }
+  static uint8_t parseStorage[kMaxUserAreaBytes];
+  static uint8_t planStorage[kMaxUserAreaBytes];
+  static uint8_t plannedNdef[kMaxUserAreaBytes];
+  size_t plannedNdefLen = 0;
+  WandNdefCodec::Diagnostics diagnostics;
+  WandNdefCodec::initDiagnostics(&diagnostics);
+  const WandNdefCodec::Status planStatus = WandNdefCodec::planSpotWrite(
+      existingNdef, existingNdefLen, huntYear, spotId, parseStorage,
+      sizeof(parseStorage), planStorage, sizeof(planStorage), plannedNdef,
+      sizeof(plannedNdef), &plannedNdefLen, &diagnostics);
+  if (planStatus != WandNdefCodec::kOk) {
+    CombiSerial.print("ERROR: codec refused spot write (status ");
+    CombiSerial.print(static_cast<int>(planStatus));
+    CombiSerial.println("). Initialize the wand or repair its metadata first.");
+    return false;
   }
 
-  NdefMessage outMsg;
-  if (hasUri)  outMsg.addRecord(uriRecord);
-  if (hasMeta) outMsg.addRecord(metaRecord);
-  for (int i = 0; i < otherYearCount; i++) {
-    outMsg.addMimeMediaRecord(otherYearMimeTypes[i], otherYearPayloads[i], 8);
-  }
-  setSpotBit(huntPayload, spotId);
-  outMsg.addMimeMediaRecord(String(mimeType), huntPayload, 8);
-
-  MifareUltralight ul(pn532);
-  if (!ul.write(outMsg, uid, uidLength)) {
-    CombiSerial.println("Failed to write NDEF message.");
+  if (!writeRawNdefToTag(plannedNdef, plannedNdefLen)) {
+    CombiSerial.println("Failed to write codec-produced NDEF message.");
     return false;
   }
 
@@ -303,30 +307,63 @@ bool writeSpotToTag(uint8_t* uid, uint8_t uidLength) {
     return false;
   }
 
-  CombiSerial.print("NDEF readback length: ");
-  CombiSerial.print((int)verifyNdefLen);
-  CombiSerial.println(" bytes");
+  static uint8_t expectedStorage[kMaxUserAreaBytes];
+  static uint8_t verifyStorage[kMaxUserAreaBytes];
+  WandNdefCodec::Message expectedMessage;
+  WandNdefCodec::Message verifyMessage;
+  WandNdefCodec::initMessage(&expectedMessage, expectedStorage,
+                             sizeof(expectedStorage));
+  WandNdefCodec::initMessage(&verifyMessage, verifyStorage,
+                             sizeof(verifyStorage));
+  if (WandNdefCodec::parse(plannedNdef, plannedNdefLen, &expectedMessage) !=
+          WandNdefCodec::kOk ||
+      WandNdefCodec::parse(verifyNdef, verifyNdefLen, &verifyMessage) !=
+          WandNdefCodec::kOk) {
+    CombiSerial.println("WARNING: Codec readback parse failed.");
+    return false;
+  }
+  (void)expectedStorage;
+  (void)verifyStorage;
+  if (!WandNdefCodec::semanticallyEquivalent(&expectedMessage, &verifyMessage)) {
+    CombiSerial.println("WARNING: NDEF readback is not semantically equivalent.");
+    return false;
+  }
 
-  NdefMessage verifyMsg(verifyNdef, (int)verifyNdefLen);
+  CombiSerial.print("NDEF readback length: ");
+  CombiSerial.print(static_cast<int>(verifyNdefLen));
+  CombiSerial.println(" bytes");
   CombiSerial.print("NDEF records: ");
-  CombiSerial.println((int)verifyMsg.getRecordCount());
-  for (int i = 0; i < (int)verifyMsg.getRecordCount(); i++) {
-    NdefRecord vr = verifyMsg.getRecord(i);
+  CombiSerial.println(static_cast<int>(verifyMessage.recordCount));
+  for (size_t i = 0; i < verifyMessage.recordCount; ++i) {
+    const WandNdefCodec::Record& vr = verifyMessage.records[i];
     CombiSerial.print("  #");
-    CombiSerial.print(i + 1);
+    CombiSerial.print(static_cast<int>(i + 1));
     CombiSerial.print(" TNF=");
-    CombiSerial.print((int)vr.getTnf());
-    CombiSerial.print(" Type=");
-    CombiSerial.print(vr.getType());
+    CombiSerial.print(static_cast<int>(vr.tnf));
+    CombiSerial.print(" ");
+    printCodecType(verifyMessage, vr);
     CombiSerial.print(" PayloadLen=");
-    CombiSerial.println((int)vr.getPayloadLength());
+    CombiSerial.println(static_cast<int>(vr.payloadLength));
   }
 
   CombiSerial.print("SUCCESS: spot ");
   CombiSerial.print(spotId);
   CombiSerial.print(" written to year ");
   CombiSerial.println(huntYear);
-  printHuntPayload(huntPayload);
+  WandNdefCodec::LedgerRead readback;
+  WandNdefCodec::inspect(&verifyMessage, &readback);
+  for (size_t i = 0; i < readback.huntCount; ++i) {
+    if (readback.hunts[i].year == huntYear) {
+      uint8_t huntPayload[8] = {0};
+      uint64_t mask = readback.hunts[i].mask;
+      for (int byte = 7; byte >= 0; --byte) {
+        huntPayload[byte] = static_cast<uint8_t>(mask & 0xff);
+        mask >>= 8;
+      }
+      printHuntPayload(huntPayload);
+      break;
+    }
+  }
   return true;
 }
 

@@ -10,20 +10,43 @@ This runbook covers website development, current spot-writer setup, and deployme
 - A LOLIN C3 Mini (ESP32-C3), PN532 reader, USB-C cable, and NTAG216 test tags
 - Optional: a legacy Wemos D1 Mini / ESP8266 setup for historical sketches
 
-## Website
+## Website and codec tests
 
-From `website/`:
+From the repository root:
 
 ```bash
 npm install
 npm test
-npm run dev
 npm run build
+npm run dev
 ```
 
-`npm test` runs the focused Vitest contract tests for the NFC lifecycle session with a deterministic fake adapter. The suite does not require a browser, Web NFC hardware, or browser automation.
+The root workspace installs the website dependencies and the pinned portable
+Zig host compiler. `npm test` runs the website Vitest contract tests followed
+by the native C++ wand codec conformance tests. The suite does not require a
+browser, Web NFC hardware, or browser automation.
 
-The dev server is for local browser testing. Production output is the static `dist/` directory. The main website and management app are separate entry points in the same build.
+The dev server is for local browser testing. Production output is the static
+`dist/` directory. The main website and management app are separate entry
+points in the same build. Run only the website tests with
+`npm run test:website`, or only the native codec tests with
+`npm run test:native`.
+
+The website fixture at
+`website/src/utils/test-fixtures/wand-ledger-codec.json` is also the source for
+the portable ESP32 conformance vectors. Regenerate the native header from the
+repository root after changing the fixture:
+
+```powershell
+npm run generate:fixtures
+```
+
+The native test runner compiles and executes the portable codec with the
+workspace's pinned Zig host compiler. The native seam has no Arduino,
+NDEF-library, BLE, EEPROM, or JSON dependency. It is compiled into the current
+ESP32 sketch as `WandNdefCodec.cpp`.
+
+The separate Arduino CLI remains necessary for the target firmware build below.
 
 The supported hunt scanner is Chrome on Android. Use [dev-debugging.instructions.md](../../.github/instructions/dev-debugging.instructions.md) for browser inspection rules.
 

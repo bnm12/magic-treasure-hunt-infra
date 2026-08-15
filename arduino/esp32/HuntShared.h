@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
-#include <NdefMessage.h>
-#include <NdefRecord.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -231,20 +229,6 @@ void rememberUid(const uint8_t* uid, uint8_t uidLength) {
 
 // ─── NFC Helpers ────────────────────────────────────────────────────────────
 
-const char kHuntMimePrefix[]   = "x-hunt:";
-const char kWandMetaMimeType[] = "x-hunt-meta";
-
-void buildHuntMimeType(char* out, size_t outSize) {
-  snprintf(out, outSize, "x-hunt:%u", (unsigned)huntYear);
-}
-
-void setSpotBit(uint8_t* payload, uint8_t id) {
-  const uint8_t bitIndex  = id - 1;
-  const uint8_t byteIndex = 7 - (bitIndex / 8);
-  const uint8_t bitInByte = bitIndex % 8;
-  payload[byteIndex] |= (uint8_t)(1u << bitInByte);
-}
-
 void printHuntPayload(const uint8_t* payload) {
   CombiSerial.print("  Payload (hex): ");
   for (uint8_t i = 0; i < 8; i++) {
@@ -281,39 +265,6 @@ bool findNdefTlv(const uint8_t* data, size_t dataLen, size_t* valueOffset, size_
     if (i + len > dataLen) return false;
     if (t == 0x03) { *valueOffset = i; *valueLen = len; return true; }
     i += len;
-  }
-  return false;
-}
-
-bool parseWandMetadataPayload(const uint8_t* payload, size_t payloadLen, uint16_t* outYear, String* outName) {
-  if (!payload || payloadLen < 3) return false;
-  *outYear = ((uint16_t)payload[0] << 8) | payload[1];
-  uint8_t nameLen = payload[2];
-  if (3 + nameLen != payloadLen) return false;
-  *outName = "";
-  for (uint8_t i = 0; i < nameLen; i++) {
-    *outName += (char)payload[3 + i];
-  }
-  return true;
-}
-
-bool hasValidWandMetadata(NdefMessage& msg, uint16_t* outYear, String* outName) {
-  if (!outYear || !outName) return false;
-  for (int i = 0; i < (int)msg.getRecordCount(); i++) {
-    NdefRecord r = msg.getRecord(i);
-    if (r.getTnf() == TNF_MIME_MEDIA) {
-      String recType = r.getType();
-      if (recType == String(kWandMetaMimeType)) {
-        uint8_t payload[256] = {0};
-        size_t payloadLen = r.getPayloadLength();
-        if (payloadLen > sizeof(payload)) return false;
-        r.getPayload(payload);
-        uint16_t year = 0;
-        if (!parseWandMetadataPayload(payload, payloadLen, &year, outName)) return false;
-        *outYear = year;
-        return true;
-      }
-    }
   }
   return false;
 }

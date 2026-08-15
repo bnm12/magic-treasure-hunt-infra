@@ -42,7 +42,7 @@ The website does not own hunt-state writes. The management app is an operational
 
 Each frontend entry point provides one shared NFC session store/context per browser document. Pages consume that shared context instead of constructing independent NFC controllers.
 
-`website/src/composables/nfcSession.ts` owns the browser scan/write lifecycle, cancellation, and normalized failure outcomes. Ledger parsing remains in `website/src/composables/useNfc.ts`; lifecycle coordination and ledger decoding stay separate.
+`website/src/composables/nfcSession.ts` owns the browser scan/write lifecycle, cancellation, and normalized failure outcomes. The adapter-neutral wand ledger codec owns record normalization and ledger decoding; `useNfc` provides the thin website integration.
 
 ### `arduino/`
 

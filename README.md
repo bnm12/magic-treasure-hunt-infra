@@ -4,12 +4,18 @@ Tryllestavsprojekt is an offline-first treasure hunt for children. A child finds
 
 ## Quick start
 
+From the repository root:
+
 ```bash
-cd website
 npm install
+npm test
 npm run dev
 npm run build
 ```
+
+The root test command runs both the website Vitest suite and the native wand
+codec conformance tests. Run `npm run test:website` or
+`npm run test:native` for one side only.
 
 For firmware and hardware setup, read [developer-build-and-deploy.md](docs/operations/developer-build-and-deploy.md).
 

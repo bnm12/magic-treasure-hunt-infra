@@ -1,1 +1,3 @@
 arduino/**/build/
+arduino/esp32/native/.build/
+node_modules/
