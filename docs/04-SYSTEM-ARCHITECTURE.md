@@ -61,6 +61,7 @@ flowchart LR
 **Owns:**
 
 - Wand scanning UX and error messages
+- Browser NFC lifecycle coordination through one shared per-entry session
 - Hunt progress visualization (which spots collected, which missing)
 - Hint and context presentation
 - Browser compatibility messaging
@@ -83,6 +84,8 @@ flowchart LR
 - **Record 1 preservation:** Never written to by hunt logic
 - **Metadata record:** `x-hunt-meta` for wand authentication
 - **Yearly hunt boundaries:** Each year is a separate record; no shared state
+
+Each frontend entry point provides one NFC store per browser document. Pages consume that store, while `website/src/composables/nfcSession.ts` owns browser scan/write lifecycle, cancellation, and normalized failure outcomes. Ledger parsing remains in `useNfc.ts` until the codec seam is deepened separately.
 
 ---
 

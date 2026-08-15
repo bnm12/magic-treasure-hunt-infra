@@ -150,6 +150,7 @@
     "not_supported": "Web NFC is not available. Open this page in Chrome on Android over HTTPS.",
     "unavailable": "Web NFC is unavailable. Use HTTPS on Android Chrome or Samsung Internet.",
     "permission_denied": "NFC permission was denied. Please allow NFC access in your browser settings and refresh.",
+    "busy": "NFC is already in use. Finish the current interaction first.",
     "detected": "Wand detected!",
     "read_failed": "Could not read the wand. Try again.",
     "scan_failed": "Scan failed: {error}",

@@ -150,6 +150,7 @@
     "not_supported": "Web NFC er ikke tilgængeligt. Åbn denne side i Chrome på Android over HTTPS.",
     "unavailable": "Web NFC er ikke tilgængeligt. Brug HTTPS on Android Chrome eller Samsung Internet.",
     "permission_denied": "NFC-tilladelse blev afvist. Tillad venligst NFC-adgang i dine browserindstillinger og opdater siden.",
+    "busy": "NFC er allerede i brug. Afslut den aktuelle handling først.",
     "detected": "Tryllestav registreret!",
     "read_failed": "Kunne ikke læse tryllestaven. Prøv igen.",
     "scan_failed": "Scanning mislykkedes: {error}",

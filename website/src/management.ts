@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import ManagementApp from "./ManagementApp.vue";
 import "./style.css";
 import { i18n } from "./i18n";
+import { createNfcStore, NFC_STORE_KEY } from "./composables/useNfc";
 
 // Register management-specific service worker for offline support
 if ("serviceWorker" in navigator) {
@@ -19,4 +20,5 @@ if ("serviceWorker" in navigator) {
 
 const app = createApp(ManagementApp);
 app.use(i18n);
+app.provide(NFC_STORE_KEY, createNfcStore());
 app.mount("#app");
