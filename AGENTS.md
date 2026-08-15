@@ -19,6 +19,7 @@ Read the smallest canonical document that covers the task:
 ## Repository scope
 
 - `website/` contains the main child-facing website and the management app.
+- `website/src/composables/spotTransport.ts` owns management transport policy; `useSerial.ts` and `useBluetooth.ts` are byte-channel adapters.
 - `arduino/esp32/` contains the current ESP32-C3 / LOLIN C3 Mini spot writer.
 - `arduino/NFC_Basic/` and `arduino/RC522_Basic/` are retired paths; historical Wemos D1 Mini / ESP8266 source remains in Git history only.
 - `docs/reference/` contains canonical product, protocol, architecture, and content references.

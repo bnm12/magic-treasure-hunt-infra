@@ -28,7 +28,11 @@ function errorMessage(error: unknown): string {
 }
 
 function commandLine(command: string): string {
-  return `${command.replace(/[\r\n]+$/g, "")}\n`;
+  const withoutTrailingNewlines = command.replace(/[\r\n]+$/g, "");
+  if (/[\r\n]/.test(withoutTrailingNewlines)) {
+    throw new Error("Spot writer commands must be single-line.");
+  }
+  return `${withoutTrailingNewlines}\n`;
 }
 
 export function createSpotTransport(
@@ -160,7 +164,13 @@ export function createSpotTransport(
       throw notConnectedError;
     }
 
-    const bytes = new TextEncoder().encode(commandLine(command));
+    let bytes: Uint8Array;
+    try {
+      bytes = new TextEncoder().encode(commandLine(command));
+    } catch (formatError) {
+      error.value = errorMessage(formatError);
+      throw formatError;
+    }
     const write = writeQueue.then(async () => {
       if (activeChannel !== channel || !isConnected.value) {
         throw new Error("Spot writer is not connected.");

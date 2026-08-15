@@ -14,6 +14,7 @@ export function createSerialChannel(): SpotByteChannel {
   let port: SerialPort | null = null;
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   let readLoopPromise: Promise<void> | null = null;
+  let activeConnectionId = 0;
   let closing = false;
   let disconnectNotified = false;
   const dataListeners = new Set<(bytes: Uint8Array) => void>();
@@ -25,17 +26,26 @@ export function createSerialChannel(): SpotByteChannel {
     for (const listener of disconnectListeners) listener(disconnectError);
   }
 
-  function handlePortDisconnect(disconnectError?: unknown): void {
+  function handlePortDisconnect(
+    connectionId: number,
+    disconnectError?: unknown,
+  ): void {
+    if (activeConnectionId !== connectionId) return;
+
     const disconnectedPort = port;
     if (disconnectedPort) disconnectedPort.ondisconnect = null;
     port = null;
     notifyDisconnect(disconnectError);
   }
 
-  async function readLoop(currentPort: SerialPort): Promise<void> {
+  async function readLoop(
+    currentPort: SerialPort,
+    connectionId: number,
+  ): Promise<void> {
+    let currentReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
     try {
-      const currentReader = currentPort.readable.getReader();
-      reader = currentReader;
+      currentReader = currentPort.readable.getReader();
+      if (activeConnectionId === connectionId) reader = currentReader;
 
       while (true) {
         const { value, done } = await currentReader.read();
@@ -45,17 +55,27 @@ export function createSerialChannel(): SpotByteChannel {
         }
       }
     } catch (readError) {
-      if (!closing && port === currentPort) {
-        handlePortDisconnect(readError);
+      if (
+        !closing &&
+        port === currentPort &&
+        activeConnectionId === connectionId
+      ) {
+        handlePortDisconnect(connectionId, readError);
       }
     } finally {
-      if (reader) {
-        reader.releaseLock();
-        reader = null;
+      if (currentReader) {
+        currentReader.releaseLock();
       }
-      readLoopPromise = null;
-      if (!closing && port === currentPort) {
-        handlePortDisconnect();
+      if (activeConnectionId === connectionId) {
+        reader = null;
+        readLoopPromise = null;
+      }
+      if (
+        !closing &&
+        port === currentPort &&
+        activeConnectionId === connectionId
+      ) {
+        handlePortDisconnect(connectionId);
       }
     }
   }
@@ -86,6 +106,7 @@ export function createSerialChannel(): SpotByteChannel {
     port = null;
     reader = null;
     readLoopPromise = null;
+    activeConnectionId = 0;
     closing = false;
     disconnectNotified = false;
     if (closeError !== undefined) throw closeError;
@@ -100,8 +121,9 @@ export function createSerialChannel(): SpotByteChannel {
 
     const selectedPort = await serial.requestPort();
     port = selectedPort;
+    const connectionId = ++activeConnectionId;
     disconnectNotified = false;
-    selectedPort.ondisconnect = handlePortDisconnect;
+    selectedPort.ondisconnect = () => handlePortDisconnect(connectionId);
 
     try {
       await selectedPort.open({ baudRate: BAUD_RATE });
@@ -116,7 +138,7 @@ export function createSerialChannel(): SpotByteChannel {
       await selectedPort.setSignals({ requestToSend: false });
       await wait(2500);
 
-      readLoopPromise = readLoop(selectedPort);
+      readLoopPromise = readLoop(selectedPort, connectionId);
     } catch (connectError) {
       try {
         await close();

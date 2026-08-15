@@ -89,6 +89,24 @@ describe("createSpotTransport", () => {
     ).toEqual(["getConfig\n", "setSpot: 4\n"]);
   });
 
+  it("rejects commands containing more than one protocol line", async () => {
+    const channel = new FakeByteChannel();
+    const transport = createSpotTransport({
+      serial: () => channel,
+      bluetooth: () => channel,
+    });
+
+    await transport.connect("serial");
+
+    await expect(transport.sendLine("setSpot: 4\ngetConfig")).rejects.toThrow(
+      "single-line",
+    );
+    expect(channel.writes).toEqual([]);
+    expect(transport.error.value).toBe(
+      "Spot writer commands must be single-line.",
+    );
+  });
+
   it("serializes writes through the active channel", async () => {
     const channel = new FakeByteChannel();
     channel.blockWrites = true;
