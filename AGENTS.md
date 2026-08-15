@@ -1,101 +1,40 @@
-# AGENTS
+# Tryllestavsprojekt agent router
 
-## Quick Links to Documentation
+Read the smallest canonical document that covers the task:
 
-This repository is documented in structured layers starting with the project overview and building to technical details:
+- **Project orientation:** [`docs/reference/project-overview-and-current-state.md`](docs/reference/project-overview-and-current-state.md)
+- **Vision and wand hardware:** [`docs/reference/vision-and-wand-hardware.md`](docs/reference/vision-and-wand-hardware.md)
+- **Wand wire contract:** [`docs/reference/wand-nfc-data-contract.md`](docs/reference/wand-nfc-data-contract.md)
+- **Architecture and flows:** [`docs/reference/system-architecture-and-data-flows.md`](docs/reference/system-architecture-and-data-flows.md)
+- **Build and deployment:** [`docs/operations/developer-build-and-deploy.md`](docs/operations/developer-build-and-deploy.md)
+- **Event operations:** [`docs/operations/organiser-runbook.md`](docs/operations/organiser-runbook.md)
+- **Documentation maintenance:** [`docs/operations/documentation-maintenance.md`](docs/operations/documentation-maintenance.md)
+- **Domain glossary:** [`CONTEXT.md`](CONTEXT.md)
+- **Hard-to-reverse decisions:** [`docs/adr/`](docs/adr/)
+- **Agent workflow rules:** [`.github/instructions/`](.github/instructions/)
+- **Hunt content authoring:** [`website/public/hunts/README.md`](website/public/hunts/README.md)
+- **Vue component conventions:** [`.github/instructions/vue-components.instructions.md`](.github/instructions/vue-components.instructions.md)
+- **Website debugging:** [`.github/instructions/dev-debugging.instructions.md`](.github/instructions/dev-debugging.instructions.md)
 
-- **Just getting started?** → [`docs/01-PROJECT-OVERVIEW.md`](docs/01-PROJECT-OVERVIEW.md)
-- **Want to build it locally?** → [`docs/05-BUILD-AND-DEPLOY.md`](docs/05-BUILD-AND-DEPLOY.md)
-- **Aligning a feature with vision?** → [`docs/02-VISION-AND-PURPOSE.md`](docs/02-VISION-AND-PURPOSE.md)
-- **Implementing NFC protocol?** → [`docs/03-TECHNICAL-PROTOCOL.md`](docs/03-TECHNICAL-PROTOCOL.md)
-- **Understanding system architecture?** → [`docs/04-SYSTEM-ARCHITECTURE.md`](docs/04-SYSTEM-ARCHITECTURE.md)
-- **Making a code change?** → [`docs/MAINTENANCE.md`](docs/MAINTENANCE.md)
-- **Working with Vue components?** → [`.github/instructions/vue-components.instructions.md`](.github/instructions/vue-components.instructions.md)
-- **Working with Arduino firmware?** → [`arduino/README.md`](arduino/README.md)
+## Repository scope
 
-**For the full documentation structure:** See [`.github/DOCUMENTATION-STRUCTURE.md`](.github/DOCUMENTATION-STRUCTURE.md)
+- `website/` contains the main child-facing website and the management app.
+- `arduino/esp32/` contains the current ESP32-C3 / LOLIN C3 Mini spot writer.
+- `arduino/NFC_Basic/` and `arduino/RC522_Basic/` are legacy Wemos D1 Mini / ESP8266 variants.
+- `docs/reference/` contains canonical product, protocol, architecture, and content references.
+- `docs/operations/` contains build, deployment, organiser, field, and documentation runbooks.
+- `docs/adr/` records accepted hard-to-reverse decisions.
 
----
+## Non-negotiable invariants
 
-## Repository Scope
+- Preserve the core loop: find spot -> tap wand -> collect -> scan website -> view progress.
+- Wand data remains the source of truth; the core loop does not require a central server.
+- Use the exact wire values `x-hunt:<YYYY>` and `x-hunt-meta`.
+- Discover records by type and year; physical record order is non-semantic.
+- Record 1 remains user-controlled. Hunt logic never overwrites it.
+- Valid metadata is a deliberate validation/write gate, not cryptographic authentication.
+- The main website reads hunt state and writes only Record 1. Management owns setup, bulk-write, and debug operations.
+- The current hardware target is ESP32-C3 / LOLIN C3 Mini with PN532 over I2C.
+- The design target is NTAG216 glass ampoule capacity of roughly 888 writable bytes; other tags work only when capacity permits.
 
-This repository currently contains two primary folders:
-
-- `website/`: The PWA (Progressive Web App) workspace using Vue 3, TypeScript, and Vite for static-site build output.
-- `arduino/`: The Arduino workspace for firmware, hardware interaction, and device-side logic.
-
----
-
-## Component Overview
-
-## Current Technical Capabilities
-
-**For detailed component status, see:** [`docs/01-PROJECT-OVERVIEW.md#current-state-2026-03-28`](docs/01-PROJECT-OVERVIEW.md#current-state-2026-03-28)
-
-**Website (`website/`):**
-
-- Vue 3 + Vite PWA with Web NFC scanning
-- Localization support (English and Danish) via vue-i18n, with browser language auto-detection and manual override in Toybox
-- Hunt visualization with progress tracking
-- Web Serial configuration for Magic Spots (`/configureSpot`)
-- Record 1 Toybox with multi-action NFC presets (web links, messages, contact cards, maps, and more)
-- Unified page layout via PageLayout component (NFC banner, NfcToast, PageHero, content width constraint)
-- Isolated magic scan-circle components
-- Local custom font asset support for decorative display moments
-- Static hunt asset delivery (JSON + images per year)
-- Auto-discovery of multi-year hunts on wand
-- Base-aware static hosting for both repo subpaths and clean domain roots
-- Installable PWA surface with manifest icons, mobile web app metadata, and an in-app install prompt
-- Toybox admin utilities for wand initialization and debug-only treasure unlocking
-- Shared per-entry NFC lifecycle state via `website/src/composables/nfcSession.ts`
-
-**Arduino (`arduino/`):**
-
-- PN532 (I2C) spot writer for NTAG21x tags (recommended for glass ampules)
-- RC522 (SPI) variant for MIFARE sticker tags
-- Yearly hunt MIME record writing with spot ID bitmasks
-- Wand metadata authentication (`x-hunt-meta` record)
-- Record 1 preservation guarantee
-- Serial configuration interface (dynamic spotId, huntYear)
-
-**Architecture:**
-
-- **Unified Page Shell:** All pages in both the main app and management app utilize `PageLayout.vue` to ensure consistent 680px max-width, padding, and entry animations.
-- **Multi-Entry Frontend:** The application is split into two entry points: `index.html` (Main App) and `management.html` (Management App), allowing for optimized bundles and cleaner separation of user vs. admin logic.
-- **Centralized NFC Feedback:** `PageLayout.vue` manages the sticky NFC compatibility banner and the floating `NfcToast`, providing a unified feedback mechanism for communication status.
-- **Per-Entry NFC Context:** Each frontend entry point provides one NFC store per browser document; child pages consume shared lifecycle state instead of constructing independent NFC controllers.
-
-**Data Model:**
-
-- Wand stores one hunt record per year with 64-bit spot mask
-- Year encoded in MIME type (`x-hunt:<YYYY>`)
-- 8-byte payload (compact binary); supports up to 64 spots/year
-- Website resolves spot metadata via `(year, spotId)` JSON lookup
-- Record 1 always reserved for user-defined NFC actions
-
-**For exact on-tag protocol:** See [`docs/03-TECHNICAL-PROTOCOL.md`](docs/03-TECHNICAL-PROTOCOL.md)
-
-## Change Documentation Rule
-
-For every future change that expands, adds, or modifies the repository structurally or conceptually, update this `AGENTS.md` file in the same change.
-
-This includes (but is not limited to):
-
-- New top-level folders or major subfolders
-- New applications/services/modules
-- Significant architecture or workflow changes
-- Cross-folder responsibility changes (for example, logic moved between `website/` and `arduino/`)
-
-## Agent skills
-
-### Issue tracker
-
-Issues and specs live in GitHub Issues, operated with the `gh` CLI. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use the canonical labels `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Use a single-context layout with root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
+Structural or conceptual changes require the relevant canonical document and this router to be updated in the same change.
