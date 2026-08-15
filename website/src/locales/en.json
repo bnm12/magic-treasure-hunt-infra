@@ -20,7 +20,14 @@
     "eyebrow": "Past & Present",
     "title": "Hunt Archive",
     "copy": "Browse all hunts — including ones you may have missed.",
+    "loading": "Loading hunts...",
     "empty": "No hunts available yet."
+  },
+  "catalog": {
+    "warning": "Some hunt content could not be loaded. Available hunts are still shown.",
+    "loading": "Loading hunt catalog...",
+    "management_heading": "Hunt catalog diagnostics",
+    "management_error": "The hunt catalog could not be loaded: {error}"
   },
   "spot": {
     "collected": "Collected",
@@ -212,6 +219,7 @@
     "disconnect": "Disconnect",
     "year_label": "Hunt Year",
     "year_placeholder": "Select Year",
+    "no_hunts": "No valid hunts are available for configuration.",
     "spot_label": "Spot ID",
     "spot_placeholder": "Select Spot",
     "spot_option": "Spot {id}",

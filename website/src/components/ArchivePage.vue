@@ -1,11 +1,13 @@
 <template>
   <div>
-    <template v-if="allYears.length > 0">
+    <p v-if="isLoading" class="empty-state">{{ t('archive.loading') }}</p>
+
+    <template v-else-if="uiYears.length > 0">
       <YearSelector
-        v-if="allYears.length > 1"
+        v-if="uiYears.length > 1"
         :model-value="archiveYear"
         @update:model-value="emit('update:archiveYear', $event)"
-        :years="allYears"
+        :years="uiYears"
         :progress="yearProgress"
       />
       <HuntView
@@ -26,12 +28,13 @@
 import { useI18n } from "vue-i18n";
 import YearSelector from "./YearSelector.vue";
 import HuntView from "./HuntView.vue";
-import type { HuntYear } from "../utils/spotLoader";
+import type { HuntYear } from "../utils/huntCatalog";
 
 const { t } = useI18n();
 
 defineProps<{
-  allYears: number[];
+  uiYears: number[];
+  isLoading: boolean;
   archiveYear: number;
   archiveHunt: HuntYear | null;
   archiveCollectedIds: string[];

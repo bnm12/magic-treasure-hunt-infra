@@ -20,7 +20,14 @@
     "eyebrow": "Fortid og Nutid",
     "title": "Jagtarkiv",
     "copy": "Gennemse alle jagter — inklusiv dem du måske er gået glip af.",
+    "loading": "Indlæser jagter...",
     "empty": "Ingen jagter tilgængelige endnu."
+  },
+  "catalog": {
+    "warning": "Noget jagtindhold kunne ikke indlæses. Tilgængelige jagter vises stadig.",
+    "loading": "Indlæser jagtkatalog...",
+    "management_heading": "Diagnostik for jagtkatalog",
+    "management_error": "Jagtkataloget kunne ikke indlæses: {error}"
   },
   "spot": {
     "collected": "Samlet",
@@ -212,6 +219,7 @@
     "disconnect": "Afbryd",
     "year_label": "Jagtår",
     "year_placeholder": "Vælg år",
+    "no_hunts": "Ingen gyldige jagter er tilgængelige til konfiguration.",
     "spot_label": "Sted-ID",
     "spot_placeholder": "Vælg sted",
     "spot_option": "Sted {id}",

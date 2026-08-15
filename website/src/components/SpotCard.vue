@@ -169,7 +169,7 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import type { SpotDefinition } from "../utils/spotLoader";
+import type { SpotDefinition } from "../utils/huntCatalog";
 
 const { t } = useI18n();
 

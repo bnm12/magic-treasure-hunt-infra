@@ -12,7 +12,9 @@ flowchart LR
   Main -->|reads| Wand
   Main -->|shows progress and hints| Child
   Organiser[Organiser] -->|edits| Assets[Static hunt assets]
-  Assets -->|served with website| Main
+  Assets --> Catalog[Hunt catalog]
+  Catalog -->|validated assets and indexes| Main
+  Catalog -->|validated assets and indexes| Management
   Organiser -->|configures| Management[Management app]
   Management -->|USB or Bluetooth| Spot
   Management -->|initialises and bulk-writes| Wand
@@ -37,6 +39,18 @@ The management app owns:
 - Deliberate debug and test operations
 
 The website does not own hunt-state writes. The management app is an operational surface, not a bypass around the protocol safety gates.
+
+### Hunt catalog boundary
+
+The hunt catalog is the authoritative discovery boundary for static hunt
+assets. It owns validation and normalization of hunt assets and the canonical
+hunt and spot indexes consumed by the main website and management app. Those
+surfaces do not maintain parallel asset-discovery or index rules.
+
+The catalog does not replace wand data as the source of truth for collected
+hunt state. The main website remains the child-facing read/progress surface
+with Record 1 as its only write, while the management app remains responsible
+for setup, bulk writes, spot configuration, and deliberate debug operations.
 
 ### Shared NFC session context
 
@@ -133,6 +147,8 @@ One wand can carry Record 1, metadata, and multiple yearly hunt records. A reade
 ## Hunt asset delivery
 
 Organisers edit `website/public/hunts/<YYYY>/hunt.json` and its `images/` folder. The folder-level [hunt asset guide](../../website/public/hunts/README.md) is the canonical content authoring reference. No server-side hunt database is required.
+The hunt catalog owns discovery of those static assets and the indexes that
+describe their available hunts and spots.
 
 ## Failure and safety behavior
 

@@ -1,5 +1,12 @@
 <template>
   <div class="configure-content glass-card">
+      <p v-if="isLoading" class="catalog-status">
+        {{ t('catalog.loading') }}
+      </p>
+      <p v-else-if="availableYears.length === 0" class="validation-error" role="alert">
+        {{ t('configure_page.no_hunts') }}
+      </p>
+
       <div v-if="!isConnected" class="connect-section">
         <p class="instruction-text">
           {{ t('configure_page.connect_instruction') }}
@@ -29,6 +36,7 @@
                 v-model="deviceHuntYear"
                 @change="updateYear"
                 class="nfc-input"
+                :disabled="isLoading || availableYears.length === 0"
               >
                 <option disabled :value="0">{{ t('configure_page.year_placeholder') }}</option>
                 <option
@@ -50,6 +58,7 @@
                 v-model="deviceSpotId"
                 @change="updateSpot"
                 class="nfc-input"
+                :disabled="isLoading || availableSpots.length === 0"
               >
                 <option disabled :value="0">{{ t('configure_page.spot_placeholder') }}</option>
                 <option v-for="id in availableSpots" :key="id" :value="id">
@@ -119,10 +128,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, computed } from "vue";
+import { ref, watch, nextTick, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useCommunication } from "../composables/useCommunication";
-import { loadHunts, type HuntYear } from "../utils/spotLoader";
+import { useHuntData } from "../composables/useHuntData";
 
 const { t } = useI18n();
 const {
@@ -140,10 +149,10 @@ const {
 const inputText = ref("");
 const terminalContent = ref<HTMLElement | null>(null);
 
-const hunts = ref<Record<number, HuntYear>>({});
-const availableYears = ref<number[]>([]);
 const deviceHuntYear = ref<number>(0);
 const deviceSpotId = ref<number>(0);
+const { hunts, uiYears: availableYears, availableSpotIdsByYear, isLoading } =
+  useHuntData();
 
 const currentHuntTitle = computed(() => {
   return hunts.value[deviceHuntYear.value]?.title || "";
@@ -156,18 +165,7 @@ const currentSpotName = computed(() => {
 });
 
 const availableSpots = computed<number[]>(() => {
-  const hunt = hunts.value[deviceHuntYear.value];
-  if (!hunt) return [];
-  return Object.keys(hunt.spots)
-    .map(Number)
-    .sort((a, b) => a - b);
-});
-
-onMounted(async () => {
-  hunts.value = await loadHunts();
-  availableYears.value = Object.keys(hunts.value)
-    .map(Number)
-    .sort((a, b) => b - a);
+  return availableSpotIdsByYear.value[deviceHuntYear.value] ?? [];
 });
 
 watch(isConnected, (connected) => {
@@ -231,6 +229,13 @@ watch(receivedText, () => {
 .configure-content {
   padding: 2rem;
   margin-top: 1rem;
+}
+
+.catalog-status {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .instruction-text {

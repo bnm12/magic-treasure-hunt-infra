@@ -36,6 +36,7 @@
           "
           id="wand-creation-year"
           class="nfc-input"
+          :disabled="isLoading || availableYears.length === 0"
         >
           <option v-for="year in availableYears" :key="year" :value="year">
             {{ year }}
@@ -99,7 +100,7 @@ const creationYearOverride = ref<number>(0);
 
 const { isWriting, status, nfcCompatMessage, nfcSupported, initializeWand } =
   useNfc();
-const { allYears: availableYears } = useHuntData();
+const { uiYears: availableYears, isLoading } = useHuntData();
 
 const creationYear = computed(() => {
   if (

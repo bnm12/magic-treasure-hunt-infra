@@ -24,6 +24,10 @@ _Avoid_: season, campaign
 The content that describes a hunt, including its branding, spots, hints, messages, and images.
 _Avoid_: hunt database, backend content
 
+**Hunt catalog**:
+The authoritative view of available hunt assets and the hunts and spots they describe.
+_Avoid_: hunt database, asset loader
+
 ## Wand data
 
 **Record 1**:

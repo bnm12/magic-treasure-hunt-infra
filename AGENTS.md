@@ -35,6 +35,7 @@ Read the smallest canonical document that covers the task:
 - The first logical NDEF record is Record 1, remains user-controlled, and is preserved opaquely.
 - Valid metadata is a deliberate validation/write gate, not cryptographic authentication.
 - The main website reads hunt state and writes only Record 1. Management owns setup, bulk-write, and debug operations.
+- The hunt catalog owns validated and normalized hunt-asset discovery and canonical hunt/spot indexes; wand data remains the source of truth, and the main/management separation is preserved.
 - The current hardware target is ESP32-C3 / LOLIN C3 Mini with PN532 over I2C.
 - The design target is NTAG216 glass ampoule capacity of roughly 888 writable bytes; other tags work only when capacity permits.
 
