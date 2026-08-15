@@ -46,11 +46,13 @@ The physical target is a hand-turned wooden wand with an NTAG216 glass ampoule i
 
 The design target is approximately 888 bytes of writable tag capacity. NTAG216 is the reference target; other tags are acceptable when their capacity, NDEF support, and RF coupling permit the same contract.
 
-## Current and legacy spot hardware
+## Current and retired spot hardware
 
 The current spot-writer target is a LOLIN C3 Mini using an ESP32-C3 and a PN532 reader over I2C. The C3 Mini also provides the current USB and Bluetooth configuration path used by the management app.
 
-Wemos D1 Mini / ESP8266 sketches are retained as legacy variants for historical hardware and experiments. They are not the current deployment target and must not redefine the current wire contract.
+Wemos D1 Mini / ESP8266 paths are retired and their tracked sketches are
+removed. Historical source remains in Git history only; these paths do not
+define the current wire contract or a deployable target.
 
 ## Supported scanner
 

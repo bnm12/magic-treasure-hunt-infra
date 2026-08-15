@@ -55,7 +55,9 @@ The current ESP32-C3 / LOLIN C3 Mini spot writer owns:
 - Capacity and safe-read checks where hardware permits
 - Operator feedback and diagnostics
 
-The Wemos D1 Mini / ESP8266 sketches are legacy variants. They do not change the current contract.
+The Wemos D1 Mini / ESP8266 paths are retired and their tracked sources are
+removed. Historical source remains in Git history only; they are not
+supported adapters and do not change the current contract.
 
 ### Shared contract
 
