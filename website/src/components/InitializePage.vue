@@ -86,6 +86,7 @@ import { useI18n } from "vue-i18n";
 import NfcConsentOverlay from "./NfcConsentOverlay.vue";
 import { useNfc } from "../composables/useNfc";
 import { useHuntData } from "../composables/useHuntData";
+import { NfcSessionError } from "../composables/nfcSession";
 
 const { t } = useI18n();
 const wandName = ref("");
@@ -137,14 +138,6 @@ async function handleInitWand() {
     return;
   }
 
-  // Try to start scanning silently; show consent popup only if a user gesture is needed
-  const { beginScanning } = useNfc();
-  const result = await beginScanning();
-  if (result === "needs-gesture") {
-    showNfcConsent.value = true;
-    return;
-  }
-
   try {
     await initializeWand(name, creationYear.value);
     lastInitialized.value = name;
@@ -155,15 +148,16 @@ async function handleInitWand() {
     wandName.value = "";
     nameInput.value?.focus();
   } catch (e) {
+    if (e instanceof NfcSessionError && e.reason === "permission-denied") {
+      showNfcConsent.value = true;
+      return;
+    }
     error.value = `Error: ${(e as Error).message}`;
   }
 }
 
 async function handleNfcConsent() {
   showNfcConsent.value = false;
-  const { beginScanning } = useNfc();
-  await beginScanning();
-  // After consent, try again
   await handleInitWand();
 }
 

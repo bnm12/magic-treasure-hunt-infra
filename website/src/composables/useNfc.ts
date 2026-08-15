@@ -1,10 +1,18 @@
-import { ref } from "vue";
+import { computed, inject, ref } from "vue";
+import type { ComputedRef, InjectionKey, Ref } from "vue";
 import { i18n } from "../i18n";
 import { resolveAppUrl } from "../utils/appUrl";
 import {
   buildToyRecord,
   type ToyRecordWriteRequest,
 } from "../utils/toyboxRecord1";
+import {
+  createNfcSession,
+  NfcSessionError,
+  type NfcFailureReason,
+  type NfcRecord,
+  type NfcSession,
+} from "./nfcSession";
 
 const { t } = i18n.global;
 const HUNT_MIME_PREFIX = "x-hunt:";
@@ -20,130 +28,126 @@ interface WandMetadata {
   name: string;
 }
 
-type ScanResult = "ok" | "needs-gesture" | "unsupported";
+export type ScanResult =
+  | "ok"
+  | "needs-gesture"
+  | "unsupported"
+  | "busy";
 
-export function useNfc() {
-  const isScanning = ref(false);
-  const isWriting = ref(false);
+export interface NfcStore {
+  isScanning: ComputedRef<boolean>;
+  isWriting: ComputedRef<boolean>;
+  status: Ref<string>;
+  nfcCompatMessage: Ref<string>;
+  record1Preview: Ref<string>;
+  collectedSpots: Ref<Record<number, number[]>>;
+  wandMetadata: Ref<WandMetadata | null>;
+  nfcSupported(): boolean;
+  beginScanning(): Promise<ScanResult>;
+  writeRecord1(request: ToyRecordWriteRequest): Promise<void>;
+  initializeWand(ownerName: string, creationYear: number): Promise<void>;
+  unlockTestSpot(year: number, spotId: number): Promise<void>;
+}
+
+export const NFC_STORE_KEY: InjectionKey<NfcStore> = Symbol("nfc-store");
+
+function toUint8Array(data: ArrayBuffer | undefined): Uint8Array {
+  return data ? new Uint8Array(data) : new Uint8Array();
+}
+
+function cloneRecordData(data: ArrayBuffer | undefined): ArrayBuffer {
+  return data ? data.slice(0) : new ArrayBuffer(0);
+}
+
+function mediaTypeForYear(year: number): string {
+  return `${HUNT_MIME_PREFIX}${year}`;
+}
+
+function yearFromMediaType(mediaType: string | undefined): number | null {
+  if (!mediaType || !mediaType.startsWith(HUNT_MIME_PREFIX)) {
+    return null;
+  }
+
+  const year = Number.parseInt(mediaType.slice(HUNT_MIME_PREFIX.length), 10);
+  return isValidYear(year) ? year : null;
+}
+
+function spotIdsToMask(spotIds: number[]): bigint {
+  let mask = 0n;
+  for (const id of spotIds) {
+    if (id >= 1 && id <= 64) {
+      mask |= 1n << BigInt(id - 1);
+    }
+  }
+  return mask;
+}
+
+function maskToSpotIds(mask: bigint): number[] {
+  const spots: number[] = [];
+  for (let i = 0; i < 64; i += 1) {
+    if ((mask & (1n << BigInt(i))) !== 0n) {
+      spots.push(i + 1);
+    }
+  }
+  return spots.sort((a, b) => a - b);
+}
+
+function encodeBinaryHuntPayload(spots: number[]): ArrayBuffer {
+  const buffer = new ArrayBuffer(HUNT_MASK_LENGTH);
+  const payload = new Uint8Array(buffer);
+
+  const mask = spotIdsToMask(spots);
+  for (let i = 0; i < HUNT_MASK_LENGTH; i += 1) {
+    const shift = BigInt((7 - i) * 8);
+    payload[i] = Number((mask >> shift) & 0xffn);
+  }
+
+  return buffer;
+}
+
+function decodeBinaryHuntPayload(data: ArrayBuffer | undefined): number[] | null {
+  const bytes = toUint8Array(data);
+  if (bytes.length !== HUNT_MASK_LENGTH) return null;
+
+  let mask = 0n;
+  for (let i = 0; i < HUNT_MASK_LENGTH; i += 1) {
+    mask = (mask << 8n) | BigInt(bytes[i]);
+  }
+
+  return maskToSpotIds(mask);
+}
+
+function isValidYear(value: unknown): value is number {
+  return (
+    Number.isInteger(value) &&
+    (value as number) >= 2020 &&
+    (value as number) <= 2100
+  );
+}
+
+function decodeData(data: ArrayBuffer | undefined): string {
+  if (!data) return "";
+  try {
+    return new TextDecoder("utf-8").decode(data).trim();
+  } catch {
+    return "";
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+export function createNfcStore(session: NfcSession = createNfcSession()): NfcStore {
+  const isScanning = computed(() => session.state.value === "scanning");
+  const isWriting = computed(() => session.state.value === "writing");
   const status = ref("");
   const nfcCompatMessage = ref("");
   const record1Preview = ref("");
   const collectedSpots = ref<Record<number, number[]>>({});
   const wandMetadata = ref<WandMetadata | null>(null);
 
-  let abortController: AbortController | null = null;
-  // NOTE: lastReadRecords is intentionally module-level (closure) state.
-  // useNfc() is designed to be called once in App.vue and treated as a singleton.
-  // Multiple calls to useNfc() share this state, which is the desired behaviour —
-  // all callers should see the same last-scanned wand records.
-  let lastReadRecords: NDEFRecord[] = [];
-
-  function spotIdsToMask(spotIds: number[]): bigint {
-    let mask = 0n;
-    for (const id of spotIds) {
-      if (id >= 1 && id <= 64) {
-        mask |= 1n << BigInt(id - 1);
-      }
-    }
-    return mask;
-  }
-
-  function maskToSpotIds(mask: bigint): number[] {
-    const spots: number[] = [];
-    for (let i = 0; i < 64; i += 1) {
-      if ((mask & (1n << BigInt(i))) !== 0n) {
-        spots.push(i + 1);
-      }
-    }
-    return spots.sort((a, b) => a - b);
-  }
-
-  function toUint8Array(data: DataView | undefined): Uint8Array {
-    if (!data) return new Uint8Array();
-    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-  }
-
-  function cloneRecordData(data: DataView | undefined): ArrayBuffer {
-    const bytes = toUint8Array(data);
-    return bytes.slice().buffer;
-  }
-
-  function mediaTypeForYear(year: number): string {
-    return `${HUNT_MIME_PREFIX}${year}`;
-  }
-
-  function yearFromMediaType(mediaType: string | undefined): number | null {
-    if (!mediaType || !mediaType.startsWith(HUNT_MIME_PREFIX)) {
-      return null;
-    }
-
-    const year = Number.parseInt(mediaType.slice(HUNT_MIME_PREFIX.length), 10);
-    return isValidYear(year) ? year : null;
-  }
-
-  function encodeBinaryHuntPayload(spots: number[]): ArrayBuffer {
-    const buffer = new ArrayBuffer(HUNT_MASK_LENGTH);
-    const payload = new Uint8Array(buffer);
-
-    const mask = spotIdsToMask(spots);
-    for (let i = 0; i < HUNT_MASK_LENGTH; i += 1) {
-      const shift = BigInt((7 - i) * 8);
-      payload[i] = Number((mask >> shift) & 0xffn);
-    }
-
-    return buffer;
-  }
-
-  function decodeBinaryHuntPayload(
-    data: DataView | undefined,
-  ): number[] | null {
-    const bytes = toUint8Array(data);
-    if (bytes.length !== HUNT_MASK_LENGTH) return null;
-
-    let mask = 0n;
-    for (let i = 0; i < HUNT_MASK_LENGTH; i += 1) {
-      mask = (mask << 8n) | BigInt(bytes[i]);
-    }
-
-    return maskToSpotIds(mask);
-  }
-
-  function nfcSupported(): boolean {
-    return "NDEFReader" in window && window.isSecureContext;
-  }
-
-  /**
-   * Checks preconditions before a write operation.
-   * Returns true if the caller should abort, false if it may proceed.
-   * Sets nfcCompatMessage if NFC is not supported.
-   */
-  function shouldAbortWrite(): boolean {
-    if (!nfcSupported()) {
-      nfcCompatMessage.value = t("nfc.unavailable");
-      return true;
-    }
-    if (isWriting.value) return true;
-    return false;
-  }
-
-  function decodeData(data: DataView | undefined): string {
-    if (!data) return "";
-    try {
-      return new TextDecoder("utf-8").decode(data).trim();
-    } catch {
-      return "";
-    }
-  }
-
-  function isValidYear(value: unknown): value is number {
-    return (
-      Number.isInteger(value) &&
-      (value as number) >= 2020 &&
-      (value as number) <= 2100
-    );
-  }
-
-  function parseHuntRecord(record: NDEFRecord): HuntLedgerEntry | null {
+  function parseHuntRecord(record: NfcRecord): HuntLedgerEntry | null {
     if (record.recordType !== "mime") {
       return null;
     }
@@ -161,7 +165,7 @@ export function useNfc() {
     return { year, spots };
   }
 
-  function parseWandMetadata(record: NDEFRecord): WandMetadata | null {
+  function parseWandMetadata(record: NfcRecord): WandMetadata | null {
     if (record.recordType !== "mime" || record.mediaType !== "x-hunt-meta") {
       return null;
     }
@@ -175,12 +179,11 @@ export function useNfc() {
     if (3 + nameLength !== bytes.length) return null;
     if (!isValidYear(creationYear)) return null;
 
-    const name = new TextDecoder("utf-8").decode(bytes.slice(3, 3 + nameLength));
-
+    const name = new TextDecoder("utf-8").decode(bytes.slice(3));
     return { creationYear, name };
   }
 
-  function extractWandMetadata(records: NDEFRecord[]): WandMetadata | null {
+  function extractWandMetadata(records: NfcRecord[]): WandMetadata | null {
     for (const record of records) {
       const metadata = parseWandMetadata(record);
       if (metadata) return metadata;
@@ -188,7 +191,7 @@ export function useNfc() {
     return null;
   }
 
-  function extractHuntYears(records: NDEFRecord[]): Record<number, number[]> {
+  function extractHuntYears(records: NfcRecord[]): Record<number, number[]> {
     const byYear = new Map<number, Set<number>>();
 
     for (const record of records) {
@@ -207,7 +210,92 @@ export function useNfc() {
     return result;
   }
 
-  function buildHuntRecordInits(records: NDEFRecord[]): NDEFRecordInit[] {
+  function updateReadState(records: NfcRecord[]) {
+    collectedSpots.value = extractHuntYears(records);
+    wandMetadata.value = extractWandMetadata(records);
+
+    const first = records[0];
+    record1Preview.value = first
+      ? decodeData(first.data) || `(${first.recordType})`
+      : "";
+    nfcCompatMessage.value = "";
+    status.value = t("nfc.detected");
+  }
+
+  function applyFailure(reason: NfcFailureReason, error?: Error) {
+    switch (reason) {
+      case "unsupported":
+        nfcCompatMessage.value = t("nfc.not_supported");
+        break;
+      case "permission-denied":
+        nfcCompatMessage.value = t("nfc.permission_denied");
+        break;
+      case "read-failed":
+      case "timeout":
+        status.value = t("nfc.read_failed");
+        break;
+      case "busy":
+        status.value = t("nfc.busy");
+        break;
+      case "cancelled":
+        break;
+      default:
+        status.value = t("nfc.scan_failed", {
+          error: error?.message ?? "Unknown NFC error",
+        });
+    }
+  }
+
+  function nfcSupported(): boolean {
+    return session.isSupported();
+  }
+
+  async function beginScanning(): Promise<ScanResult> {
+    const result = await session.startScan({
+      onReading: updateReadState,
+      onError: applyFailure,
+    });
+
+    if (!result.ok) {
+      applyFailure(result.reason, result.error);
+      if (result.reason === "permission-denied") return "needs-gesture";
+      if (result.reason === "busy") return "busy";
+      if (result.reason === "unsupported") return "unsupported";
+    }
+
+    return "ok";
+  }
+
+  async function readTagOnce(prompt: string): Promise<NfcRecord[]> {
+    status.value = prompt;
+    const result = await session.readOnce();
+    if (!result.ok) {
+      applyFailure(result.reason, result.error);
+      throw new NfcSessionError(result.reason, result.error?.message);
+    }
+    return result.value;
+  }
+
+  async function writeRecords(records: NDEFRecordInit[]): Promise<void> {
+    const result = await session.write({ records });
+    if (!result.ok) {
+      applyFailure(result.reason, result.error);
+      throw new NfcSessionError(result.reason, result.error?.message);
+    }
+  }
+
+  function shouldAbortWrite(): boolean {
+    if (!nfcSupported()) {
+      nfcCompatMessage.value = t("nfc.unavailable");
+      return true;
+    }
+    if (isWriting.value) return true;
+
+    session.cancel();
+    return false;
+  }
+
+  function buildHuntRecordInits(records: NfcRecord[]): NDEFRecordInit[] {
     const extracted = extractHuntYears(records);
     return Object.entries(extracted).map(([year, spots]) => ({
       recordType: "mime",
@@ -216,20 +304,22 @@ export function useNfc() {
     }));
   }
 
-  function buildMetaRecordInits(records: NDEFRecord[]): NDEFRecordInit[] {
+  function buildMetaRecordInits(records: NfcRecord[]): NDEFRecordInit[] {
     for (const record of records) {
       if (record.recordType === "mime" && record.mediaType === "x-hunt-meta") {
-        return [{
-          recordType: "mime",
-          mediaType: "x-hunt-meta",
-          data: cloneRecordData(record.data),
-        }];
+        return [
+          {
+            recordType: "mime",
+            mediaType: "x-hunt-meta",
+            data: cloneRecordData(record.data),
+          },
+        ];
       }
     }
     return [];
   }
 
-  function preserveRecord1(record: NDEFRecord | undefined): NDEFRecordInit | null {
+  function preserveRecord1(record: NfcRecord | undefined): NDEFRecordInit | null {
     if (!record) return null;
 
     if (record.recordType === "url") {
@@ -251,149 +341,34 @@ export function useNfc() {
     return null;
   }
 
-  function stopScanning() {
-    abortController?.abort();
-    abortController = null;
-    isScanning.value = false;
-  }
-
-  async function readTagOnce(
-    prompt: string,
-    timeoutMs = 15000,
-  ): Promise<NDEFRecord[]> {
-    if (!nfcSupported()) {
-      throw new DOMException(
-        "Web NFC is unavailable on this device/browser.",
-        "NotSupportedError",
-      );
-    }
-
-    stopScanning();
-    status.value = prompt;
-
-    return await new Promise<NDEFRecord[]>((resolve, reject) => {
-      const scanController = new AbortController();
-      let finished = false;
-
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeout);
-        scanController.abort();
-      };
-
-      const timeout = setTimeout(() => {
-        finish();
-        reject(new DOMException("Timed out waiting for tag.", "TimeoutError"));
-      }, timeoutMs);
-
-      void (async () => {
-        try {
-          const ndef = new NDEFReader();
-
-          ndef.onreading = (event: NDEFReadingEvent) => {
-            const records = [...event.message.records];
-            finish();
-            resolve(records);
-          };
-
-          ndef.onreadingerror = () => {
-            finish();
-            reject(new DOMException("Could not read the tag.", "ReadError"));
-          };
-
-          await ndef.scan({ signal: scanController.signal });
-        } catch (error) {
-          finish();
-          reject(error);
-        }
-      })();
-    });
-  }
-
   async function keepReaderActive(): Promise<void> {
-    if (isScanning.value) return;
-    await beginScanning();
-  }
-
-  async function beginScanning(): Promise<ScanResult> {
-    if (!nfcSupported()) {
-      nfcCompatMessage.value = t("nfc.unavailable");
-      return "unsupported";
-    }
-    if (isScanning.value) return "ok";
-
-    try {
-      const ndef = new NDEFReader();
-      abortController = new AbortController();
-
-      abortController.signal.addEventListener("abort", () => {
-        isScanning.value = false;
-      });
-
-      ndef.onreading = (event: NDEFReadingEvent) => {
-        lastReadRecords = [...event.message.records];
-        collectedSpots.value = extractHuntYears(lastReadRecords);
-        wandMetadata.value = extractWandMetadata(lastReadRecords);
-
-        const first = lastReadRecords[0];
-        record1Preview.value = first
-          ? decodeData(first.data) || `(${first.recordType})`
-          : "";
-
-        status.value = t("nfc.detected");
-      };
-
-      ndef.onreadingerror = () => {
-        status.value = t("nfc.read_failed");
-      };
-
-      isScanning.value = true;
-      await ndef.scan({ signal: abortController.signal });
-      return "ok";
-    } catch (error) {
-      isScanning.value = false;
-      const err = error as DOMException;
-      if (err.name === "AbortError") return "ok";
-      if (err.name === "NotAllowedError") return "needs-gesture";
-      if (err.name === "NotSupportedError") {
-        nfcCompatMessage.value = t("nfc.not_supported");
-        return "unsupported";
-      }
-      status.value = t("nfc.scan_failed", { error: err.message });
-      return "unsupported";
+    const result = await beginScanning();
+    if (result === "needs-gesture") {
+      nfcCompatMessage.value = t("nfc.permission_denied");
     }
   }
 
   async function writeRecord1(request: ToyRecordWriteRequest): Promise<void> {
     if (shouldAbortWrite()) return;
 
-    isWriting.value = true;
     status.value = t("nfc.write_verify");
 
     try {
       const currentRecords = await readTagOnce(
         t("nfc.write_verify_reading"),
       );
-      const ndef = new NDEFReader();
       const toyRecord = buildToyRecord(request);
-
       const huntRecords = buildHuntRecordInits(currentRecords);
       const metaRecords = buildMetaRecordInits(currentRecords);
-      await ndef.write({
-        records: [toyRecord, ...metaRecords, ...huntRecords],
-      });
 
-      lastReadRecords = currentRecords;
-      collectedSpots.value = extractHuntYears(currentRecords);
-      wandMetadata.value = extractWandMetadata(currentRecords);
+      await writeRecords([toyRecord, ...metaRecords, ...huntRecords]);
+      updateReadState(currentRecords);
       status.value = t("nfc.write_record1_success");
-      await keepReaderActive();
+      void keepReaderActive();
     } catch (error) {
-      const err = error as DOMException;
-      status.value = t("nfc.write_record1_failed", { error: err.message });
-    } finally {
-      isWriting.value = false;
+      status.value = t("nfc.write_record1_failed", {
+        error: errorMessage(error),
+      });
     }
   }
 
@@ -407,12 +382,9 @@ export function useNfc() {
       return;
     }
 
-    isWriting.value = true;
     status.value = t("nfc.init_prompt");
 
     try {
-      const ndef = new NDEFReader();
-
       const nameBytes = new TextEncoder().encode(ownerName);
       const metaPayload = new ArrayBuffer(2 + 1 + nameBytes.length);
       const metaView = new Uint8Array(metaPayload);
@@ -426,26 +398,31 @@ export function useNfc() {
         { recordType: "mime", mediaType: "x-hunt-meta", data: metaPayload },
       ];
 
-      await ndef.write({ records });
-      status.value = t("nfc.init_success", { name: ownerName, year: creationYear });
+      await writeRecords(records);
+      status.value = t("nfc.init_success", {
+        name: ownerName,
+        year: creationYear,
+      });
       wandMetadata.value = { creationYear, name: ownerName };
-      await keepReaderActive();
+      void keepReaderActive();
     } catch (error) {
-      const err = error as DOMException;
-      status.value = t("nfc.init_failed", { error: err.message });
-    } finally {
-      isWriting.value = false;
+      status.value = t("nfc.init_failed", { error: errorMessage(error) });
+      throw error;
     }
   }
 
   async function unlockTestSpot(year: number, spotId: number): Promise<void> {
     if (shouldAbortWrite()) return;
-    if (!isValidYear(year) || !Number.isInteger(spotId) || spotId < 1 || spotId > 64) {
+    if (
+      !isValidYear(year) ||
+      !Number.isInteger(spotId) ||
+      spotId < 1 ||
+      spotId > 64
+    ) {
       status.value = t("nfc.unlock_invalid");
       return;
     }
 
-    isWriting.value = true;
     status.value = t("nfc.unlock_prompt", { spot: spotId, year });
 
     try {
@@ -473,19 +450,13 @@ export function useNfc() {
         ...huntRecords,
       ];
 
-      const ndef = new NDEFReader();
-      await ndef.write({ records });
-
-      lastReadRecords = currentRecords;
+      await writeRecords(records);
       collectedSpots.value = updatedByYear;
       wandMetadata.value = extractWandMetadata(currentRecords);
       status.value = t("nfc.unlock_success", { spot: spotId, year });
-      await keepReaderActive();
+      void keepReaderActive();
     } catch (error) {
-      const err = error as DOMException;
-      status.value = t("nfc.unlock_failed", { error: err.message });
-    } finally {
-      isWriting.value = false;
+      status.value = t("nfc.unlock_failed", { error: errorMessage(error) });
     }
   }
 
@@ -503,4 +474,12 @@ export function useNfc() {
     initializeWand,
     unlockTestSpot,
   };
+}
+
+export function useNfc(): NfcStore {
+  const store = inject(NFC_STORE_KEY);
+  if (!store) {
+    throw new Error("NFC store is not provided by the application entry point.");
+  }
+  return store;
 }

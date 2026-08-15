@@ -47,6 +47,7 @@ This repository currently contains two primary folders:
 - Base-aware static hosting for both repo subpaths and clean domain roots
 - Installable PWA surface with manifest icons, mobile web app metadata, and an in-app install prompt
 - Toybox admin utilities for wand initialization and debug-only treasure unlocking
+- Shared per-entry NFC lifecycle state via `website/src/composables/nfcSession.ts`
 
 **Arduino (`arduino/`):**
 
@@ -62,6 +63,7 @@ This repository currently contains two primary folders:
 - **Unified Page Shell:** All pages in both the main app and management app utilize `PageLayout.vue` to ensure consistent 680px max-width, padding, and entry animations.
 - **Multi-Entry Frontend:** The application is split into two entry points: `index.html` (Main App) and `management.html` (Management App), allowing for optimized bundles and cleaner separation of user vs. admin logic.
 - **Centralized NFC Feedback:** `PageLayout.vue` manages the sticky NFC compatibility banner and the floating `NfcToast`, providing a unified feedback mechanism for communication status.
+- **Per-Entry NFC Context:** Each frontend entry point provides one NFC store per browser document; child pages consume shared lifecycle state instead of constructing independent NFC controllers.
 
 **Data Model:**
 
