@@ -9,6 +9,7 @@ interface NDEFRecord {
   encoding?: string;
   lang?: string;
   data?: DataView;
+  toRecords?: () => NDEFRecord[] | null;
 }
 
 interface NDEFReadingEvent extends Event {

@@ -31,7 +31,7 @@ Read the smallest canonical document that covers the task:
 - Wand data remains the source of truth; the core loop does not require a central server.
 - Use the exact wire values `x-hunt:<YYYY>` and `x-hunt-meta`.
 - Discover records by type and year; physical record order is non-semantic.
-- Record 1 remains user-controlled. Hunt logic never overwrites it.
+- The first logical NDEF record is Record 1, remains user-controlled, and is preserved opaquely.
 - Valid metadata is a deliberate validation/write gate, not cryptographic authentication.
 - The main website reads hunt state and writes only Record 1. Management owns setup, bulk-write, and debug operations.
 - The current hardware target is ESP32-C3 / LOLIN C3 Mini with PN532 over I2C.

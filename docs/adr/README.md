@@ -6,3 +6,4 @@ These records capture accepted decisions that are hard to reverse, surprising wi
 - [0002 — Metadata validation is a write gate](0002-metadata-validation-write-gate.md)
 - [0003 — Separate child and management write surfaces](0003-website-management-write-surfaces.md)
 - [0004 — Current spot writer platform](0004-current-spot-writer-platform.md)
+- [0005 — Normalized wand ledger codec seam](0005-normalized-wand-ledger-codec.md)

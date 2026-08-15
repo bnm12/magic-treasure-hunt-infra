@@ -24,6 +24,7 @@ export interface NfcRecord {
   encoding?: string;
   lang?: string;
   data?: ArrayBuffer;
+  records?: NfcRecord[];
 }
 
 export type NfcResult<T> =
@@ -132,6 +133,7 @@ function cloneRecordData(data: DataView | undefined): ArrayBuffer | undefined {
 }
 
 function toTransportRecord(record: NDEFRecord): NfcRecord {
+  const nested = record.toRecords?.();
   return {
     recordType: record.recordType,
     mediaType: record.mediaType,
@@ -139,6 +141,7 @@ function toTransportRecord(record: NDEFRecord): NfcRecord {
     encoding: record.encoding,
     lang: record.lang,
     data: cloneRecordData(record.data),
+    ...(nested ? { records: nested.map(toTransportRecord) } : {}),
   };
 }
 
