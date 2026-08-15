@@ -8,7 +8,7 @@ This runbook covers website development, current spot-writer setup, and deployme
 - Arduino CLI for firmware
 - Chrome on Android for Web NFC scanning
 - A LOLIN C3 Mini (ESP32-C3), PN532 reader, USB-C cable, and NTAG216 test tags
-- Optional: a legacy Wemos D1 Mini / ESP8266 setup for historical sketches
+- No supported Wemos D1 Mini / ESP8266 deployment; those paths are retired and historical source remains in Git history only
 
 ## Website and codec tests
 
@@ -94,11 +94,17 @@ The management app configures the C3 Mini over USB Web Serial or Bluetooth. Blue
 
 ## Legacy firmware
 
-`arduino/NFC_Basic/` and `arduino/RC522_Basic/` contain Wemos D1 Mini / ESP8266 sketches retained for historical hardware. They are not the current target. Their old board assumptions and old wire labels must not be copied into new protocol or deployment documentation.
+`arduino/NFC_Basic/` and `arduino/RC522_Basic/` are retired paths; their
+tracked sketches and board configs have been removed. Historical source
+remains in Git history only. Do not recreate or deploy those old board
+assumptions; the supported firmware build is the ESP32-C3 target above.
 
 ## Libraries
 
-Install the libraries required by the selected sketch, including PN532, MFRC522 where applicable, NDEF, and the built-in Wire/SPI libraries. Verify the sketch's includes before installing additional packages.
+Install the PN532 library required by `arduino/esp32/esp32.ino`. `Wire`,
+`EEPROM`, and the Bluetooth headers are supplied by the ESP32 core. The
+current sketch uses its portable codec and does not require the retired
+MFRC522 or legacy NDEF libraries.
 
 ## Build and deployment checks
 

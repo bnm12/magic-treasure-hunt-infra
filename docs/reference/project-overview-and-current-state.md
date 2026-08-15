@@ -16,7 +16,7 @@ Tryllestavsprojekt is an offline-first treasure hunt for children. A child finds
 | --- | --- |
 | `website/` | Main website and management app, static hunt delivery, Web NFC, Web Serial, and Record 1 Toybox actions |
 | `arduino/esp32/` | Current ESP32-C3 / LOLIN C3 Mini spot-writer firmware |
-| `arduino/NFC_Basic/` and `arduino/RC522_Basic/` | Legacy Wemos D1 Mini / ESP8266 sketches |
+| `arduino/NFC_Basic/` and `arduino/RC522_Basic/` | Retired paths; historical source remains in Git history |
 | `website/public/hunts/` | Yearly hunt assets maintained by organisers |
 | `docs/reference/` | Product, protocol, architecture, and content references |
 | `docs/operations/` | Build, deployment, field, organiser, and documentation runbooks |
@@ -41,7 +41,7 @@ The management surface uses Web Serial and Bluetooth configuration paths where t
 
 ### Spot writers
 
-The current hardware target is the ESP32-C3 on a LOLIN C3 Mini with a PN532 reader over I2C. Wemos D1 Mini / ESP8266 sketches remain legacy hardware variants and are not the current deployment target.
+The current hardware target is the ESP32-C3 on a LOLIN C3 Mini with a PN532 reader over I2C. Wemos D1 Mini / ESP8266 paths are retired and not deployable; their source remains in Git history only.
 
 ### Wand and tags
 

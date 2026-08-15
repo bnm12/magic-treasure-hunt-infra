@@ -40,5 +40,5 @@ For firmware and hardware setup, read [developer-build-and-deploy.md](docs/opera
 - The main website reads hunt state and writes only the user-controlled Record 1 action.
 - The management app handles wand initialisation, bulk writes, spot configuration, and deliberate debug operations.
 - The current spot-writer target is ESP32-C3 / LOLIN C3 Mini with PN532 over I2C.
-- Wemos D1 Mini / ESP8266 sketches are legacy variants.
+- Wemos D1 Mini / ESP8266 paths are retired and not deployable; historical source remains in Git history only.
 - Android Chromium is the supported Web NFC scanner.

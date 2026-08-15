@@ -1,19 +1,21 @@
 {
-  "port": "COM8",
-  "configuration": "baud=921600,xtal=80,eesz=4M2M,dbg=Disabled,lvl=None____,ip=lm2f,vt=flash,exception=disabled,stacksmash=disabled,wipe=none,ssl=all,mmu=3232,non32xfer=fast",
+  "configuration": "UploadSpeed=921600,CDCOnBoot=default,CPUFreq=160,FlashFreq=80,PartitionScheme=default,DebugLevel=none,EraseFlash=none",
   "output": "build",
-  "board": "esp8266:esp8266:d1_mini",
-  "programmer": "",
+  "board": "esp32:esp32:lolin_c3_mini",
+  "programmer": "esptool",
   "useProgrammer": false,
   "optimize_for_debug": false,
   "configurationRequired": true,
   "compile_profile": "",
   "monitorPortSettings": {
-    "port": "COM8",
-    "baudRate": 115200,
-    "lineEnding": "\r\n",
-    "dataBits": 8,
-    "parity": "none",
-    "stopBits": "one"
+    "settings": {
+      "baudRate": 115200,
+      "lineEnding": "\r\n",
+      "dataBits": 8,
+      "parity": "none",
+      "stopBits": "one",
+      "rts": false
+    },
+    "profile_name": ""
   }
 }
