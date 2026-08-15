@@ -44,6 +44,15 @@ Each frontend entry point provides one shared NFC session store/context per brow
 
 `website/src/composables/nfcSession.ts` owns the browser scan/write lifecycle, cancellation, and normalized failure outcomes. The adapter-neutral wand ledger codec owns record normalization and ledger decoding; `useNfc` provides the thin website integration.
 
+### Spot configuration transport
+
+The management app uses `website/src/composables/spotTransport.ts` as the
+transport seam. It owns active-mode selection, newline framing, streaming
+UTF-8 decoding, complete-line delivery, serialized writes, and explicit or
+physical disconnect cleanup. `useSerial.ts` and `useBluetooth.ts` are byte
+channel adapters; they keep Web Serial reset timing and Web Bluetooth service,
+notification, and 20-byte write details behind that seam.
+
 ### `arduino/`
 
 The current ESP32-C3 / LOLIN C3 Mini spot writer owns:
