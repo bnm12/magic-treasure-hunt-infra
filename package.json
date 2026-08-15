@@ -1,0 +1,19 @@
+{
+  "name": "tryllestavsprojekt",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "website"
+  ],
+  "scripts": {
+    "test": "npm run test:website && npm run test:native",
+    "test:website": "npm --workspace website test",
+    "test:native": "node tools/run-wand-native-tests.mjs",
+    "build": "npm --workspace website run build",
+    "dev": "npm --workspace website run dev",
+    "generate:fixtures": "node tools/generate-wand-fixtures.mjs"
+  },
+  "devDependencies": {
+    "@zigc/cli": "0.16.0"
+  }
+}

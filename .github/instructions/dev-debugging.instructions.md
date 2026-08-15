@@ -7,7 +7,7 @@ applyTo: "website/**"
 
 ## Dev Server
 
-- Run `npm run dev` from `website/` to start the Vite dev server with HTTPS (mkcert).
+- Run `npm run dev` from the repository root to start the Vite dev server with HTTPS (mkcert).
 - Check whether the dev server is already running before starting a new one.
 - The dev server supports HMR — no restart needed after code changes.
 
@@ -34,5 +34,5 @@ Use these alternatives instead:
 
 ## Build Verification
 
-- Run `npm run build` from `website/` to verify TypeScript + Vite production build.
+- Run `npm run build` from the repository root to verify TypeScript + Vite production build.
 - Always build after code changes before considering a task complete.
