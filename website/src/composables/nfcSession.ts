@@ -161,7 +161,18 @@ class BrowserNfcAdapter implements NfcAdapter {
       options.onReading(event.message.records.map(toTransportRecord));
     };
     reader.onreadingerror = () => options.onReadingError();
-    await reader.scan({ signal: options.signal });
+    const cleanup = () => {
+      reader.onreading = null;
+      reader.onreadingerror = null;
+      options.signal.removeEventListener("abort", cleanup);
+    };
+    options.signal.addEventListener("abort", cleanup, { once: true });
+    try {
+      await reader.scan({ signal: options.signal });
+    } catch (error) {
+      cleanup();
+      throw error;
+    }
   }
 
   async write(message: NDEFMessageInit, signal: AbortSignal): Promise<void> {
@@ -214,11 +225,16 @@ export function createNfcSession(
     const controller = new AbortController();
     const timeoutMs = handlers.timeoutMs ?? 30_000;
     let finished = false;
+    let result: NfcResult<void> | undefined;
     const timeout = setTimeout(() => {
       if (finished) return;
-      handlers.onError("timeout", new NfcSessionError("timeout"));
-      finish();
-      controller.abort();
+      const error = new NfcSessionError("timeout");
+      handlers.onError("timeout", error);
+      complete({
+        ok: false,
+        reason: "timeout",
+        error,
+      });
     }, timeoutMs);
 
     function finish() {
@@ -231,14 +247,18 @@ export function createNfcSession(
       }
     }
 
-    function cancel() {
+    function complete(nextResult: NfcResult<void>) {
       if (finished) return;
-      handlers.onError(
-        "cancelled",
-        new NfcSessionError("cancelled"),
-      );
+      result = nextResult;
       finish();
       controller.abort();
+    }
+
+    function cancel() {
+      if (finished) return;
+      const error = new NfcSessionError("cancelled");
+      handlers.onError("cancelled", error);
+      complete({ ok: false, reason: "cancelled", error });
     }
 
     activeOperation = { controller, finish, cancel };
@@ -249,27 +269,26 @@ export function createNfcSession(
         signal: controller.signal,
         onReading: (records) => {
           if (finished) return;
-          finish();
+          complete({ ok: true, value: undefined });
           handlers.onReading(records);
         },
         onReadingError: () => {
           if (finished) return;
-          handlers.onError(
-            "read-failed",
-            new NfcSessionError("read-failed"),
-          );
-          finish();
+          const error = new NfcSessionError("read-failed");
+          handlers.onError("read-failed", error);
+          complete({ ok: false, reason: "read-failed", error });
         },
       })
       .then(
-        () => ({ ok: true, value: undefined }),
+        () => result ?? { ok: true, value: undefined },
         (error: unknown) => {
-          if (finished) return { ok: true, value: undefined };
+          if (finished) return result ?? { ok: true, value: undefined };
           const normalized = toError(error);
           const reason = failureReasonFor(normalized, "read");
           handlers.onError(reason, normalized);
-          finish();
-          return { ok: false, reason, error: normalized };
+          const failure = { ok: false, reason, error: normalized } as const;
+          complete(failure);
+          return failure;
         },
       );
   }
